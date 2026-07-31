@@ -3,8 +3,8 @@
 ## Status snapshot
 Last updated: 2026-07-31
 
-**Step 1 of 10 complete.** Scaffold + provider boundary + schema committed (`4142f8e`).
-Nothing runs end-to-end yet — no adapter implementation, no UI, no database instance.
+**Steps 1–2 of 10 complete.** Scaffold, Neon database, and a working Blockscout adapter
+(`4142f8e`, `063a9bc`, `89d5057`). No UI yet — verification is via `scripts/probe.ts`.
 Full plan: `/home/greyw0rks/.claude/plans/nested-bubbling-babbage.md`
 
 ## What Atlas is
@@ -20,7 +20,29 @@ Deliberately NOT in v1: entity clustering, mixer deanonymization, non-EVM chains
 - `lib/adapters/types.ts` — `ChainAdapter` interface; the swap point for data providers
 - `prisma/schema.prisma` — 9 models, validated, client generated
 - `.env.example` committed; `.env` gitignored
-- Typecheck clean, `npm run build` green
+- Typecheck clean, lint clean, `npm run build` green
+- **Neon Postgres live and migrated** (`20260731154142_init`). All 8 tables created;
+  `Transfer.rawAmount` confirmed as `numeric(78,0)`. Schema uses `directUrl` — PgBouncer
+  can't serve the session-level connections migrations need, so `DIRECT_URL` is the same
+  host with `-pooler` stripped.
+- **`lib/adapters/blockscout.ts`** — full `ChainAdapter` implementation: both endpoints,
+  cursor pagination, rate-limit-aware errors, decoded log fetching.
+- `scripts/probe.ts` / `scripts/probe-logs.ts` — manual verification harnesses.
+
+## Verified working (2026-07-31)
+**Adapter, all 6 chains in parallel:** Ethereum 1.6s (17 native/50 erc20), Arbitrum 3.2s
+(43/50), Optimism 4.7s (39/50), Polygon 6.3s (39/50), Celo 6.6s (6/30, exhausted),
+Base 8.2s (20/50). Integrity checks pass on every chain: amounts are valid integer
+strings, every row involves the subject address, no duplicate `(txHash, logIndex)` keys.
+
+**THE CORE PREMISE IS PROVEN — deterministic bridge matching works.**
+Live Across deposit on Arbitrum (`0xa99003b8…`) decodes to:
+`FundsDeposited{destinationChainId: 1, depositId: 4503376, inputAmount: 185000000,
+outputAmount: 184726565}`. The receiving side (`0xa9fc6dd5…`) decodes to
+`FilledRelay{originChainId: 56, depositId: 860186}` — the matching join-key pair.
+So cross-chain links are **provable**, not inferred from amount/time correlation.
+Across SpokePool on Arbitrum: `0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A`
+(methods seen: `fillRelay` 34, `deposit` 7, `depositV3` 7).
 
 ## Verified facts (curl, 2026-07-31)
 - **Blockscout v2 returns HTTP 200 with real data on all 6 chains.** eth 594KB / base 531KB /
@@ -36,20 +58,21 @@ Deliberately NOT in v1: entity clustering, mixer deanonymization, non-EVM chains
 - Rate-limit headers exposed: `x-ratelimit-limit: 180` / `-remaining` / `-reset`. Buckets are
   **per-endpoint** (`/stats` was 10), and the limit is **per egress IP**, shared across all users.
 
-## Next step (step 2 of 10)
-Blockscout adapter, **Ethereum only**. Prove fetch → normalize → `Transfer` rows.
-Verify: a known address's tx count matches the public explorer UI exactly.
+## Next step (step 3 of 10)
+Single-chain address page — plain table, no graph yet. First visible milestone.
+Persist normalized transfers via Prisma (note: `logIndex` is `null` for native transfers
+in `RawTransfer` but the compound unique needs a sentinel `-1` at write time, since
+Postgres treats NULLs as distinct).
 
-Then in order: 3) single-chain address table, 4) 6-chain parallel + streaming NDJSON route,
+Then in order: 4) 6-chain parallel + streaming NDJSON route,
 5) Postgres cache + token bucket (**before** the graph — step 4 will hit limits),
 6) bridge registry + deterministic matching (Across + CCTP first), 7) fuzzy fallback,
 8) graph + timeline, 9) free label sets, 10) honesty pass.
 
 ## Blocked on human
-- **Postgres instance.** No DB exists yet. `.env` points at `localhost:5432`; either run the
-  docker one-liner in `.env.example` or provision Neon/Supabase. `prisma migrate dev` has NOT run.
 - Optional: Alchemy API key (faster path; app works fully without it).
 - Eventually: a stated position on who the customer is, before clustering/mixer work.
+- Vercel project + deploy authorisation, when there's something worth deploying.
 
 ## What has failed / been ruled out
 - **Dune Sim** — shut down 2026-08-01, new signups disabled since May 2025. Was the only API
@@ -64,6 +87,8 @@ Then in order: 3) single-chain address table, 4) 6-chain parallel + streaming ND
   constant false positives. A wrong edge is worse than a missing one in a tracing tool.
 - `create-next-app --src-dir=false` is not a valid flag and hangs on an interactive prompt.
   Use `--no-src-dir`.
+- `tsx` cannot run top-level `await` in these scripts (esbuild emits cjs) — use `.then()`.
+- Node scripts importing `@prisma/client` must live **inside** the project dir, not `/tmp`.
 - `npm audit fix` cannot clear the last 2 high vulns (Next's bundled postcss + Image Optimizer
   DoS); both need a Next 15 major bump. Neither applies here — Vercel-hosted, no `remotePatterns`.
   Left as-is deliberately.
