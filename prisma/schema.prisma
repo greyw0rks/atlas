@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TraceStatus {
+  RUNNING
+  DONE
+  ERROR
+}
+
+enum TransferDirection {
+  IN
+  OUT
+  SELF
+}
+
+enum BridgeRole {
+  SEND
+  RECV
+}
+
+enum MatchType {
+  DETERMINISTIC
+  HEURISTIC
+}
+
+model TraceJob {
+  id          String      @id @default(cuid())
+  rootAddress String
+  status      TraceStatus @default(RUNNING)
+  chainStatus Json        @default("{}")
+  truncated   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  cursors ChainCursor[]
+
+  @@index([rootAddress])
+}
+
+model ChainCursor {
+  id             String   @id @default(cuid())
+  jobId          String
+  job            TraceJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  chainId        Int
+  endpoint       String
+  nextPageParams Json?
+  pagesFetched   Int      @default(0)
+  exhausted      Boolean  @default(false)
+
+  @@unique([jobId, chainId, endpoint])
+}
+
+model Wallet {
+  address    String   @id
+  label      String?
+  isContract Boolean  @default(false)
+  isCex      Boolean  @default(false)
+  isBridge   Boolean  @default(false)
+  updatedAt  DateTime @updatedAt
+}
+
+model Transfer {
+  id          String            @id @default(cuid())
+  chainId     Int
+  txHash      String
+  // Null for native-value transfers, which have no log. Prisma treats NULLs as
+  // distinct in a compound unique, so a sentinel of -1 is used at write time.
+  logIndex    Int
+  blockNumber Int
+  timestamp   DateTime
+  fromAddr    String
+  toAddr      String?
+  tokenAddr   String?
+  tokenSymbol String?
+  decimals    Int               @default(18)
+  // Raw base units. Decimal(78,0) holds any uint256 exactly; storing scaled
+  // values (e.g. Decimal(18,6)) would truncate 18-decimal tokens and make the
+  // bridge fee tolerance comparisons meaningless.
+  rawAmount   Decimal           @db.Decimal(78, 0)
+  method      String?
+  direction   TransferDirection
+
+  bridgeEvents BridgeEvent[]
+
+  @@unique([chainId, txHash, logIndex])
+  @@index([fromAddr])
+  @@index([toAddr])
+  @@index([chainId, timestamp])
+}
+
+model BridgeEvent {
+  id         String     @id @default(cuid())
+  transferId String
+  transfer   Transfer   @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  protocol   String
+  role       BridgeRole
+  // Opaque string. Across depositIds can be 70-digit hashed values, so this is
+  // never parsed as a number.
+  joinKey    String?
+  srcChainId Int?
+  dstChainId Int?
+  recipient  String?
+  rawParams  Json
+
+  sentHops     BridgeHop[] @relation("SrcEvent")
+  receivedHops BridgeHop[] @relation("DstEvent")
+
+  @@index([protocol, joinKey])
+}
+
+model BridgeHop {
+  id         String      @id @default(cuid())
+  srcEventId String
+  srcEvent   BridgeEvent @relation("SrcEvent", fields: [srcEventId], references: [id], onDelete: Cascade)
+  dstEventId String
+  dstEvent   BridgeEvent @relation("DstEvent", fields: [dstEventId], references: [id], onDelete: Cascade)
+  confidence Decimal     @db.Decimal(3, 2)
+  matchType  MatchType
+  // Both tx hashes, the join key or observed (delta, epsilon), candidate count,
+  // and every scoring penalty by name. Rendered verbatim in the UI.
+  evidence   Json
+
+  @@unique([srcEventId, dstEventId])
+}
+
+model ProviderCache {
+  cacheKey  String   @id
+  payload   Json
+  fetchedAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+model RateLimitBucket {
+  // "{host}:{windowStart}" — coarse token bucket shared across serverless
+  // invocations, since the upstream limit is per egress IP.
+  key         String   @id
+  tokensUsed  Int      @default(0)
+  windowStart DateTime
+  updatedAt   DateTime @updatedAt
+
+  @@index([windowStart])
+}
