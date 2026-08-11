@@ -1,0 +1,572 @@
+# Document 13: Cross-Chain Intelligence Engine
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+The Cross-Chain Intelligence Engine enables Atlas to investigate activity across multiple blockchains as if they were a single connected ecosystem.
+
+Modern blockchain activity rarely stays on one chain.
+
+An investigator may begin on Ethereum, discover a bridge to Base, follow funds to Arbitrum, observe a swap on Solana, and end at a centralized exchange.
+
+Traditional blockchain explorers treat these as separate investigations.
+
+Atlas treats them as one continuous story.
+
+---
+
+# Core Philosophy
+
+People, organizations, and attackers operate across ecosystems, not within individual chains.
+
+Atlas should investigate identities, behaviors, and fund flows rather than limiting analysis to a single blockchain.
+
+The blockchain is a location.
+
+The investigation follows the actor.
+
+---
+
+# Responsibilities
+
+The Cross-Chain Intelligence Engine is responsible for:
+
+* linking identities across chains
+* tracking assets through bridges
+* reconstructing cross-chain fund flows
+* normalizing blockchain data
+* identifying cross-chain behavioral patterns
+* correlating investigations between ecosystems
+* maintaining chain-aware intelligence
+* providing a unified investigation timeline
+
+It does **not** replace individual blockchain adapters.
+
+Instead, it coordinates them.
+
+---
+
+# Supported Chains (MVP)
+
+Atlas should be designed to support any blockchain through adapters.
+
+Initial priorities include:
+
+### EVM Networks
+
+* Ethereum
+* Base
+* Arbitrum
+* Optimism
+* Polygon
+* BNB Chain
+* Avalanche C-Chain
+* Celo
+
+---
+
+### Bitcoin Ecosystem
+
+* Bitcoin
+* Stacks (future)
+
+---
+
+### Solana
+
+Native account model support.
+
+---
+
+### Additional Chains (Future)
+
+* Sui
+* Aptos
+* Cosmos Ecosystem
+* Polkadot
+* Near
+* Tron
+* Hyperliquid
+* Berachain
+* Monad
+* MegaETH
+* Others through plugins
+
+No investigation logic should depend on one blockchain architecture.
+
+---
+
+# Core Principle
+
+Every blockchain has different data structures.
+
+Atlas normalizes them into one investigation model.
+
+Example
+
+Ethereum
+
+↓
+
+Transaction
+
+↓
+
+Bridge
+
+↓
+
+Base
+
+↓
+
+Swap
+
+↓
+
+Transfer
+
+Solana
+
+↓
+
+Instruction
+
+↓
+
+Program
+
+↓
+
+Token Account
+
+↓
+
+Transfer
+
+↓
+
+Swap
+
+Both become standardized Atlas intelligence objects.
+
+---
+
+# Universal Investigation Model
+
+Regardless of blockchain, Atlas represents activity using common concepts.
+
+Core objects include:
+
+* Wallet
+* Asset
+* Transaction
+* Contract / Program
+* Protocol
+* Entity
+* Bridge
+* Investigation
+* Pattern
+* Relationship
+* Evidence
+
+Blockchain-specific details remain available but do not change the investigation workflow.
+
+---
+
+# Chain Adapters
+
+Each blockchain is implemented as an independent adapter.
+
+Responsibilities include:
+
+* address validation
+* transaction retrieval
+* block retrieval
+* event extraction
+* protocol decoding
+* token metadata
+* chain-specific logic
+
+The rest of Atlas communicates with adapters through a common interface.
+
+Adding a new blockchain should require creating only a new adapter.
+
+---
+
+# Cross-Chain Identity Resolution
+
+One individual may control many wallets across different chains.
+
+Atlas attempts to identify related identities using evidence.
+
+Signals include:
+
+* bridge activity
+* identical funding patterns
+* repeated transaction timing
+* shared centralized exchange deposits
+* protocol usage
+* investigator-confirmed associations
+
+Identity resolution should always be probabilistic and evidence-backed.
+
+---
+
+# Bridge Intelligence
+
+Bridges are among the most important sources of cross-chain intelligence.
+
+Atlas should recognize:
+
+* bridge deposits
+* bridge withdrawals
+* bridge contracts
+* destination chains
+* asset conversions
+* transfer timing
+
+Supported bridge examples may include:
+
+* LayerZero
+* Across
+* Wormhole
+* Hyperlane
+* Axelar
+* CCTP
+* Native rollup bridges
+
+Bridge support should remain modular.
+
+---
+
+# Cross-Chain Asset Tracking
+
+Assets frequently change form.
+
+Example
+
+USDC (Ethereum)
+
+↓
+
+Bridge
+
+↓
+
+USDC (Base)
+
+↓
+
+Swap
+
+↓
+
+ETH
+
+↓
+
+Bridge
+
+↓
+
+ETH (Arbitrum)
+
+Atlas should preserve the asset lineage.
+
+The investigator should see one continuous movement rather than disconnected transfers.
+
+---
+
+# Cross-Chain Timeline
+
+Every investigation produces a unified chronological timeline.
+
+Example
+
+```text id="3mq1fx"
+09:42
+
+Funds Received (Ethereum)
+
+↓
+
+09:47
+
+Bridge Deposit
+
+↓
+
+09:51
+
+Bridge Completion (Base)
+
+↓
+
+09:53
+
+DEX Swap
+
+↓
+
+10:02
+
+Transfer To New Wallet
+```
+
+The user should not have to manually switch between blockchain explorers.
+
+---
+
+# Chain-Aware Relationships
+
+Relationships store blockchain context.
+
+Example
+
+Wallet A
+
+↓
+
+Transferred To
+
+↓
+
+Wallet B
+
+Properties
+
+* source chain
+* destination chain
+* asset
+* bridge
+* timestamp
+* confidence
+
+Cross-chain relationships become first-class graph objects.
+
+---
+
+# Multi-Chain Pattern Detection
+
+Patterns often span ecosystems.
+
+Examples include:
+
+* bridge hopping
+* cross-chain laundering
+* liquidity migration
+* coordinated Sybil farming
+* multi-chain phishing
+* governance manipulation
+
+The Pattern Recognition Agent should evaluate behavior across all supported chains.
+
+---
+
+# Cross-Chain Semantic Search
+
+Semantic memory should not be limited by blockchain.
+
+Example query
+
+> Find investigations similar to this bridge-hopping strategy.
+
+Results may include:
+
+Ethereum
+
+↓
+
+Base
+
+↓
+
+Polygon
+
+↓
+
+Arbitrum
+
+↓
+
+Celo
+
+The similarity is behavioral, not chain-specific.
+
+---
+
+# Chain Confidence
+
+Cross-chain attribution should include confidence.
+
+Example
+
+Bridge Match
+
+Confidence:
+
+98%
+
+Shared Exchange Deposit
+
+Confidence:
+
+83%
+
+Timing Correlation
+
+Confidence:
+
+74%
+
+Atlas should clearly communicate why different chains are believed to be connected.
+
+---
+
+# Failure Handling
+
+Cross-chain investigations must tolerate incomplete information.
+
+Examples:
+
+* unsupported bridge
+* missing destination transaction
+* unavailable RPC
+* delayed indexing
+* incomplete traces
+
+Atlas should preserve known evidence and mark unresolved transitions rather than abandoning the investigation.
+
+---
+
+# Collaboration with Other Agents
+
+## Investigation Agent
+
+Requests:
+
+* cross-chain expansion
+
+Receives:
+
+* unified investigation timeline
+
+---
+
+## Transaction Analysis Engine
+
+Provides:
+
+* decoded transactions
+
+Receives:
+
+* chain-specific decoding requests
+
+---
+
+## Knowledge Graph Agent
+
+Receives:
+
+* cross-chain relationships
+* bridge connections
+
+---
+
+## Pattern Recognition Agent
+
+Receives:
+
+* normalized behavioral sequences
+
+---
+
+## Memory Agent
+
+Stores:
+
+* unified cross-chain investigations
+* semantic summaries
+* identity associations
+
+---
+
+## Risk Engine
+
+Uses:
+
+* cross-chain activity
+* bridge frequency
+* behavioral consistency
+* multi-chain exposure
+
+---
+
+# Performance Principles
+
+The engine should:
+
+* avoid duplicate blockchain requests
+* cache bridge metadata
+* normalize data once
+* process chains independently where possible
+* support parallel investigation across multiple chains
+* allow incremental synchronization for monitored wallets
+
+Performance should scale with the number of supported blockchains.
+
+---
+
+# Future Enhancements
+
+Future versions may include:
+
+* real-time bridge monitoring
+* automatic bridge discovery
+* support for account abstraction wallets
+* cross-chain NFT provenance
+* stablecoin flow analysis
+* rollup state proof visualization
+* interoperability protocol intelligence
+* intent-based transaction tracking
+
+These additions should extend the engine without changing the investigation architecture.
+
+---
+
+# Guiding Principle
+
+Atlas investigates people, organizations, and behaviors—not blockchains.
+
+Every supported network becomes another source of evidence feeding a single, unified intelligence system.
+
+Cross-chain complexity should be handled by Atlas so investigators can focus on understanding behavior instead of navigating fragmented ecosystems.
+
+---
+
+# Objectives for Document 14
+
+Document 14 will define the **Evidence Engine**, explaining how Atlas collects, validates, preserves, versions, and cites evidence throughout every investigation. It will establish evidence as the foundation of every relationship, memory, pattern, and risk assessment, ensuring that all intelligence remains transparent, auditable, and reproducible.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* The architecture for cross-chain investigations is clearly defined.
+* Blockchain-specific differences are abstracted through adapters.
+* Identity resolution and bridge intelligence are documented.
+* Cross-chain asset tracking and unified timelines are established.
+* Collaboration with all major agents is clearly described.
+* Failure handling supports incomplete cross-chain information.
+* The Cross-Chain Intelligence Engine positions Atlas as a blockchain intelligence platform rather than a collection of individual chain explorers.

@@ -1,0 +1,547 @@
+# Document 25: Product Roadmap & Evolution Strategy
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+This document defines the long-term evolution of Atlas from a hackathon project into a production-ready blockchain intelligence platform.
+
+The roadmap exists to ensure every feature, architectural decision, and engineering effort contributes toward a single vision rather than becoming a collection of disconnected capabilities.
+
+Atlas should be built incrementally.
+
+Every release must provide immediate value while moving the platform toward its long-term objective.
+
+---
+
+# Product Vision
+
+Atlas is building the operating system for blockchain intelligence.
+
+Rather than becoming another blockchain explorer or analytics dashboard, Atlas becomes a continuously learning intelligence platform capable of:
+
+* remembering every investigation
+* understanding blockchain relationships
+* coordinating AI agents
+* detecting emerging threats
+* explaining complex blockchain behavior
+* assisting investigators through natural language
+* operating autonomously when appropriate
+
+Persistent memory is Atlas's competitive advantage.
+
+---
+
+# Product Principles
+
+Every product decision should reinforce these principles:
+
+* Evidence before assumptions
+* AI enhances, never replaces, deterministic intelligence
+* Every conclusion must be explainable
+* Memory compounds in value over time
+* Enterprise security is foundational
+* Collaboration creates better intelligence
+* Performance should scale with adoption
+* Simplicity for users, sophistication internally
+
+If a feature does not strengthen these principles, it should be reconsidered.
+
+---
+
+# Development Philosophy
+
+Atlas follows an iterative development model.
+
+```text id="4pr8km"
+Prototype
+
+↓
+
+MVP
+
+↓
+
+Production
+
+↓
+
+Enterprise
+
+↓
+
+Platform
+
+↓
+
+Ecosystem
+```
+
+Each phase delivers a usable product.
+
+---
+
+# Phase 1: Hackathon MVP
+
+**Goal**
+
+Demonstrate persistent agentic memory using CockroachDB on AWS while solving a real blockchain investigation problem.
+
+This phase is focused on proving the core concept rather than maximizing features.
+
+---
+
+## MVP Features
+
+Core capabilities:
+
+* Wallet investigation
+* Persistent investigation memory
+* AI-powered investigation summaries
+* Semantic memory search
+* Knowledge graph
+* Evidence engine
+* Entity resolution
+* Risk scoring
+* Investigation reports
+* Natural language interface
+
+---
+
+## Required CockroachDB Features
+
+The MVP should use at least two required hackathon technologies.
+
+Recommended:
+
+* CockroachDB Managed MCP Server
+* Distributed Vector Indexing
+
+Optional additions:
+
+* Agent Skills Repository
+* ccloud CLI
+
+---
+
+## Required AWS Services
+
+Recommended stack:
+
+* Amazon Bedrock
+* Amazon ECS
+* Amazon S3
+* AWS Lambda
+
+These services satisfy hackathon requirements while matching Atlas's long-term architecture.
+
+---
+
+## MVP Success Criteria
+
+The MVP is successful when a user can:
+
+* investigate a wallet
+* ask follow-up questions
+* retrieve previous investigations from memory
+* understand why Atlas reached its conclusions
+* generate an investigation report
+
+Persistent memory should be clearly demonstrated during the demo.
+
+---
+
+# Phase 2: Public Beta
+
+Primary goals:
+
+Improve usability.
+
+Increase investigation accuracy.
+
+Expand supported blockchains.
+
+---
+
+## New Features
+
+* User accounts
+* Organization workspaces
+* Investigation history
+* Shared reports
+* Watchlists
+* Alerting
+* Background investigations
+* Additional blockchain integrations
+
+---
+
+## Infrastructure Improvements
+
+* production monitoring
+* autoscaling
+* distributed queues
+* improved observability
+
+---
+
+# Phase 3: Professional Edition
+
+Target customers:
+
+* security researchers
+* blockchain analytics firms
+* compliance teams
+* exchanges
+* auditors
+
+---
+
+## New Features
+
+* enterprise dashboards
+* investigation templates
+* approval workflows
+* advanced graph analytics
+* custom alert rules
+* API access
+* organization memory
+
+---
+
+# Phase 4: Enterprise Platform
+
+Target customers:
+
+* exchanges
+* custodians
+* governments
+* financial institutions
+* law enforcement
+* large protocols
+
+---
+
+## Enterprise Capabilities
+
+* multi-region deployment
+* SSO
+* RBAC
+* audit exports
+* compliance workflows
+* advanced collaboration
+* custom integrations
+* dedicated infrastructure
+
+---
+
+# Phase 5: Autonomous Intelligence
+
+Atlas begins operating continuously.
+
+Capabilities include:
+
+* autonomous investigations
+* predictive monitoring
+* automatic pattern discovery
+* AI-assisted threat hunting
+* continuous intelligence generation
+* investigator recommendations
+
+Atlas evolves into an active intelligence partner rather than a passive tool.
+
+---
+
+# Phase 6: Intelligence Platform
+
+Atlas expands beyond investigations.
+
+Future capabilities include:
+
+* protocol intelligence
+* ecosystem monitoring
+* attack prediction
+* market intelligence
+* cross-chain intelligence
+* regulatory intelligence
+* ecosystem risk monitoring
+
+The platform becomes a comprehensive blockchain intelligence operating system.
+
+---
+
+# Technical Roadmap
+
+## Stage 1
+
+Foundation
+
+Deliver:
+
+* authentication
+* CockroachDB
+* AWS deployment
+* memory
+* investigation engine
+
+---
+
+## Stage 2
+
+Intelligence
+
+Deliver:
+
+* graph engine
+* entity resolution
+* semantic search
+* evidence engine
+* AI reasoning
+
+---
+
+## Stage 3
+
+Automation
+
+Deliver:
+
+* monitoring
+* alerts
+* autonomous investigations
+* scheduling
+* memory evolution
+
+---
+
+## Stage 4
+
+Enterprise
+
+Deliver:
+
+* organizations
+* collaboration
+* permissions
+* reporting
+* APIs
+
+---
+
+## Stage 5
+
+Optimization
+
+Deliver:
+
+* performance improvements
+* cost optimization
+* scaling
+* observability
+* operational tooling
+
+---
+
+# User Growth Strategy
+
+Early users:
+
+* hackathon judges
+* blockchain developers
+
+↓
+
+Security researchers
+
+↓
+
+Protocol teams
+
+↓
+
+Auditors
+
+↓
+
+Compliance teams
+
+↓
+
+Enterprise customers
+
+↓
+
+Governments
+
+Product maturity should grow alongside customer sophistication.
+
+---
+
+# Success Metrics
+
+Engineering metrics:
+
+* investigation latency
+* AI response time
+* database availability
+* report generation time
+* memory retrieval latency
+
+---
+
+Product metrics:
+
+* daily active investigators
+* investigations created
+* reports generated
+* follow-up investigation rate
+* memory reuse rate
+* semantic search accuracy
+
+---
+
+Business metrics:
+
+* enterprise workspaces
+* API usage
+* paid organizations
+* retention
+* customer satisfaction
+* recurring revenue
+
+---
+
+# Technical Debt Strategy
+
+Technical debt should be managed continuously.
+
+Guidelines:
+
+* refactor after validation
+* avoid premature optimization
+* automate repetitive work
+* prioritize architectural consistency
+* document major decisions
+
+Speed should never permanently compromise maintainability.
+
+---
+
+# Open Source Strategy
+
+The core platform may evolve through a hybrid approach.
+
+Potential structure:
+
+Open Source:
+
+* SDK
+* Agent Skills
+* CLI
+* connectors
+* selected integrations
+
+Commercial:
+
+* enterprise collaboration
+* advanced monitoring
+* organization memory
+* managed infrastructure
+* premium intelligence
+
+The boundary should remain clear and sustainable.
+
+---
+
+# Ecosystem Strategy
+
+Atlas should integrate with:
+
+* wallets
+* exchanges
+* block explorers
+* security platforms
+* SIEM systems
+* compliance software
+* AI frameworks
+* investigation platforms
+
+Atlas becomes an intelligence layer rather than replacing existing infrastructure.
+
+---
+
+# Long-Term Vision
+
+Five years from now, Atlas should be recognized as the platform organizations rely on when they need to understand blockchain activity quickly, accurately, and transparently.
+
+Its value will not come from having the most data.
+
+It will come from having the most useful memory.
+
+Every investigation improves future investigations.
+
+Every relationship strengthens the graph.
+
+Every report enriches organizational knowledge.
+
+Every interaction compounds Atlas's intelligence.
+
+---
+
+# Guiding Principle
+
+The long-term success of Atlas depends on disciplined execution.
+
+The platform should evolve through deliberate phases, with every release strengthening the core promise:
+
+**An AI-powered blockchain intelligence platform with persistent, explainable, agentic memory.**
+
+Features will grow.
+
+Infrastructure will scale.
+
+AI models will improve.
+
+Blockchain ecosystems will evolve.
+
+The mission remains constant.
+
+Help investigators understand blockchain activity with intelligence that remembers.
+
+---
+
+# Final Acceptance Criteria
+
+The Atlas architecture is considered complete when:
+
+* All core platform components have been defined.
+* The multi-agent architecture is documented.
+* Persistent memory is integrated throughout the platform.
+* AI reasoning remains evidence-first and explainable.
+* Enterprise security, scalability, and collaboration are established.
+* The deployment architecture supports production workloads.
+* A phased roadmap exists from MVP to enterprise adoption.
+* Atlas has a coherent vision that aligns product strategy, technical architecture, and long-term platform evolution around persistent blockchain intelligence powered by CockroachDB and AWS.
+
+---
+
+# Next Recommended Deliverables
+
+With the architecture complete, the next artifacts should focus on execution rather than design:
+
+1. **System Architecture Diagram** (C4 Model: Context, Container, Component)
+2. **CockroachDB Database Schema** (tables, indexes, vector columns, relationships)
+3. **AWS Infrastructure Diagram** (ECS/Lambda/Bedrock/S3/EventBridge/CockroachDB Cloud)
+4. **API Specification** (REST + MCP tools + WebSocket events)
+5. **Multi-Agent Prompt Specifications** for every Atlas agent
+6. **Frontend UX Wireframes** (dashboard, investigation view, graph explorer, chat interface)
+7. **Development Roadmap** with weekly milestones from Day 1 to production launch
+8. **Pitch Deck** tailored for the CockroachDB × AWS Hackathon and future investors
+
+These execution documents will convert the Atlas vision into an implementation-ready blueprint.

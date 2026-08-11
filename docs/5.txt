@@ -1,0 +1,633 @@
+# Document 5: Semantic Memory & Vector Intelligence
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+This document defines how Atlas uses semantic memory to move beyond traditional database queries.
+
+Traditional databases answer questions like:
+
+> "Find wallet 0x123..."
+
+Atlas should also answer questions like:
+
+* "Show wallets that behave like this one."
+* "Have we investigated something similar before?"
+* "Find investigations involving bridge hopping."
+* "Show phishing campaigns that resemble this pattern."
+* "Find wallets using the same laundering strategy."
+
+These questions cannot be answered with exact SQL matching alone.
+
+Atlas achieves this using **semantic embeddings** stored and searched directly inside CockroachDB.
+
+---
+
+# What is Semantic Memory?
+
+Semantic memory is Atlas's ability to remember the *meaning* of previous investigations rather than only exact values.
+
+Instead of storing only:
+
+* wallet addresses
+* transaction hashes
+* labels
+
+Atlas also stores numerical representations (embeddings) of:
+
+* investigation summaries
+* wallet behavior
+* entity descriptions
+* scam patterns
+* AI reasoning
+* conversations
+
+This allows Atlas to retrieve similar knowledge even when there are no exact matches.
+
+---
+
+# Why Semantic Memory Matters
+
+Without semantic memory:
+
+User asks:
+
+> "Find wallets behaving like this."
+
+Atlas can only search labels or addresses.
+
+---
+
+With semantic memory:
+
+Atlas understands concepts such as:
+
+* bridge abuse
+* wallet splitting
+* phishing
+* token laundering
+* MEV
+* wash trading
+* Sybil behavior
+* exchange deposit patterns
+
+It retrieves similar investigations even if they use different wallets, protocols, or chains.
+
+This is what makes Atlas feel like an investigator rather than a search engine.
+
+---
+
+# Semantic Objects
+
+Every object is not embedded.
+
+Only knowledge that benefits from semantic comparison should generate embeddings.
+
+For the MVP, Atlas embeds:
+
+## Investigation Summaries
+
+Example:
+
+> "Wallet funded through Base bridge before interacting with multiple phishing contracts."
+
+---
+
+## Wallet Profiles
+
+Generated summary, not raw transactions.
+
+Example:
+
+> "High-frequency DeFi wallet interacting with lending protocols and bridges."
+
+---
+
+## Entity Profiles
+
+Example:
+
+> "Centralized exchange hot wallet cluster."
+
+---
+
+## Pattern Descriptions
+
+Example:
+
+> "Funds split across multiple fresh wallets before bridge transfer."
+
+---
+
+## AI Conclusions
+
+Example:
+
+> "Likely controlled by the same operator due to identical funding behavior."
+
+---
+
+Future versions may include:
+
+* governance proposals
+* smart contract summaries
+* uploaded reports
+* malware indicators
+* sanctions intelligence
+
+---
+
+# What Should NOT Be Embedded
+
+Do **not** create embeddings for:
+
+* raw transaction hashes
+* wallet addresses
+* block numbers
+* timestamps
+* numeric balances
+* chain IDs
+* gas values
+
+These are better handled with traditional indexes.
+
+---
+
+# Embedding Generation Pipeline
+
+Every completed investigation follows the same semantic workflow.
+
+```text
+Investigation Complete
+
+↓
+
+Generate Structured Summary
+
+↓
+
+Normalize Text
+
+↓
+
+Generate Embedding
+
+↓
+
+Store in CockroachDB
+
+↓
+
+Index Vector
+
+↓
+
+Ready for Semantic Search
+```
+
+Embeddings should be generated **after** the investigation is finalized to ensure they represent stable knowledge.
+
+---
+
+# Embedding Models
+
+Atlas should abstract the embedding provider behind a common interface.
+
+Initial implementation:
+
+* Amazon Bedrock embedding model
+
+Future support:
+
+* Titan Embeddings
+* Cohere
+* OpenAI-compatible providers
+* Voyage AI
+* other supported embedding services
+
+The application must not depend on one vendor.
+
+---
+
+# Embedding Metadata
+
+Every embedding stores:
+
+* object type
+* object ID
+* embedding model
+* model version
+* embedding timestamp
+* source language
+* embedding dimensions
+
+This allows future re-indexing without losing compatibility.
+
+---
+
+# Vector Indexing
+
+CockroachDB Distributed Vector Indexing is the official semantic search engine.
+
+Atlas should not introduce an external vector database.
+
+Every vector search should execute inside CockroachDB.
+
+Benefits include:
+
+* transactional consistency
+* simplified infrastructure
+* no synchronization issues
+* lower operational complexity
+
+---
+
+# Similarity Search
+
+Atlas retrieves memories using vector similarity.
+
+Example query flow:
+
+```text
+User Question
+
+↓
+
+Generate Query Embedding
+
+↓
+
+Vector Search
+
+↓
+
+Top Matching Memories
+
+↓
+
+Rank Results
+
+↓
+
+Provide Context to AI
+```
+
+The AI reasons over retrieved memories before generating a response.
+
+---
+
+# Hybrid Search
+
+Semantic search should never replace structured search.
+
+Atlas combines both.
+
+```text
+Exact Filters
+
++
+
+Graph Relationships
+
++
+
+Semantic Search
+
+=
+
+Final Memory Retrieval
+```
+
+Example:
+
+Find:
+
+* Ethereum wallets
+* Risk score above 80
+* Similar to previous phishing campaigns
+
+This combines SQL filtering with vector similarity.
+
+---
+
+# Retrieval Pipeline
+
+Every investigation starts by retrieving relevant memory.
+
+```text
+Receive Request
+
+↓
+
+Exact Wallet Lookup
+
+↓
+
+Relationship Search
+
+↓
+
+Entity Lookup
+
+↓
+
+Pattern Lookup
+
+↓
+
+Semantic Search
+
+↓
+
+Merge Results
+
+↓
+
+Rank Memories
+
+↓
+
+Send Context to AI
+```
+
+The AI never starts reasoning with an empty context unless nothing relevant exists.
+
+---
+
+# Memory Ranking
+
+Not every retrieved memory is equally useful.
+
+Atlas ranks memories using multiple signals.
+
+Factors include:
+
+## Similarity Score
+
+How close the embedding is to the query.
+
+---
+
+## Confidence
+
+Higher-confidence investigations rank higher.
+
+---
+
+## Freshness
+
+Recently verified memories receive a small boost.
+
+---
+
+## Evidence Count
+
+Memories supported by more evidence are preferred.
+
+---
+
+## Investigation Quality
+
+Comprehensive investigations should outrank shallow analyses.
+
+---
+
+## User Context
+
+If the user previously worked on a related investigation, those memories may receive a slight boost without affecting shared intelligence.
+
+---
+
+# Context Window Construction
+
+The AI should never receive dozens of unrelated memories.
+
+Instead:
+
+Retrieve many.
+
+Keep only the most relevant.
+
+Construct a concise context.
+
+Example:
+
+```text
+Top 25 Matches
+
+↓
+
+Remove Duplicates
+
+↓
+
+Merge Similar Findings
+
+↓
+
+Prioritize High Confidence
+
+↓
+
+Summarize
+
+↓
+
+Provide Final Context
+```
+
+This prevents context window overflow.
+
+---
+
+# Memory Expansion
+
+Retrieved memories often reference additional knowledge.
+
+Example:
+
+User investigates:
+
+Wallet A
+
+Atlas retrieves:
+
+Investigation X
+
+Investigation X references:
+
+Wallet B
+
+Bridge Y
+
+Pattern Z
+
+Atlas may expand the search to include these related objects before responding.
+
+This creates richer, evidence-backed reasoning.
+
+---
+
+# Semantic Deduplication
+
+Before storing new memories:
+
+Atlas should determine:
+
+* Is this genuinely new?
+* Is it an update?
+* Is it nearly identical to an existing investigation?
+
+If similarity exceeds a configurable threshold:
+
+Instead of creating duplicate knowledge:
+
+* update confidence
+* create a new version
+* append evidence
+* preserve history
+
+This keeps the memory base clean.
+
+---
+
+# Continuous Re-Embedding
+
+Knowledge evolves.
+
+Examples:
+
+New evidence appears.
+
+Risk score changes.
+
+Entity attribution improves.
+
+Atlas should regenerate embeddings whenever meaningful semantic changes occur.
+
+Do **not** regenerate embeddings for insignificant metadata updates.
+
+---
+
+# Semantic Memory Use Cases
+
+Examples include:
+
+**Example 1**
+
+User:
+
+> Show wallets similar to this phishing wallet.
+
+Atlas retrieves previous phishing investigations.
+
+---
+
+**Example 2**
+
+User:
+
+> Have we seen this bridge sequence before?
+
+Atlas searches historical bridge patterns.
+
+---
+
+**Example 3**
+
+User:
+
+> Find investigations involving rapid token splitting.
+
+Atlas retrieves laundering investigations from different blockchains.
+
+---
+
+**Example 4**
+
+User:
+
+> Show investigations similar to this MEV strategy.
+
+Atlas identifies previous MEV behaviors based on semantic similarity rather than exact addresses.
+
+---
+
+# Performance Strategy
+
+Semantic retrieval should remain fast.
+
+Guidelines:
+
+* store only meaningful embeddings
+* avoid embedding raw blockchain data
+* use hybrid retrieval
+* cache frequently accessed searches
+* regenerate embeddings only when necessary
+
+---
+
+# Failure Handling
+
+If embedding generation fails:
+
+Atlas should:
+
+* complete the investigation
+* mark embedding as pending
+* schedule background regeneration
+* never discard the investigation
+
+Semantic memory enhances Atlas but should never block core functionality.
+
+---
+
+# Future Enhancements
+
+Future versions may support:
+
+* multilingual embeddings
+* cross-modal search (text + images)
+* graph-aware embeddings
+* temporal embeddings that account for behavior over time
+* agent-generated memory summaries
+* adaptive embedding models based on investigation type
+
+---
+
+# Guiding Principle
+
+Semantic memory exists to help Atlas **understand meaning, not replace facts**.
+
+Every semantic result must remain grounded in structured data, evidence, and relationships stored elsewhere in the system.
+
+Embeddings accelerate discovery.
+
+Evidence establishes truth.
+
+---
+
+# Objectives for Document 6
+
+Document 6 will define the **Investigation Agent**, the primary AI agent responsible for orchestrating blockchain investigations. It will cover its responsibilities, tools, reasoning process, prompts, decision-making framework, interaction with memory, failure recovery, and how it collaborates with the other specialized agents.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* The role of semantic memory is clearly defined.
+* Embedding generation and storage workflows are established.
+* Hybrid retrieval is adopted as the default strategy.
+* Memory ranking and context construction are documented.
+* Deduplication and re-embedding strategies are defined.
+* The relationship between semantic memory and factual evidence is explicit.
+* Semantic search is fully integrated into Atlas's investigation workflow without replacing structured intelligence.

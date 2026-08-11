@@ -1,0 +1,612 @@
+# Document 8: Pattern Recognition Agent
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+The Pattern Recognition Agent is responsible for discovering behaviors that repeat across blockchain investigations.
+
+While the Investigation Agent answers:
+
+> "What happened in this investigation?"
+
+The Pattern Recognition Agent answers:
+
+> "Have we seen this behavior before?"
+
+Its goal is not to investigate individual wallets, but to transform isolated observations into reusable intelligence.
+
+Over time, Atlas should become increasingly capable of recognizing attack techniques, laundering strategies, fraud campaigns, and behavioral signatures without requiring explicit rules for every scenario.
+
+---
+
+# Core Philosophy
+
+Individual transactions rarely tell the full story.
+
+Patterns do.
+
+One wallet interacting with a bridge may be normal.
+
+Hundreds of wallets following the same sequence over weeks may indicate coordinated activity.
+
+The Pattern Recognition Agent identifies these recurring behaviors and converts them into permanent knowledge.
+
+---
+
+# Responsibilities
+
+The Pattern Recognition Agent is responsible for:
+
+* identifying recurring behaviors
+* clustering similar investigations
+* detecting emerging attack techniques
+* recognizing historical similarities
+* creating new behavioral patterns
+* updating existing patterns
+* increasing confidence in known patterns
+* notifying other agents of newly discovered patterns
+
+It does **not** assign risk scores or perform complete investigations.
+
+---
+
+# Inputs
+
+The Pattern Recognition Agent receives:
+
+* completed investigations
+* wallet summaries
+* transaction sequences
+* relationship graphs
+* semantic embeddings
+* evidence
+* entity relationships
+* historical patterns
+
+It should never process raw blockchain events directly.
+
+It operates on structured intelligence produced by other agents.
+
+---
+
+# Outputs
+
+The Pattern Recognition Agent produces:
+
+* new patterns
+* updated pattern confidence
+* matched investigations
+* behavioral clusters
+* pattern summaries
+* recommended relationships
+* similarity reports
+
+All outputs are submitted to the Memory Agent for persistence.
+
+---
+
+# Pattern Lifecycle
+
+Every discovered behavior follows the same lifecycle.
+
+```text id="mkp7r2"
+Completed Investigation
+
+↓
+
+Extract Behaviors
+
+↓
+
+Compare Against Existing Patterns
+
+↓
+
+Similarity Analysis
+
+↓
+
+Pattern Match?
+
+↓
+
+YES
+
+↓
+
+Increase Confidence
+
+↓
+
+Update Pattern
+
+↓
+
+NO
+
+↓
+
+Create Candidate Pattern
+
+↓
+
+Wait For Additional Evidence
+
+↓
+
+Promote To Official Pattern
+```
+
+Patterns should mature gradually through repeated observations.
+
+---
+
+# Pattern Categories
+
+Atlas should classify patterns into well-defined categories.
+
+## Money Laundering
+
+Examples:
+
+* wallet splitting
+* rapid fund dispersion
+* bridge chaining
+* mixer interactions
+* peel chains
+
+---
+
+## Scam Activity
+
+Examples:
+
+* phishing campaigns
+* fake token launches
+* rug pull deployments
+* impersonation wallets
+
+---
+
+## DeFi Exploits
+
+Examples:
+
+* flash loan attacks
+* oracle manipulation
+* governance attacks
+* liquidity draining
+
+---
+
+## Sybil Activity
+
+Examples:
+
+* repeated wallet creation
+* identical funding trees
+* synchronized transaction timing
+* farming behavior
+
+---
+
+## Exchange Activity
+
+Examples:
+
+* deposit clusters
+* withdrawal patterns
+* operational hot wallets
+
+---
+
+## MEV Behavior
+
+Examples:
+
+* sandwich attacks
+* arbitrage sequences
+* liquidation bots
+
+---
+
+## Cross-Chain Movement
+
+Examples:
+
+* bridge hopping
+* chain rotation
+* liquidity migration
+* coordinated cross-chain transfers
+
+---
+
+# Behavioral Signatures
+
+Patterns are identified using behavioral signatures rather than isolated transactions.
+
+Examples of signatures include:
+
+* transaction ordering
+* transaction timing
+* funding source similarity
+* destination similarity
+* protocol usage
+* bridge sequence
+* smart contract interactions
+* token movement
+* recurring counterparties
+
+Behavioral signatures are more resilient than simple rule matching.
+
+---
+
+# Pattern Extraction
+
+Each completed investigation is transformed into a normalized behavior profile.
+
+Example
+
+```text id="j3f0dx"
+Wallet Created
+
+↓
+
+Funded
+
+↓
+
+Bridge Used
+
+↓
+
+Token Swap
+
+↓
+
+Funds Split
+
+↓
+
+Exchange Deposit
+```
+
+The Pattern Recognition Agent compares this sequence against existing knowledge.
+
+---
+
+# Similarity Analysis
+
+Pattern similarity combines multiple signals.
+
+Factors include:
+
+* semantic similarity
+* graph similarity
+* transaction sequence similarity
+* protocol overlap
+* timing similarity
+* entity overlap
+* wallet clustering
+
+No single factor should determine a match.
+
+---
+
+# Pattern Confidence
+
+Every pattern stores confidence.
+
+Confidence increases when:
+
+* multiple investigations support it
+* evidence accumulates
+* multiple chains exhibit the same behavior
+* relationships strengthen
+
+Confidence decreases when:
+
+* contradictory evidence appears
+* the pattern becomes outdated
+* false positives are identified
+
+Patterns should evolve rather than remain static.
+
+---
+
+# Candidate Patterns
+
+Not every observed behavior becomes official.
+
+When Atlas discovers a potentially new behavior:
+
+It creates a **Candidate Pattern**.
+
+Candidate patterns require additional supporting investigations before promotion.
+
+Example
+
+```text id="xk2q6f"
+Investigation 1
+
+↓
+
+Candidate Pattern
+
+↓
+
+Investigation 2
+
+↓
+
+Confidence Increases
+
+↓
+
+Investigation 3
+
+↓
+
+Pattern Promoted
+```
+
+This reduces false discoveries.
+
+---
+
+# Pattern Matching
+
+During every investigation:
+
+Atlas asks:
+
+> Does this investigation resemble an existing pattern?
+
+If yes:
+
+* attach the pattern
+* update confidence
+* retrieve previous investigations
+* recommend related entities
+
+This allows Atlas to learn continuously.
+
+---
+
+# Pattern Evolution
+
+Patterns are living objects.
+
+Example
+
+Version 1
+
+Bridge
+
+↓
+
+Exchange
+
+↓
+
+Cash Out
+
+Version 2
+
+Bridge
+
+↓
+
+DEX
+
+↓
+
+Bridge
+
+↓
+
+Exchange
+
+The original version remains accessible.
+
+Atlas records how patterns evolve over time.
+
+---
+
+# Pattern Relationships
+
+Patterns can relate to other patterns.
+
+Example
+
+Wallet Splitting
+
+↓
+
+Often Leads To
+
+↓
+
+Bridge Hopping
+
+Bridge Hopping
+
+↓
+
+Often Followed By
+
+↓
+
+Exchange Deposit
+
+Atlas should model these relationships inside the Knowledge Graph.
+
+---
+
+# Pattern Search
+
+Users should be able to ask questions like:
+
+* Show investigations similar to this laundering behavior.
+* Find all wallets matching this phishing campaign.
+* Have we seen this bridge sequence before?
+* Which investigations resemble this exploit?
+
+Pattern search combines:
+
+* semantic search
+* graph traversal
+* structured filtering
+
+---
+
+# Learning From Feedback
+
+Future versions should allow investigators to provide feedback.
+
+Examples:
+
+Correct Pattern
+
+Incorrect Match
+
+False Positive
+
+Useful Pattern
+
+This feedback should adjust confidence but never immediately overwrite historical knowledge.
+
+---
+
+# Collaboration with Other Agents
+
+## Investigation Agent
+
+Provides:
+
+* completed investigation
+* behavior summaries
+
+Receives:
+
+* matching patterns
+* related investigations
+
+---
+
+## Memory Agent
+
+Receives:
+
+* new patterns
+* updated confidence
+* pattern versions
+
+Returns:
+
+* historical patterns
+* semantic matches
+
+---
+
+## Knowledge Graph Agent
+
+Receives:
+
+* pattern relationships
+* pattern associations
+
+Returns:
+
+* graph expansions
+
+---
+
+## Risk Engine
+
+Receives:
+
+* confirmed patterns
+
+Uses them as signals when calculating explainable risk scores.
+
+---
+
+# Performance Principles
+
+Pattern detection should:
+
+* operate asynchronously where possible
+* avoid rescanning unchanged investigations
+* reuse semantic embeddings
+* prioritize high-confidence investigations
+* support incremental learning
+
+---
+
+# Failure Recovery
+
+If pattern analysis fails:
+
+* complete the investigation
+* mark pattern analysis as pending
+* retry asynchronously
+* never discard investigation results
+
+Pattern recognition enhances Atlas but should not block investigations.
+
+---
+
+# Future Enhancements
+
+Future versions may include:
+
+* anomaly detection using unsupervised learning
+* temporal pattern analysis
+* graph neural network-assisted clustering
+* real-time pattern alerts
+* adaptive pattern generation
+* federated pattern sharing between Atlas deployments
+
+These capabilities should integrate with the existing architecture without requiring significant redesign.
+
+---
+
+# Guiding Principle
+
+The Pattern Recognition Agent transforms experience into expertise.
+
+A single investigation produces knowledge.
+
+Repeated investigations produce patterns.
+
+Patterns enable Atlas to recognize threats faster, uncover hidden relationships, and continuously improve its understanding of blockchain behavior.
+
+This is how Atlas evolves from remembering facts to recognizing intelligence.
+
+---
+
+# Objectives for Document 9
+
+Document 9 will define the **Knowledge Graph Agent**, responsible for building and maintaining Atlas's blockchain intelligence graph. It will cover graph construction, entity resolution, relationship validation, graph traversal, graph expansion, and how interconnected knowledge enables more powerful investigations.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* The role of the Pattern Recognition Agent is clearly defined.
+* Pattern discovery, matching, and evolution workflows are documented.
+* Candidate patterns and confidence progression are established.
+* Behavioral signatures are prioritized over isolated events.
+* Collaboration with the Investigation Agent, Memory Agent, Knowledge Graph Agent, and Risk Engine is clearly defined.
+* The architecture supports continuous learning without generating excessive false positives.
+* Pattern intelligence becomes a reusable asset that strengthens every future investigation.

@@ -1,0 +1,721 @@
+# Document 26: System Architecture & Implementation Blueprint
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+This document translates the Atlas architecture into an implementation-ready blueprint.
+
+The previous documents defined what Atlas should do.
+
+This document defines how every component connects together in production.
+
+Its purpose is to give engineers, AI coding agents (such as Claude Code or Codex), and future contributors a single architectural reference before implementation begins.
+
+This document intentionally stays at the system level. Database schemas, API contracts, and individual services are defined in later documents.
+
+---
+
+# Architecture Philosophy
+
+Atlas follows a modular, event-driven, service-oriented architecture.
+
+Every service has one responsibility.
+
+Every service communicates through well-defined APIs or events.
+
+No service should depend on internal implementation details of another service.
+
+Loose coupling enables independent scaling, testing, and deployment.
+
+---
+
+# High-Level System Architecture
+
+```text
+                        User
+                          │
+                          ▼
+                Frontend (Next.js)
+                          │
+                          ▼
+                  API Gateway / BFF
+                          │
+     ┌──────────────┬───────────────┬───────────────┐
+     ▼              ▼               ▼
+ Auth Service   Investigation     Chat Service
+                  Service
+     │              │               │
+     │              ▼               ▼
+     │        AI Orchestrator ◄─────┘
+     │              │
+     └──────────────┼────────────────────────────────────┐
+                    ▼                                    │
+         ┌──────────────────────────┐                    │
+         │      Internal Agents     │                    │
+         └──────────────────────────┘                    │
+                    │                                    │
+     ┌──────────────┼───────────────┬──────────────┐
+     ▼              ▼               ▼              ▼
+Evidence      Graph Engine    Memory Engine   Risk Engine
+Engine
+     │              │               │              │
+     └──────────────┼───────────────┴──────────────┘
+                    ▼
+             CockroachDB Cloud
+                    │
+          Distributed Vector Index
+                    │
+                    ▼
+               Amazon S3 Storage
+
+                    ▲
+                    │
+             AWS Bedrock Models
+
+                    ▲
+                    │
+             EventBridge + SQS
+```
+
+---
+
+# Major System Components
+
+Atlas consists of eight primary domains.
+
+1. Frontend
+
+2. API Layer
+
+3. AI Layer
+
+4. Investigation Layer
+
+5. Intelligence Layer
+
+6. Memory Layer
+
+7. Data Layer
+
+8. Infrastructure Layer
+
+Each domain evolves independently.
+
+---
+
+# Frontend Layer
+
+Responsibilities:
+
+* authentication
+* dashboard
+* investigation workspace
+* graph visualization
+* AI chat
+* reports
+* organization management
+* monitoring
+
+Technology:
+
+* Next.js
+* React
+* TypeScript
+* TailwindCSS
+* React Query
+* WebSockets
+
+The frontend contains no investigation logic.
+
+It only renders data.
+
+---
+
+# Backend Layer
+
+Responsibilities:
+
+* routing
+* validation
+* authentication
+* authorization
+* orchestration
+
+Recommended stack:
+
+* Node.js
+* TypeScript
+* Fastify or NestJS
+
+Every endpoint returns structured JSON.
+
+---
+
+# AI Layer
+
+The AI layer coordinates all reasoning.
+
+It consists of:
+
+AI Orchestrator
+
+↓
+
+Reasoning Engine
+
+↓
+
+Prompt Builder
+
+↓
+
+Memory Retriever
+
+↓
+
+Response Validator
+
+↓
+
+Report Generator
+
+The orchestrator decides:
+
+* which model to call
+* which tools to invoke
+* how much context to retrieve
+* how results are validated
+
+---
+
+# Investigation Layer
+
+Core services:
+
+Investigation Service
+
+↓
+
+Transaction Analyzer
+
+↓
+
+Evidence Builder
+
+↓
+
+Entity Resolver
+
+↓
+
+Relationship Builder
+
+↓
+
+Investigation Timeline
+
+↓
+
+Summary Generator
+
+This layer produces investigation results.
+
+---
+
+# Intelligence Layer
+
+Responsible for:
+
+Knowledge Graph
+
+↓
+
+Pattern Recognition
+
+↓
+
+Behavior Detection
+
+↓
+
+Risk Analysis
+
+↓
+
+Confidence Scoring
+
+↓
+
+Recommendation Engine
+
+This layer converts evidence into intelligence.
+
+---
+
+# Memory Layer
+
+The Memory Layer is Atlas's competitive advantage.
+
+Responsibilities:
+
+* investigation memory
+* semantic search
+* vector retrieval
+* historical memory
+* organization memory
+* memory evolution
+* embedding generation
+
+CockroachDB remains the system of record.
+
+---
+
+# Data Layer
+
+Primary storage:
+
+CockroachDB
+
+Stores:
+
+* users
+* organizations
+* investigations
+* evidence
+* vectors
+* entities
+* relationships
+* reports
+
+Secondary storage:
+
+Amazon S3
+
+Stores:
+
+* exports
+* uploads
+* report assets
+* archived files
+
+---
+
+# Event Layer
+
+Atlas communicates internally using events.
+
+Examples:
+
+InvestigationStarted
+
+InvestigationCompleted
+
+MemoryUpdated
+
+RiskChanged
+
+ReportGenerated
+
+AlertCreated
+
+Events reduce service coupling.
+
+---
+
+# Service Responsibilities
+
+## Authentication Service
+
+Responsible for:
+
+* login
+* sessions
+* MFA
+* organizations
+* permissions
+
+---
+
+## Investigation Service
+
+Responsible for:
+
+* blockchain analysis
+* orchestration
+* transaction collection
+
+---
+
+## Graph Service
+
+Responsible for:
+
+* relationships
+* graph traversal
+* shortest paths
+* graph summaries
+
+---
+
+## Memory Service
+
+Responsible for:
+
+* semantic search
+* memory retrieval
+* embedding updates
+* version history
+
+---
+
+## AI Service
+
+Responsible for:
+
+* reasoning
+* summaries
+* recommendations
+* report narratives
+
+---
+
+## Reporting Service
+
+Responsible for:
+
+* report generation
+* exports
+* PDFs
+* dossiers
+
+---
+
+## Monitoring Service
+
+Responsible for:
+
+* watchlists
+* alerts
+* scheduled investigations
+
+---
+
+# Agent Communication
+
+Agents communicate through structured messages.
+
+Example:
+
+```json
+{
+  "task": "AnalyzeWallet",
+  "wallet": "0x123...",
+  "objective": "Determine fund origin",
+  "investigationId": "...",
+  "priority": "high"
+}
+```
+
+Every message is deterministic.
+
+---
+
+# Internal Request Flow
+
+User
+
+↓
+
+API
+
+↓
+
+Investigation Service
+
+↓
+
+Memory Retrieval
+
+↓
+
+Evidence Collection
+
+↓
+
+Graph Analysis
+
+↓
+
+Risk Engine
+
+↓
+
+AI Reasoning
+
+↓
+
+Report Generation
+
+↓
+
+Frontend Response
+
+No component skips validation.
+
+---
+
+# Failure Isolation
+
+Every service must fail independently.
+
+Example
+
+If Reporting fails:
+
+Investigation succeeds.
+
+↓
+
+Memory updates.
+
+↓
+
+User receives investigation.
+
+↓
+
+Report retries later.
+
+Failures never cascade across the platform.
+
+---
+
+# Scaling Strategy
+
+Stateless services:
+
+Scale horizontally.
+
+Memory:
+
+Distributed through CockroachDB.
+
+AI:
+
+Scales independently.
+
+Queues:
+
+Absorb workload spikes.
+
+Storage:
+
+Scales automatically.
+
+No architectural bottlenecks should exist.
+
+---
+
+# Development Order
+
+Recommended implementation sequence:
+
+Phase 1
+
+Authentication
+
+CockroachDB
+
+Backend
+
+Frontend
+
+---
+
+Phase 2
+
+Wallet investigations
+
+Evidence Engine
+
+Memory
+
+---
+
+Phase 3
+
+Knowledge Graph
+
+Risk Engine
+
+AI summaries
+
+---
+
+Phase 4
+
+Natural language interface
+
+Reports
+
+Semantic search
+
+---
+
+Phase 5
+
+Organizations
+
+Monitoring
+
+Alerts
+
+Enterprise features
+
+---
+
+# Coding Standards
+
+Every service should:
+
+* own its domain
+* expose typed interfaces
+* use dependency injection
+* include unit tests
+* expose health endpoints
+* emit structured logs
+
+Consistency is more important than cleverness.
+
+---
+
+# Repository Structure
+
+```text
+atlas/
+
+apps/
+   web/
+   api/
+
+services/
+   investigation/
+   graph/
+   memory/
+   ai/
+   reporting/
+   monitoring/
+
+packages/
+   database/
+   shared/
+   sdk/
+   prompts/
+   events/
+
+infrastructure/
+   docker/
+   terraform/
+   kubernetes/
+
+docs/
+```
+
+The repository should support independent service development.
+
+---
+
+# Observability
+
+Every service exposes:
+
+* metrics
+* traces
+* logs
+* health
+* version
+
+Operational visibility is mandatory.
+
+---
+
+# Security Boundaries
+
+Every request passes through:
+
+Authentication
+
+↓
+
+Authorization
+
+↓
+
+Validation
+
+↓
+
+Business Logic
+
+↓
+
+Audit Logging
+
+↓
+
+Response
+
+No internal service should assume trust.
+
+---
+
+# Performance Goals
+
+Target characteristics:
+
+* responsive investigations
+* efficient graph traversal
+* fast semantic retrieval
+* low-latency AI responses
+* scalable event processing
+
+Optimization should occur after correctness.
+
+---
+
+# Guiding Principle
+
+Atlas is built as a collection of focused, composable services working together through persistent memory.
+
+Each service should be understandable in isolation.
+
+Together they create a blockchain intelligence platform that continuously learns, reasons, and improves.
+
+The architecture should remain stable even as new blockchains, AI models, and enterprise features are added.
+
+---
+
+# Objectives for Document 27
+
+Document 27 will define the **CockroachDB Data Model & Schema Design**, including every table, relationship, vector index, primary key strategy, multi-tenant design, audit tables, investigation storage, graph structures, semantic memory, and optimization strategy needed to implement Atlas on CockroachDB Cloud.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* The complete system architecture is defined.
+* Major services and responsibilities are documented.
+* Internal communication patterns are established.
+* Failure isolation and scaling strategies are described.
+* Repository structure and development order are specified.
+* Security boundaries and operational standards are included.
+* The document provides engineers and AI coding agents with a clear implementation blueprint for building Atlas.

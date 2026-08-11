@@ -325,3 +325,30 @@ export class BlockscoutAdapter implements ChainAdapter {
     return out;
   }
 }
+
+// Singleton adapter instances by chain
+const adapters = new Map<number, BlockscoutAdapter>();
+
+// Get or create an adapter for the given chainId
+export function getAdapter(chainId: number): ChainAdapter {
+  let adapter = adapters.get(chainId);
+  if (!adapter) {
+    // Map chainId to ChainKey
+    const chainKey =
+      chainId === 1 ? "ethereum" :
+      chainId === 8453 ? "base" :
+      chainId === 42161 ? "arbitrum" :
+      chainId === 10 ? "optimism" :
+      chainId === 137 ? "polygon" :
+      chainId === 42220 ? "celo" :
+      null;
+
+    if (!chainKey) {
+      throw new Error(`Unsupported chainId: ${chainId}`);
+    }
+
+    adapter = new BlockscoutAdapter(chainKey);
+    adapters.set(chainId, adapter);
+  }
+  return adapter;
+}

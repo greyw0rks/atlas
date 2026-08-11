@@ -1,0 +1,600 @@
+# Document 19: AI Reasoning & Decision Engine
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+The AI Reasoning & Decision Engine is the intelligence orchestration layer that enables Atlas to reason over blockchain data without replacing deterministic systems.
+
+Artificial intelligence should enhance investigations, not invent them.
+
+Atlas uses AI to connect evidence, explain complex relationships, generate hypotheses, summarize findings, and assist investigators. However, every AI-generated conclusion must remain grounded in verifiable evidence collected by the platform.
+
+The AI does not replace the Investigation Agent, Risk Engine, Knowledge Graph, or Evidence Engine.
+
+It coordinates them.
+
+---
+
+# Core Philosophy
+
+Atlas should never ask an AI model:
+
+> "What do you think happened?"
+
+Instead, it should ask:
+
+> "Given this verified evidence, graph context, historical memory, and investigation objectives, explain what is most likely happening and why."
+
+Reasoning begins with evidence.
+
+Not with the language model.
+
+---
+
+# Responsibilities
+
+The AI Reasoning & Decision Engine is responsible for:
+
+* reasoning over structured evidence
+* synthesizing findings
+* generating investigation summaries
+* proposing investigation hypotheses
+* recommending next investigative steps
+* explaining graph relationships
+* producing natural language reports
+* coordinating multi-agent reasoning
+* evaluating uncertainty
+
+It is **not** responsible for:
+
+* assigning final risk scores
+* validating evidence
+* modifying memory
+* changing graph relationships
+* making autonomous security decisions
+
+---
+
+# Reasoning Pipeline
+
+```text id="4kq9vr"
+Receive Objective
+
+↓
+
+Retrieve Evidence
+
+↓
+
+Retrieve Graph Context
+
+↓
+
+Retrieve Memory
+
+↓
+
+Retrieve Patterns
+
+↓
+
+Retrieve Risk Signals
+
+↓
+
+Construct Reasoning Context
+
+↓
+
+AI Analysis
+
+↓
+
+Validate Output
+
+↓
+
+Generate Structured Findings
+
+↓
+
+Generate Human Report
+```
+
+Every reasoning task follows this lifecycle.
+
+---
+
+# Inputs
+
+The AI receives structured inputs only.
+
+Examples include:
+
+## Investigation Summary
+
+* wallet profile
+* transaction summary
+* evidence references
+
+---
+
+## Knowledge Graph
+
+* connected entities
+* relationship paths
+* graph confidence
+
+---
+
+## Memory
+
+* historical investigations
+* semantic retrieval
+* previous conclusions
+
+---
+
+## Pattern Matches
+
+* confirmed behaviors
+* candidate behaviors
+
+---
+
+## Risk Assessment
+
+* deterministic score
+* contributing factors
+* confidence
+
+---
+
+## User Objective
+
+Example
+
+> Explain why this wallet is considered suspicious.
+
+The AI should always receive a clearly defined objective.
+
+---
+
+# Context Construction
+
+Atlas constructs a reasoning package before invoking the language model.
+
+The package should contain:
+
+* investigation objective
+* verified evidence
+* graph summary
+* semantic memory
+* entity context
+* risk explanation
+* uncertainty indicators
+* constraints
+
+The AI should never retrieve raw blockchain data independently.
+
+---
+
+# Grounded Reasoning
+
+Every AI statement must reference supporting evidence.
+
+Example
+
+Correct
+
+> The wallet appears to be associated with repeated bridge activity because five verified bridge transactions were observed over the last seven days.
+
+Incorrect
+
+> The wallet is probably laundering funds.
+
+Grounded reasoning is mandatory.
+
+---
+
+# Explainability
+
+Every AI-generated conclusion must include:
+
+Supporting evidence
+
+Confidence
+
+Alternative explanations
+
+Remaining uncertainty
+
+Suggested next investigation
+
+Nothing should appear without justification.
+
+---
+
+# Decision Boundaries
+
+The AI may:
+
+* summarize
+* compare
+* explain
+* prioritize
+* hypothesize
+* identify missing information
+
+The AI may **not**:
+
+* fabricate evidence
+* invent entities
+* assign unsupported relationships
+* modify risk scores directly
+* override deterministic systems
+
+---
+
+# Investigation Hypotheses
+
+The AI may generate hypotheses.
+
+Example
+
+Hypothesis
+
+Wallet may belong to an exchange hot wallet.
+
+Supporting observations
+
+* repeated exchange interactions
+* consistent funding behavior
+* transaction timing
+
+Confidence
+
+Moderate
+
+Suggested verification
+
+Investigate known exchange infrastructure.
+
+Hypotheses remain clearly distinguished from confirmed findings.
+
+---
+
+# Missing Information Detection
+
+The AI should identify information gaps.
+
+Examples:
+
+* missing bridge transaction
+* unavailable contract ABI
+* incomplete execution traces
+* unknown counterparty
+
+Rather than guessing, Atlas recommends additional investigation.
+
+---
+
+# Multi-Agent Reasoning
+
+The AI coordinates intelligence from multiple systems.
+
+Example
+
+Evidence Engine
+
+↓
+
+Knowledge Graph
+
+↓
+
+Memory
+
+↓
+
+Pattern Recognition
+
+↓
+
+Risk Engine
+
+↓
+
+Unified Reasoning
+
+This produces a coherent explanation without altering the underlying intelligence.
+
+---
+
+# Uncertainty Handling
+
+Every reasoning task should estimate uncertainty.
+
+Sources include:
+
+* incomplete evidence
+* conflicting investigations
+* low-confidence graph relationships
+* missing blockchain data
+* unsupported chains
+
+Uncertainty should always be communicated.
+
+---
+
+# Output Structure
+
+Every reasoning response produces:
+
+Executive Summary
+
+Key Findings
+
+Supporting Evidence
+
+Confidence Assessment
+
+Alternative Explanations
+
+Recommended Actions
+
+Open Questions
+
+Machine Summary
+
+This structure supports both investigators and downstream agents.
+
+---
+
+# Human Report
+
+Reports should be:
+
+* concise
+* technically accurate
+* evidence-backed
+* easy to understand
+* reproducible
+
+The report should explain reasoning rather than merely presenting results.
+
+---
+
+# Machine Output
+
+Alongside natural language, Atlas produces structured reasoning.
+
+Example fields:
+
+* reasoning ID
+* objective
+* evidence references
+* graph references
+* hypothesis list
+* confidence
+* uncertainty
+* recommended actions
+
+Structured outputs allow future automation.
+
+---
+
+# Prompt Governance
+
+Prompts should:
+
+* use predefined templates
+* restrict AI scope
+* include explicit constraints
+* forbid unsupported conclusions
+* require evidence citations
+
+Prompt templates become versioned system assets.
+
+---
+
+# Hallucination Prevention
+
+Atlas minimizes hallucinations by:
+
+* retrieving context before reasoning
+* grounding every prompt
+* limiting available information
+* validating outputs
+* rejecting unsupported statements
+
+If supporting evidence is absent:
+
+The AI should explicitly state:
+
+> "Insufficient evidence is available to support this conclusion."
+
+---
+
+# Validation Layer
+
+After reasoning completes:
+
+Atlas validates:
+
+* referenced evidence exists
+* cited relationships exist
+* graph paths are valid
+* entities exist
+* confidence values are present
+
+Invalid outputs should be rejected or regenerated.
+
+---
+
+# Collaboration with Other Agents
+
+## Investigation Agent
+
+Provides:
+
+* investigation objectives
+
+Receives:
+
+* reasoning reports
+
+---
+
+## Memory Agent
+
+Provides:
+
+* semantic memory
+
+Stores:
+
+* reasoning summaries
+
+---
+
+## Knowledge Graph Agent
+
+Provides:
+
+* graph context
+
+---
+
+## Evidence Engine
+
+Provides:
+
+* verified evidence
+
+---
+
+## Pattern Recognition Agent
+
+Provides:
+
+* behavior matches
+
+---
+
+## Risk Engine
+
+Provides:
+
+* deterministic assessments
+
+Receives:
+
+* natural language explanations
+
+---
+
+# Performance Principles
+
+The AI Reasoning Engine should:
+
+* minimize token usage
+* reuse retrieved memory
+* cache reasoning context
+* support streaming responses
+* separate retrieval from generation
+* avoid repeated reasoning over unchanged investigations
+
+Reasoning should become faster as Atlas accumulates knowledge.
+
+---
+
+# Failure Recovery
+
+If AI reasoning fails:
+
+Atlas should still return:
+
+* structured investigation
+* deterministic findings
+* evidence
+* graph context
+* risk assessment
+
+AI enhances Atlas.
+
+It should never become a single point of failure.
+
+---
+
+# Security Considerations
+
+The AI must:
+
+* reject prompt injection attempts
+* ignore malicious blockchain metadata
+* sanitize retrieved context
+* enforce access permissions
+* prevent unauthorized memory disclosure
+* maintain complete reasoning logs
+
+Reasoning should always occur within controlled boundaries.
+
+---
+
+# Future Enhancements
+
+Future versions may include:
+
+* collaborative reasoning between multiple specialized LLMs
+* domain-specific blockchain reasoning models
+* adaptive reasoning strategies based on investigation type
+* investigator feedback loops
+* self-evaluation of reasoning quality
+* automated hypothesis ranking
+* multilingual investigation reports
+
+These enhancements should extend the reasoning architecture while preserving explainability.
+
+---
+
+# Guiding Principle
+
+Artificial intelligence should make Atlas easier to understand, not harder to trust.
+
+Evidence creates knowledge.
+
+The Knowledge Graph provides context.
+
+Memory provides experience.
+
+The Risk Engine provides prioritization.
+
+The AI Reasoning & Decision Engine brings these together into coherent, explainable intelligence while remaining firmly grounded in verifiable facts.
+
+---
+
+# Objectives for Document 20
+
+Document 20 will define the **Natural Language Investigation Interface**, covering how investigators interact with Atlas using conversational language. It will specify intent detection, conversational memory, follow-up reasoning, multi-turn investigations, and how Atlas converts natural language questions into coordinated actions across all internal agents.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* The AI Reasoning & Decision Engine is clearly defined.
+* The reasoning pipeline and context construction process are documented.
+* Grounded reasoning and hallucination prevention are enforced.
+* Explainability, uncertainty handling, and validation layers are established.
+* Collaboration with all major agents is clearly described.
+* Failure recovery and security safeguards are included.
+* The AI Reasoning & Decision Engine establishes Atlas as an explainable, evidence-first blockchain intelligence system rather than an opaque AI assistant.

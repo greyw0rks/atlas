@@ -1,0 +1,495 @@
+# Document 1: System Architecture
+
+## Project Name
+
+# Atlas
+
+**Tagline:**
+*An AI blockchain intelligence platform that remembers every investigation.*
+
+---
+
+# Overview
+
+Atlas is built as a distributed, agent-based blockchain intelligence platform where persistent memory is the foundation of every investigation.
+
+Unlike traditional blockchain explorers that treat each investigation independently, Atlas continuously builds an ever-growing intelligence network. Every completed investigation enriches the system's memory, enabling future investigations to start with accumulated knowledge rather than from scratch.
+
+The architecture is designed around modular AI agents, persistent memory, semantic retrieval, and scalable cloud infrastructure.
+
+---
+
+# High-Level Architecture
+
+```
+                        User
+
+                          │
+
+          Web Dashboard / API / Chat Interface
+
+                          │
+
+──────────────────────────────────────────────────
+
+                API Gateway / Backend
+
+                          │
+
+──────────────────────────────────────────────────
+
+                 Investigation Orchestrator
+
+        ┌──────────────┬──────────────┬──────────────┐
+        │              │              │              │
+        │              │              │              │
+ Memory Agent   Investigation   Knowledge Graph   Risk Engine
+                    Agent            Agent
+
+        │              │              │              │
+
+──────────────────────────────────────────────────
+
+                 External Data Providers
+
+Ethereum
+Base
+Bitcoin
+Celo
+Solana
+Arbitrum
+Optimism
+Polygon
+Block Explorers
+RPC Providers
+Indexers
+
+──────────────────────────────────────────────────
+
+                Persistent Memory Layer
+
+               CockroachDB Cloud
+
+• Investigation Memory
+• Wallet Intelligence
+• Entity Graph
+• Transaction History
+• Pattern Library
+• User Context
+• Semantic Embeddings
+
+──────────────────────────────────────────────────
+
+                AWS Infrastructure
+
+Amazon Bedrock
+AWS Lambda
+Amazon S3
+Amazon EventBridge
+
+(Optional)
+Amazon ECS
+CloudWatch
+```
+
+---
+
+# Core Components
+
+Atlas is divided into independent services that communicate through well-defined interfaces. Each service has a single responsibility and can evolve independently.
+
+---
+
+# 1. Frontend
+
+The frontend is responsible for presenting investigations, visualizing relationships, and allowing users to interact with Atlas using natural language.
+
+Responsibilities:
+
+* wallet search
+* investigation dashboard
+* AI chat interface
+* graph visualization
+* investigation history
+* evidence viewer
+* semantic search
+* report generation
+
+The frontend should remain lightweight and never perform blockchain analysis directly.
+
+---
+
+# 2. Backend API
+
+The backend acts as the gateway between users, AI agents, CockroachDB, and external blockchain services.
+
+Responsibilities:
+
+* authentication
+* request validation
+* API routing
+* orchestrating investigations
+* retrieving historical memory
+* exposing REST APIs
+* exposing WebSocket events for long-running investigations
+
+The backend should not contain investigation logic itself. Its primary role is orchestration.
+
+---
+
+# 3. Investigation Orchestrator
+
+The orchestrator coordinates every investigation.
+
+It determines:
+
+* what information already exists
+* what needs to be fetched
+* which AI agents should execute
+* when memory should be updated
+* when new relationships should be created
+
+The orchestrator is the central brain that coordinates specialized agents rather than performing every task itself.
+
+---
+
+# 4. Investigation Agent
+
+The Investigation Agent is responsible for collecting and analyzing blockchain data.
+
+Responsibilities include:
+
+* wallet analysis
+* transaction tracing
+* token interaction analysis
+* smart contract interaction analysis
+* bridge detection
+* exchange identification
+* protocol identification
+* behavioral summaries
+
+It produces structured findings rather than final conclusions.
+
+---
+
+# 5. Memory Agent
+
+The Memory Agent is the most important service in Atlas.
+
+Its responsibilities include:
+
+* storing investigations
+* retrieving historical investigations
+* generating semantic embeddings
+* finding similar investigations
+* updating long-term knowledge
+* preventing duplicate memories
+* maintaining memory consistency
+
+The Memory Agent ensures that Atlas never forgets.
+
+---
+
+# 6. Knowledge Graph Agent
+
+Rather than storing isolated facts, Atlas builds relationships between entities.
+
+Examples include:
+
+Wallet A
+→ funded Wallet B
+
+Wallet B
+→ bridged assets to Base
+
+Wallet B
+→ interacted with Protocol X
+
+Wallet B
+→ deposited into Exchange Y
+
+Wallet C
+→ shares behavioral similarity with Wallet B
+
+This graph grows continuously over time.
+
+---
+
+# 7. Risk Engine
+
+The Risk Engine evaluates blockchain behavior using deterministic rules combined with AI-assisted reasoning.
+
+Inputs include:
+
+* transaction patterns
+* wallet age
+* interaction history
+* known malicious entities
+* bridge usage
+* mixer interactions
+* historical investigations
+* semantic similarity
+
+Outputs include:
+
+* risk score
+* confidence score
+* explanation
+* supporting evidence
+
+Every score must be explainable.
+
+---
+
+# Data Flow
+
+Every investigation follows the same lifecycle.
+
+```
+User Request
+
+↓
+
+Backend API
+
+↓
+
+Investigation Orchestrator
+
+↓
+
+Memory Lookup
+
+↓
+
+Existing Investigation?
+
+↓
+
+YES
+↓
+
+Retrieve Memory
+
+↓
+
+NO
+
+↓
+
+Blockchain Data Collection
+
+↓
+
+AI Analysis
+
+↓
+
+Relationship Discovery
+
+↓
+
+Risk Assessment
+
+↓
+
+Semantic Embedding
+
+↓
+
+Store Investigation
+
+↓
+
+Update Knowledge Graph
+
+↓
+
+Return Results
+```
+
+This ensures every investigation contributes to Atlas's long-term intelligence.
+
+---
+
+# Persistent Memory
+
+CockroachDB is the permanent memory layer.
+
+Atlas stores:
+
+* wallets
+* investigations
+* conversations
+* relationships
+* entities
+* evidence
+* AI summaries
+* semantic vectors
+* user preferences
+* historical reports
+
+No investigation should be discarded.
+
+Every completed investigation becomes reusable knowledge.
+
+---
+
+# Semantic Memory
+
+Every investigation is converted into an embedding.
+
+Examples of searchable concepts include:
+
+* "wallets behaving like Tornado Cash exits"
+
+* "NFT wash trading"
+
+* "possible phishing wallets"
+
+* "bridge abuse"
+
+* "high-frequency MEV behavior"
+
+Atlas retrieves similar historical investigations before starting a new one.
+
+---
+
+# Knowledge Graph
+
+The graph represents relationships rather than isolated records.
+
+Example:
+
+```
+Wallet
+
+↓
+
+Transaction
+
+↓
+
+Bridge
+
+↓
+
+Protocol
+
+↓
+
+Exchange
+
+↓
+
+Known Entity
+
+↓
+
+Investigation
+
+↓
+
+Risk Pattern
+```
+
+The graph continuously expands as investigations are completed.
+
+---
+
+# External Data Sources
+
+Atlas should abstract blockchain data behind provider interfaces.
+
+Supported providers may include:
+
+* Alchemy
+* Blockscout
+* Etherscan-compatible APIs
+* Covalent
+* The Graph
+* Chain-specific RPC endpoints
+* Custom indexers
+
+The investigation engine should not depend on a single provider.
+
+---
+
+# AWS Responsibilities
+
+Amazon Bedrock
+
+* AI reasoning
+* summarization
+* tool calling
+* investigation generation
+
+AWS Lambda
+
+* asynchronous investigations
+* scheduled rescoring
+* background memory updates
+
+Amazon S3
+
+* exported reports
+* investigation artifacts
+* datasets
+* cached responses
+
+Amazon EventBridge
+
+* scheduled intelligence refresh
+* periodic rescoring
+* memory maintenance jobs
+
+Future versions may introduce ECS for continuously running indexing workers.
+
+---
+
+# Scalability Principles
+
+Atlas should be designed for horizontal scaling.
+
+Individual services must remain stateless wherever possible.
+
+Persistent state belongs inside CockroachDB.
+
+Long-running investigations should execute asynchronously.
+
+Background workers should process expensive analysis without blocking users.
+
+---
+
+# Design Principles
+
+The architecture follows these principles:
+
+* modular services
+* event-driven workflows
+* persistent memory first
+* evidence-backed AI
+* explainable intelligence
+* scalable cloud-native deployment
+* provider abstraction
+* reusable components
+
+---
+
+# Objectives for Document 2
+
+Document 2 will define the complete technology stack, development standards, repository structure, coding conventions, deployment strategy, and engineering practices that every contributor and AI coding agent must follow throughout the project.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* Every major system component is defined.
+* The flow of an investigation is clearly documented.
+* The responsibilities of each agent are separated.
+* CockroachDB is established as the persistent memory layer.
+* AWS services have clearly defined roles.
+* The architecture is modular, scalable, and implementation-ready.
+* The design supports future expansion without major architectural changes.

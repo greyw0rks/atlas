@@ -1,0 +1,538 @@
+# Document 3: Memory Architecture
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+This document defines the memory architecture that powers Atlas.
+
+Memory is not a feature layered on top of Atlas. It is the foundation of the entire platform.
+
+Every investigation, every relationship, every conclusion, and every user interaction should contribute to a growing body of intelligence that improves future investigations.
+
+The primary responsibility of Atlas is not simply to answer questions, but to **remember, organize, retrieve, connect, and continuously refine knowledge**.
+
+---
+
+# The Philosophy of Memory
+
+Most AI systems operate with temporary context.
+
+Atlas operates with permanent knowledge.
+
+Every investigation should leave Atlas more intelligent than it was before.
+
+The system must never treat an investigation as a one-time event. Instead, each investigation becomes part of a continuously expanding knowledge base that future agents can reuse.
+
+Memory should be:
+
+* persistent
+* searchable
+* explainable
+* evidence-backed
+* interconnected
+* versioned
+* continuously updated
+
+---
+
+# Memory Lifecycle
+
+Every piece of memory follows the same lifecycle.
+
+```text
+User Request
+
+↓
+
+Investigation Starts
+
+↓
+
+Retrieve Existing Memory
+
+↓
+
+Collect New Evidence
+
+↓
+
+AI Analysis
+
+↓
+
+Compare Against Existing Knowledge
+
+↓
+
+Create New Memories
+
+↓
+
+Update Existing Memories
+
+↓
+
+Generate Embeddings
+
+↓
+
+Link Relationships
+
+↓
+
+Store Permanently
+
+↓
+
+Available For Future Retrieval
+```
+
+Memory is never discarded without an explicit retention policy.
+
+---
+
+# Memory Categories
+
+Atlas separates memory into specialized domains instead of using a single generic memory table.
+
+Each category has a clearly defined purpose.
+
+---
+
+# 1. Wallet Memory
+
+Represents everything Atlas knows about a wallet.
+
+Each wallet becomes a living profile that evolves over time.
+
+Contains:
+
+* wallet address
+* blockchain
+* first seen
+* last analyzed
+* labels
+* tags
+* confidence score
+* AI summary
+* calculated risk score
+* known aliases
+* semantic embedding
+
+A wallet profile is updated rather than recreated.
+
+---
+
+# 2. Investigation Memory
+
+Stores completed investigations.
+
+Each investigation includes:
+
+* investigation question
+* objective
+* execution timestamp
+* AI reasoning
+* findings
+* confidence
+* evidence
+* referenced wallets
+* referenced entities
+* generated report
+
+Investigations become reusable knowledge.
+
+---
+
+# 3. Entity Memory
+
+Represents real-world entities inferred from blockchain activity.
+
+Examples:
+
+* centralized exchanges
+* bridges
+* DAOs
+* protocols
+* NFT marketplaces
+* scam organizations
+* phishing groups
+* MEV bots
+
+Each entity stores:
+
+* known wallets
+* descriptions
+* confidence
+* associated investigations
+* behavior summaries
+
+Entities are dynamic and evolve over time.
+
+---
+
+# 4. Relationship Memory
+
+Stores relationships between objects.
+
+Examples include:
+
+Wallet A
+
+funded
+
+Wallet B
+
+Wallet B
+
+interacted with
+
+Protocol X
+
+Wallet C
+
+shares behavioral similarity with
+
+Wallet D
+
+Relationships should always include:
+
+* source
+* destination
+* relationship type
+* evidence
+* confidence
+* discovery timestamp
+
+Relationships are first-class objects, not simple foreign keys.
+
+---
+
+# 5. Pattern Memory
+
+Atlas should recognize recurring behaviors.
+
+Examples:
+
+* Tornado Cash exit patterns
+* bridge hopping
+* wash trading
+* phishing campaigns
+* wallet splitting
+* funding trees
+* rapid token swaps
+
+Each pattern contains:
+
+* description
+* examples
+* known investigations
+* confidence
+* semantic embedding
+
+Patterns allow Atlas to recognize previously unseen threats.
+
+---
+
+# 6. Evidence Memory
+
+Every AI conclusion must reference evidence.
+
+Evidence may include:
+
+* transaction hashes
+* smart contracts
+* event logs
+* block numbers
+* token transfers
+* decoded calldata
+* screenshots
+* uploaded documents
+
+Evidence should never be modified after creation.
+
+If corrected, a new version should be created.
+
+---
+
+# 7. User Memory
+
+Atlas remembers how individual users work.
+
+Examples:
+
+Preferred chains:
+
+Ethereum
+
+Base
+
+Preferred report style:
+
+technical
+
+Preferred risk threshold:
+
+high confidence only
+
+Frequently investigated protocols
+
+Saved investigations
+
+Pinned entities
+
+User memory personalizes investigations without affecting shared intelligence.
+
+---
+
+# 8. Conversation Memory
+
+Stores conversations between users and Atlas.
+
+Includes:
+
+* prompts
+* responses
+* follow-up questions
+* retrieved investigations
+* generated summaries
+
+Conversation memory improves user experience but should not automatically become shared intelligence.
+
+Only verified insights should enter permanent memory.
+
+---
+
+# Shared Memory vs Personal Memory
+
+Atlas distinguishes between two types of knowledge.
+
+## Shared Memory
+
+Knowledge available to every investigation.
+
+Examples:
+
+* scam wallets
+* bridge behavior
+* protocol relationships
+* known entities
+* historical investigations
+
+Shared memory continually grows.
+
+---
+
+## Personal Memory
+
+Knowledge unique to an individual user.
+
+Examples:
+
+* saved searches
+* dashboard preferences
+* report formatting
+* pinned wallets
+* investigation history
+
+Personal memory must never contaminate shared intelligence.
+
+---
+
+# Memory Retrieval Strategy
+
+Every investigation begins by asking:
+
+"What do we already know?"
+
+Retrieval follows this order:
+
+1. Exact wallet match
+2. Exact entity match
+3. Existing investigation
+4. Relationship graph
+5. Similar semantic investigations
+6. Pattern memory
+7. External blockchain data
+
+The AI should always reuse existing knowledge before collecting new information.
+
+---
+
+# Semantic Memory
+
+Every investigation generates embeddings.
+
+Embeddings enable questions such as:
+
+* "Find investigations similar to this wallet."
+
+* "Show phishing campaigns resembling this behavior."
+
+* "Have we seen this transaction pattern before?"
+
+Semantic retrieval complements exact database queries.
+
+---
+
+# Memory Freshness
+
+Not every memory remains equally reliable.
+
+Each memory stores:
+
+* creation date
+* last verification
+* confidence score
+* freshness score
+
+Older memories may require revalidation.
+
+Atlas should periodically refresh high-value memories through scheduled background jobs.
+
+---
+
+# Memory Versioning
+
+Memory should never be overwritten without history.
+
+Every significant update creates a new version.
+
+Example:
+
+Wallet Summary v1
+
+↓
+
+Wallet Summary v2
+
+↓
+
+Wallet Summary v3
+
+Users should be able to inspect previous conclusions.
+
+This improves transparency and auditability.
+
+---
+
+# Memory Confidence
+
+Every memory carries confidence.
+
+Confidence depends on:
+
+* number of supporting transactions
+* quality of evidence
+* corroborating investigations
+* AI certainty
+* external verification
+
+Confidence should evolve over time.
+
+---
+
+# Memory Conflict Resolution
+
+Sometimes investigations disagree.
+
+Example:
+
+Investigation A
+
+Wallet belongs to Exchange X
+
+Confidence: 65%
+
+Investigation B
+
+Wallet belongs to Bridge Y
+
+Confidence: 92%
+
+Atlas should never silently replace knowledge.
+
+Instead:
+
+* preserve both findings
+* compare evidence
+* increase or decrease confidence
+* flag conflicts
+* request additional investigation if needed
+
+Knowledge improves through refinement, not deletion.
+
+---
+
+# Memory Compression
+
+Large investigations should generate concise summaries.
+
+Instead of repeatedly loading thousands of transactions, Atlas should store:
+
+* executive summary
+* important findings
+* key relationships
+* important evidence
+* semantic embedding
+
+The original investigation remains available when needed.
+
+---
+
+# Continuous Learning
+
+Every completed investigation should answer:
+
+* What new wallets were discovered?
+* What relationships were discovered?
+* Did we identify a new entity?
+* Did confidence increase?
+* Was a new behavior identified?
+* Should an existing pattern be updated?
+* Should semantic memory be regenerated?
+
+If the answer to every question is "No," the investigation likely produced little long-term value.
+
+---
+
+# Memory Principles
+
+Every memory in Atlas should satisfy these rules:
+
+* Evidence before conclusions.
+* Never lose historical knowledge.
+* Reuse knowledge whenever possible.
+* Connect related information.
+* Keep memory explainable.
+* Separate shared and personal memory.
+* Version important updates.
+* Continuously improve confidence.
+* Make retrieval faster than recollection from external sources.
+
+---
+
+# Objectives for Document 4
+
+Document 4 will define the complete CockroachDB data model, including table structures, relationships, indexes, vector storage, constraints, partitioning strategy, and how Atlas persists and retrieves every category of memory efficiently at scale.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* Every memory category is clearly defined.
+* The memory lifecycle is documented.
+* Retrieval and storage strategies are established.
+* Shared and personal memory are separated.
+* Versioning, confidence, freshness, and conflict resolution are defined.
+* Continuous learning is established as a core behavior of the platform.
+* The memory architecture supports long-term growth without requiring redesign.

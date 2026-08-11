@@ -1,0 +1,886 @@
+# Document 27: CockroachDB Data Model & Schema Design
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+This document defines the logical and physical data model for Atlas using CockroachDB Cloud as the primary operational database and persistent memory layer.
+
+The schema is designed to support:
+
+* billions of blockchain transactions
+* millions of investigations
+* semantic vector search
+* multi-tenant organizations
+* AI memory
+* graph intelligence
+* enterprise collaboration
+
+CockroachDB is the source of truth for Atlas.
+
+Every investigation, report, memory object, entity, and AI interaction is ultimately persisted here.
+
+---
+
+# Design Principles
+
+The database should be:
+
+* normalized where appropriate
+* denormalized where performance requires
+* horizontally scalable
+* strongly consistent
+* audit-friendly
+* multi-region ready
+* optimized for AI retrieval
+* optimized for vector search
+
+Every table should have a single responsibility.
+
+---
+
+# Primary Design Goals
+
+The schema must support:
+
+* multi-tenancy
+* immutable investigation history
+* memory versioning
+* semantic search
+* graph relationships
+* report generation
+* event sourcing
+* audit logging
+* organization isolation
+
+The database should continue performing efficiently as Atlas grows.
+
+---
+
+# Multi-Tenant Model
+
+Every business object belongs to an organization.
+
+```text id="8tb4jm"
+Organization
+
+↓
+
+Workspace
+
+↓
+
+User
+
+↓
+
+Investigation
+
+↓
+
+Evidence
+
+↓
+
+Memory
+
+↓
+
+Reports
+```
+
+Tenant isolation begins at the schema level.
+
+Every major table includes:
+
+* organization_id
+* workspace_id (when applicable)
+
+---
+
+# Core Database Domains
+
+The schema is organized into twelve logical domains.
+
+1. Identity
+
+2. Organizations
+
+3. Investigations
+
+4. Blockchain Intelligence
+
+5. Memory
+
+6. Knowledge Graph
+
+7. Reporting
+
+8. Monitoring
+
+9. AI
+
+10. Collaboration
+
+11. Audit
+
+12. System Operations
+
+---
+
+# Identity Tables
+
+## users
+
+Stores:
+
+* user_id
+* email
+* password_hash
+* display_name
+* status
+* created_at
+* updated_at
+
+---
+
+## sessions
+
+Stores:
+
+* session_id
+* user_id
+* refresh_token
+* expires_at
+* created_at
+
+---
+
+## api_keys
+
+Stores:
+
+* key_id
+* organization_id
+* hashed_key
+* permissions
+* last_used
+
+---
+
+# Organization Tables
+
+## organizations
+
+Stores:
+
+* organization_id
+* name
+* plan
+* settings
+* created_at
+
+---
+
+## workspaces
+
+Stores:
+
+* workspace_id
+* organization_id
+* name
+* configuration
+
+---
+
+## memberships
+
+Stores:
+
+* user_id
+* workspace_id
+* role
+* permissions
+
+---
+
+# Investigation Tables
+
+## investigations
+
+Stores:
+
+* investigation_id
+* organization_id
+* title
+* objective
+* status
+* confidence
+* created_by
+* created_at
+* updated_at
+
+Primary table for every investigation.
+
+---
+
+## investigation_targets
+
+Stores:
+
+* wallet
+* contract
+* entity
+* chain
+* investigation_id
+
+Multiple targets may belong to one investigation.
+
+---
+
+## investigation_events
+
+Stores:
+
+* event_id
+* investigation_id
+* event_type
+* timestamp
+* metadata
+
+Supports investigation timelines.
+
+---
+
+## investigation_tasks
+
+Stores:
+
+* task_id
+* investigation_id
+* assigned_to
+* status
+* priority
+
+Used for enterprise collaboration.
+
+---
+
+# Blockchain Intelligence Tables
+
+## wallets
+
+Stores:
+
+* wallet_id
+* address
+* blockchain
+* first_seen
+* last_seen
+
+---
+
+## transactions
+
+Stores:
+
+* transaction_hash
+* chain
+* timestamp
+* block
+* sender
+* receiver
+* value
+* decoded_data
+
+High-volume table.
+
+Should be partition-aware.
+
+---
+
+## contracts
+
+Stores:
+
+* contract_address
+* ABI
+* verified
+* protocol
+
+---
+
+## protocols
+
+Stores:
+
+* protocol_id
+* category
+* supported_chains
+
+---
+
+## entities
+
+Stores:
+
+* entity_id
+* name
+* type
+* confidence
+
+Examples:
+
+Exchange
+
+Bridge
+
+Protocol
+
+DAO
+
+Person
+
+Organization
+
+---
+
+# Memory Tables
+
+## memories
+
+Stores:
+
+* memory_id
+* investigation_id
+* organization_id
+* memory_type
+* summary
+* confidence
+* version
+* created_at
+
+Core persistent memory table.
+
+---
+
+## memory_versions
+
+Stores historical versions.
+
+Supports memory evolution.
+
+---
+
+## memory_embeddings
+
+Stores:
+
+* embedding vector
+* memory reference
+* embedding model
+* embedding version
+
+Uses CockroachDB vector indexing.
+
+---
+
+## semantic_queries
+
+Stores:
+
+* query
+* embedding
+* results
+* latency
+
+Useful for optimization.
+
+---
+
+# Knowledge Graph Tables
+
+## graph_nodes
+
+Stores:
+
+* node_id
+* node_type
+* reference_id
+
+---
+
+## graph_edges
+
+Stores:
+
+* edge_id
+* source_node
+* destination_node
+* relationship
+* confidence
+
+---
+
+## graph_paths
+
+Stores:
+
+Precomputed relationship paths.
+
+Improves traversal performance.
+
+---
+
+# Evidence Tables
+
+## evidence
+
+Stores:
+
+* evidence_id
+* investigation_id
+* evidence_type
+* source
+* confidence
+* metadata
+
+Evidence is immutable.
+
+---
+
+## evidence_references
+
+Maps evidence to:
+
+* transactions
+* entities
+* graph nodes
+* reports
+
+---
+
+# Pattern Recognition Tables
+
+## patterns
+
+Stores:
+
+Known behavioral patterns.
+
+Examples:
+
+* laundering
+* bridge hopping
+* Sybil
+* phishing
+
+---
+
+## pattern_matches
+
+Stores:
+
+Detected pattern instances.
+
+Includes:
+
+* confidence
+* evidence
+
+---
+
+# Risk Tables
+
+## risk_assessments
+
+Stores:
+
+* investigation_id
+* score
+* confidence
+* explanation
+* version
+
+Risk history remains preserved.
+
+---
+
+## risk_factors
+
+Stores individual contributors.
+
+Examples:
+
+* mixer usage
+* sanctions exposure
+* exploit proximity
+
+---
+
+# AI Tables
+
+## ai_conversations
+
+Stores:
+
+Conversation metadata.
+
+---
+
+## ai_messages
+
+Stores:
+
+* prompts
+* responses
+* reasoning references
+
+---
+
+## ai_reasoning
+
+Stores:
+
+Structured reasoning output.
+
+Supports explainability.
+
+---
+
+# Reporting Tables
+
+## reports
+
+Stores:
+
+* report_id
+* investigation_id
+* report_type
+* version
+* export_status
+
+---
+
+## report_exports
+
+Stores:
+
+PDF
+
+HTML
+
+JSON
+
+Markdown
+
+Export history.
+
+---
+
+# Monitoring Tables
+
+## watchlists
+
+Stores:
+
+Organization watchlists.
+
+---
+
+## alerts
+
+Stores:
+
+Generated alerts.
+
+---
+
+## monitoring_jobs
+
+Stores:
+
+Scheduled investigations.
+
+---
+
+# Collaboration Tables
+
+## annotations
+
+Stores:
+
+Investigator notes.
+
+---
+
+## comments
+
+Stores:
+
+Internal discussions.
+
+---
+
+## approvals
+
+Stores:
+
+Review history.
+
+---
+
+# Audit Tables
+
+## audit_events
+
+Stores every critical platform action.
+
+Examples:
+
+* login
+* export
+* investigation
+* report approval
+
+Immutable.
+
+---
+
+## security_events
+
+Stores:
+
+Authentication failures.
+
+Permission violations.
+
+Potential attacks.
+
+---
+
+# System Tables
+
+## feature_flags
+
+Stores:
+
+Platform capabilities.
+
+---
+
+## background_jobs
+
+Stores:
+
+Queue state.
+
+Retries.
+
+Worker metadata.
+
+---
+
+## integrations
+
+Stores:
+
+Third-party connections.
+
+---
+
+# Primary Key Strategy
+
+Every table uses UUIDs.
+
+Advantages:
+
+* globally unique
+* distributed generation
+* multi-region safe
+
+Business identifiers remain separate.
+
+---
+
+# Indexing Strategy
+
+Primary indexes:
+
+* IDs
+* timestamps
+* organization
+
+Secondary indexes:
+
+* wallet address
+* entity
+* investigation status
+* blockchain
+* report status
+
+Composite indexes should match common query patterns.
+
+---
+
+# Vector Index Strategy
+
+Memory embeddings use:
+
+Distributed Vector Indexing.
+
+Supports:
+
+* semantic search
+* nearest neighbor retrieval
+* long-term AI memory
+
+Vectors remain inside CockroachDB.
+
+No external vector database is required.
+
+---
+
+# Relationship Strategy
+
+Relationships are stored separately from entities.
+
+Benefits:
+
+* easier graph traversal
+* simpler updates
+* historical versioning
+
+Edges remain immutable whenever possible.
+
+---
+
+# Soft Deletes
+
+Critical business objects should use:
+
+deleted_at
+
+instead of physical deletion.
+
+Historical intelligence must remain recoverable.
+
+---
+
+# Versioning
+
+Version-controlled tables include:
+
+* reports
+* memories
+* investigations
+* risk assessments
+* AI prompts
+
+History is a first-class feature.
+
+---
+
+# Partitioning Strategy
+
+Large tables should support partitioning by:
+
+* blockchain
+* organization
+* time
+
+This improves long-term scalability.
+
+---
+
+# Transactions
+
+CockroachDB transactions should protect:
+
+* investigation creation
+* report generation
+* memory updates
+* graph updates
+* organization changes
+
+Related writes should succeed or fail together.
+
+---
+
+# Backup Strategy
+
+Database backups include:
+
+* schema
+* vectors
+* investigations
+* audit logs
+* reports metadata
+
+Backups are encrypted and replicated.
+
+---
+
+# Performance Considerations
+
+Optimize for:
+
+* wallet lookups
+* investigation retrieval
+* semantic search
+* graph traversal
+* report generation
+
+Avoid excessive joins in high-frequency queries.
+
+---
+
+# Future Schema Extensions
+
+Future additions may include:
+
+* NFT intelligence
+* DeFi protocol states
+* bridge metadata
+* governance proposals
+* cross-chain messaging
+* AI fine-tuning datasets
+* organization knowledge graphs
+
+The schema should remain extensible without disruptive migrations.
+
+---
+
+# Guiding Principle
+
+Atlas does not merely store blockchain data.
+
+It stores institutional intelligence.
+
+The schema is designed so that every investigation, every AI interaction, every graph relationship, and every memory contributes to a durable, explainable, and continuously improving intelligence platform powered by CockroachDB.
+
+---
+
+# Objectives for Document 28
+
+Document 28 will define the **API & Service Contract Specification**, including REST APIs, WebSocket events, internal service interfaces, MCP tool definitions, authentication flows, request/response models, pagination, error handling, versioning, and integration contracts between every Atlas service.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* The logical database schema is fully defined.
+* All major domains and tables are documented.
+* Multi-tenant design and UUID strategy are established.
+* Vector indexing, graph storage, and memory persistence are included.
+* Indexing, partitioning, and versioning strategies are documented.
+* Performance, backup, and scalability considerations are covered.
+* The CockroachDB schema provides a complete implementation foundation for Atlas's persistent intelligence platform.

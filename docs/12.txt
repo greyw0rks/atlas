@@ -1,0 +1,643 @@
+# Document 12: Transaction Analysis Engine
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+The Transaction Analysis Engine is responsible for transforming raw blockchain transactions into structured intelligence.
+
+A blockchain transaction is far more than a sender, recipient, and amount.
+
+Every transaction contains context about intent, relationships, protocol interactions, asset movement, and behavioral signals.
+
+The Transaction Analysis Engine extracts that context and converts it into reusable knowledge for Atlas.
+
+Rather than storing raw transaction data alone, Atlas stores an explanation of what happened, why it happened, and how it relates to previous investigations.
+
+---
+
+# Core Philosophy
+
+Every blockchain transaction tells a story.
+
+Atlas should answer questions such as:
+
+* What actually happened?
+* Which smart contracts were involved?
+* Was value transferred directly or indirectly?
+* Was this part of a larger behavioral pattern?
+* Did this transaction establish a new relationship?
+* Does this resemble previous activity?
+
+The engine exists to answer those questions consistently.
+
+---
+
+# Responsibilities
+
+The Transaction Analysis Engine is responsible for:
+
+* decoding transactions
+* analyzing fund movement
+* decoding smart contract interactions
+* identifying emitted events
+* detecting protocol interactions
+* extracting behavioral signals
+* identifying counterparties
+* generating transaction summaries
+* proposing graph relationships
+* forwarding structured intelligence to other agents
+
+It is **not** responsible for assigning risk or persisting long-term memory.
+
+---
+
+# Inputs
+
+The engine accepts:
+
+## Transaction Hash
+
+Example
+
+```text id="4tfq8a"
+0xabc123...
+```
+
+---
+
+## Block Number
+
+Analyze every transaction inside a block.
+
+---
+
+## Wallet Investigation
+
+Analyze transactions associated with a wallet.
+
+---
+
+## Monitoring Events
+
+Analyze newly observed blockchain activity.
+
+---
+
+# Outputs
+
+Every analyzed transaction produces:
+
+* decoded transaction
+* asset transfers
+* protocol interactions
+* event summaries
+* identified entities
+* behavioral signals
+* relationship proposals
+* semantic summary
+* machine-readable transaction object
+
+---
+
+# Transaction Analysis Pipeline
+
+```text id="7m2bfr"
+Receive Transaction
+
+↓
+
+Identify Blockchain
+
+↓
+
+Retrieve Raw Transaction
+
+↓
+
+Decode Transaction
+
+↓
+
+Decode Events
+
+↓
+
+Identify Asset Movement
+
+↓
+
+Identify Contract Calls
+
+↓
+
+Detect Protocol
+
+↓
+
+Generate Behavioral Signals
+
+↓
+
+Generate Summary
+
+↓
+
+Forward Intelligence
+```
+
+Every transaction follows the same lifecycle regardless of blockchain.
+
+---
+
+# Stage 1: Transaction Retrieval
+
+Atlas retrieves:
+
+* transaction data
+* receipt
+* block information
+* execution status
+* gas information
+* logs
+* traces (if available)
+
+Provider implementations remain abstracted behind adapters.
+
+---
+
+# Stage 2: Transaction Classification
+
+Every transaction is classified.
+
+Examples include:
+
+Native Transfer
+
+ERC-20 Transfer
+
+NFT Transfer
+
+Contract Deployment
+
+Contract Interaction
+
+Bridge Deposit
+
+Bridge Withdrawal
+
+Swap
+
+Liquidity Operation
+
+Governance Vote
+
+Multisig Execution
+
+Unknown Interaction
+
+Transactions may belong to multiple categories.
+
+---
+
+# Stage 3: Smart Contract Decoding
+
+If the transaction calls a contract:
+
+Atlas determines:
+
+* contract name
+* verified status
+* function name
+* decoded parameters
+* contract owner
+* protocol
+
+Example
+
+```text id="g9vrq1"
+swapExactTokensForTokens()
+
+↓
+
+DEX Swap
+```
+
+Decoded interactions provide much richer intelligence than raw calldata.
+
+---
+
+# Stage 4: Event Analysis
+
+Atlas decodes emitted events.
+
+Examples:
+
+Transfer
+
+Approval
+
+Mint
+
+Burn
+
+Swap
+
+Deposit
+
+Withdraw
+
+BridgeInitiated
+
+BridgeCompleted
+
+OwnershipTransferred
+
+Events often describe what actually occurred more accurately than the transaction input.
+
+---
+
+# Stage 5: Asset Flow Analysis
+
+Atlas tracks movement of assets.
+
+For each asset:
+
+Identify:
+
+* sender
+* recipient
+* amount
+* token
+* chain
+* transfer path
+
+Complex transactions may contain many internal transfers.
+
+All significant flows should be captured.
+
+---
+
+# Stage 6: Internal Execution Analysis
+
+Where supported, Atlas inspects execution traces.
+
+Examples:
+
+* internal ETH transfers
+* delegate calls
+* proxy execution
+* multicall operations
+* nested contract interactions
+
+Many exploits can only be understood through execution traces.
+
+---
+
+# Stage 7: Protocol Identification
+
+Atlas identifies which protocol was used.
+
+Examples:
+
+Uniswap
+
+Aave
+
+Morpho
+
+Curve
+
+Pendle
+
+LayerZero
+
+Across
+
+Wormhole
+
+If unknown:
+
+Create a candidate protocol profile for later review.
+
+---
+
+# Stage 8: Counterparty Discovery
+
+Every transaction reveals participants.
+
+Examples:
+
+wallet
+
+↓
+
+contract
+
+↓
+
+protocol
+
+↓
+
+bridge
+
+↓
+
+exchange
+
+These participants become candidates for graph expansion.
+
+---
+
+# Stage 9: Behavioral Signal Extraction
+
+The engine extracts reusable behavioral signals.
+
+Examples:
+
+Large transfer
+
+Repeated approvals
+
+Bridge usage
+
+Wallet splitting
+
+Liquidity provision
+
+Rapid token swaps
+
+Repeated governance voting
+
+Cross-chain movement
+
+High-frequency trading
+
+Behavioral signals feed the Pattern Recognition Agent.
+
+---
+
+# Stage 10: Relationship Proposal
+
+The engine proposes graph relationships.
+
+Example
+
+```text id="2yxm8n"
+Wallet
+
+↓
+
+Transferred Token To
+
+↓
+
+Wallet
+
+↓
+
+Interacted With
+
+↓
+
+Contract
+
+↓
+
+Belongs To
+
+↓
+
+Protocol
+```
+
+Relationship proposals are validated by the Knowledge Graph Agent before persistence.
+
+---
+
+# Stage 11: Semantic Summary
+
+Every important transaction generates a concise semantic description.
+
+Example
+
+> Wallet bridged USDC from Ethereum to Base before swapping into ETH through Uniswap.
+
+This summary is embedded for future semantic retrieval.
+
+Raw blockchain data should never be embedded directly.
+
+---
+
+# Stage 12: Machine Representation
+
+Every analyzed transaction becomes a structured object.
+
+Contains:
+
+* participants
+* contracts
+* assets
+* events
+* protocol
+* behavioral signals
+* evidence references
+* semantic summary
+* metadata
+
+This object is consumed by downstream agents.
+
+---
+
+# Multi-Transaction Context
+
+Many blockchain actions span multiple transactions.
+
+Example
+
+Transaction 1
+
+↓
+
+Bridge Deposit
+
+↓
+
+Transaction 2
+
+↓
+
+Bridge Completion
+
+↓
+
+Transaction 3
+
+↓
+
+DEX Swap
+
+↓
+
+Transaction 4
+
+↓
+
+Exchange Deposit
+
+Atlas should recognize related transaction sequences when sufficient evidence exists.
+
+---
+
+# Batch Analysis
+
+Wallet investigations often require analyzing thousands of transactions.
+
+The engine should support:
+
+* streaming analysis
+* batch processing
+* incremental updates
+* checkpoint recovery
+* parallel execution
+
+Scalability is a design requirement.
+
+---
+
+# Error Handling
+
+Transactions may fail for many reasons.
+
+Examples:
+
+* reverted execution
+* missing traces
+* unsupported chain
+* unavailable ABI
+* provider timeout
+
+Atlas should still preserve:
+
+* raw transaction
+* failure reason
+* partial analysis
+
+Failures should not terminate an investigation.
+
+---
+
+# Collaboration with Other Agents
+
+## Investigation Agent
+
+Receives:
+
+* decoded intelligence
+* summaries
+* behavioral observations
+
+---
+
+## Pattern Recognition Agent
+
+Receives:
+
+* behavioral signals
+* transaction sequences
+
+---
+
+## Knowledge Graph Agent
+
+Receives:
+
+* relationship proposals
+* discovered entities
+
+---
+
+## Memory Agent
+
+Receives:
+
+* semantic summaries
+* transaction intelligence
+
+---
+
+## Risk Engine
+
+Consumes:
+
+* transaction behaviors
+* protocol interactions
+* evidence
+
+---
+
+# Performance Principles
+
+The Transaction Analysis Engine should:
+
+* avoid repeated decoding
+* cache verified contract metadata
+* batch provider requests
+* parallelize independent analyses
+* reuse decoded ABIs
+* process only newly observed transactions during monitoring
+
+Efficiency should improve as Atlas learns.
+
+---
+
+# Future Enhancements
+
+Future versions may include:
+
+* AI-generated natural language transaction explanations
+* exploit-specific decoding modules
+* MEV path reconstruction
+* bridge lifecycle visualization
+* token provenance tracking
+* cross-chain transaction stitching
+* simulation of hypothetical transaction outcomes
+
+These capabilities should extend the engine without changing its core pipeline.
+
+---
+
+# Guiding Principle
+
+A transaction is the smallest unit of blockchain behavior.
+
+By understanding every transaction deeply, Atlas builds reliable knowledge about wallets, entities, protocols, and patterns.
+
+The Transaction Analysis Engine transforms raw blockchain activity into structured intelligence that powers every other component of the platform.
+
+---
+
+# Objectives for Document 13
+
+Document 13 will define the **Cross-Chain Intelligence Engine**, describing how Atlas links identities, assets, transactions, and behavioral patterns across multiple blockchains to produce a unified investigation experience rather than isolated per-chain analyses.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* The complete transaction analysis lifecycle is documented.
+* Smart contract decoding, event analysis, and asset flow extraction are clearly defined.
+* Behavioral signal extraction and relationship proposals are established.
+* Transaction intelligence is structured for downstream agents.
+* Multi-transaction context and batch analysis are supported.
+* Collaboration with specialized agents is clearly separated.
+* The Transaction Analysis Engine is positioned as the foundation for converting raw blockchain events into explainable intelligence.

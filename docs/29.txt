@@ -1,0 +1,767 @@
+# Document 29: AI Agent Specifications
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+This document defines every AI agent that powers Atlas, including its responsibilities, inputs, outputs, communication protocols, lifecycle, tools, constraints, and orchestration rules.
+
+Atlas is not a single AI assistant.
+
+It is a coordinated multi-agent system where each agent has one clearly defined responsibility.
+
+Instead of one large model attempting to solve every problem, Atlas distributes work among specialized agents and combines their outputs into a single, explainable investigation.
+
+Every agent should be independently testable, replaceable, and scalable.
+
+---
+
+# Agent Design Principles
+
+Every Atlas agent must:
+
+* Have one responsibility.
+* Operate within clearly defined boundaries.
+* Produce deterministic structured outputs whenever possible.
+* Never modify data outside its assigned scope.
+* Explain its reasoning.
+* Validate its inputs before execution.
+* Log every significant action.
+* Fail gracefully.
+
+Agents should collaborate rather than compete.
+
+---
+
+# Agent Lifecycle
+
+Every agent follows the same execution lifecycle.
+
+```text id="v7kp4m"
+Task Received
+
+↓
+
+Validate Input
+
+↓
+
+Retrieve Required Context
+
+↓
+
+Execute Task
+
+↓
+
+Validate Output
+
+↓
+
+Publish Result
+
+↓
+
+Log Execution
+
+↓
+
+Terminate
+```
+
+An agent should never bypass validation.
+
+---
+
+# Agent Communication Model
+
+Agents communicate through structured tasks.
+
+Each task contains:
+
+* task ID
+* investigation ID
+* requesting agent
+* objective
+* priority
+* deadline
+* payload
+
+Agents never communicate through free-form prompts alone.
+
+Structured contracts take priority.
+
+---
+
+# Agent Registry
+
+Atlas maintains an internal registry of all available agents.
+
+Each registry entry includes:
+
+* agent ID
+* version
+* capabilities
+* supported tasks
+* required permissions
+* health status
+* execution cost
+
+The registry allows dynamic orchestration.
+
+---
+
+# Core Atlas Agents
+
+The MVP consists of the following specialized agents.
+
+1. Investigation Agent
+
+2. Evidence Agent
+
+3. Memory Agent
+
+4. Knowledge Graph Agent
+
+5. Entity Resolution Agent
+
+6. Pattern Recognition Agent
+
+7. Risk Assessment Agent
+
+8. AI Reasoning Agent
+
+9. Report Generation Agent
+
+10. Monitoring Agent
+
+11. Conversation Agent
+
+12. Orchestrator Agent
+
+---
+
+# Orchestrator Agent
+
+## Purpose
+
+Coordinates every investigation.
+
+Determines:
+
+* which agents execute
+* execution order
+* dependency resolution
+* retries
+* timeout handling
+
+The Orchestrator never performs investigations itself.
+
+It coordinates specialists.
+
+---
+
+## Inputs
+
+* user objective
+* investigation request
+* workflow context
+
+---
+
+## Outputs
+
+* execution plan
+* agent tasks
+* investigation status
+
+---
+
+# Investigation Agent
+
+## Responsibilities
+
+* collect blockchain data
+* identify targets
+* coordinate evidence collection
+* create investigation timeline
+
+---
+
+## Inputs
+
+* wallet
+* transaction
+* entity
+* investigation objective
+
+---
+
+## Outputs
+
+* structured investigation
+* timeline
+* investigation metadata
+
+---
+
+# Evidence Agent
+
+## Responsibilities
+
+* collect supporting evidence
+* validate evidence
+* assign confidence
+* link evidence to findings
+
+---
+
+## Outputs
+
+* evidence objects
+* evidence references
+* confidence metrics
+
+Evidence must always be reproducible.
+
+---
+
+# Memory Agent
+
+## Responsibilities
+
+* retrieve historical investigations
+* semantic search
+* generate embeddings
+* evolve memory
+* version memories
+
+---
+
+## Tools
+
+* CockroachDB
+* Vector Search
+* Memory Index
+
+---
+
+## Outputs
+
+Relevant historical context.
+
+---
+
+# Knowledge Graph Agent
+
+## Responsibilities
+
+* construct graph relationships
+* traverse graph
+* discover connected entities
+* identify clusters
+
+---
+
+## Outputs
+
+Graph objects.
+
+Relationship summaries.
+
+Traversal results.
+
+---
+
+# Entity Resolution Agent
+
+## Responsibilities
+
+Determine whether two blockchain objects refer to the same real-world entity.
+
+Examples:
+
+Wallet A
+
+↓
+
+Exchange Wallet
+
+↓
+
+Known Binance Cluster
+
+Confidence should always accompany entity attribution.
+
+---
+
+# Pattern Recognition Agent
+
+## Responsibilities
+
+Identify known blockchain behaviors.
+
+Examples:
+
+* laundering
+* bridge hopping
+* wallet splitting
+* Sybil attacks
+* phishing infrastructure
+
+Pattern recognition combines deterministic rules with AI-assisted classification.
+
+---
+
+# Risk Assessment Agent
+
+## Responsibilities
+
+Produce explainable risk scores.
+
+Inputs include:
+
+* evidence
+* graph
+* memory
+* entities
+* patterns
+
+Outputs include:
+
+* score
+* confidence
+* explanation
+
+The agent never invents risk factors.
+
+---
+
+# AI Reasoning Agent
+
+## Responsibilities
+
+Explain investigations.
+
+Generate summaries.
+
+Recommend next steps.
+
+Identify uncertainty.
+
+The reasoning agent never overrides deterministic findings.
+
+---
+
+# Report Generation Agent
+
+## Responsibilities
+
+Transform investigation outputs into:
+
+* executive reports
+* technical reports
+* intelligence dossiers
+* evidence packages
+
+Reports remain grounded in evidence.
+
+---
+
+# Monitoring Agent
+
+## Responsibilities
+
+Continuously monitor:
+
+* wallets
+* contracts
+* entities
+* watchlists
+
+Generate alerts when conditions are met.
+
+Runs independently from user requests.
+
+---
+
+# Conversation Agent
+
+## Responsibilities
+
+Maintain natural language conversations.
+
+Resolve references.
+
+Track conversation memory.
+
+Generate follow-up questions.
+
+The Conversation Agent manages dialogue, not blockchain analysis.
+
+---
+
+# Agent Context Model
+
+Every agent receives only the context necessary for its task.
+
+Example:
+
+Investigation Agent
+
+Receives:
+
+Wallet
+
+Objective
+
+Chain
+
+↓
+
+Memory Agent
+
+Receives:
+
+Investigation ID
+
+Semantic query
+
+↓
+
+Risk Agent
+
+Receives:
+
+Evidence
+
+Patterns
+
+Graph
+
+Reducing context improves performance and security.
+
+---
+
+# Shared Context Objects
+
+Agents exchange structured objects.
+
+Examples:
+
+Investigation
+
+Evidence
+
+Graph
+
+Risk
+
+Memory
+
+Report
+
+Alert
+
+Every object has a defined schema.
+
+---
+
+# Prompt Templates
+
+Every AI-powered agent uses version-controlled prompt templates.
+
+Prompt templates include:
+
+* role definition
+* constraints
+* expected output
+* validation rules
+* examples
+
+Prompts are treated as production assets.
+
+---
+
+# Tool Access
+
+Each agent has explicit tool permissions.
+
+Example
+
+Memory Agent
+
+Can access:
+
+* CockroachDB
+* Vector Index
+
+Cannot access:
+
+* Reporting
+
+Example
+
+Report Agent
+
+Can access:
+
+* investigation results
+* evidence
+
+Cannot modify:
+
+* memory
+* graph
+
+Least privilege applies to AI agents.
+
+---
+
+# Execution Modes
+
+Agents support:
+
+Synchronous execution
+
+For interactive investigations.
+
+---
+
+Asynchronous execution
+
+For background processing.
+
+---
+
+Scheduled execution
+
+For monitoring.
+
+---
+
+Event-driven execution
+
+For platform automation.
+
+---
+
+# Retry Policy
+
+Transient failures should be retried.
+
+Permanent failures should:
+
+* return structured errors
+* notify orchestrator
+* preserve investigation state
+
+Retries should use exponential backoff.
+
+---
+
+# Timeouts
+
+Each agent defines:
+
+Maximum runtime.
+
+Retry count.
+
+Fallback behavior.
+
+Long-running work should move to asynchronous execution.
+
+---
+
+# Agent Health
+
+Every agent reports:
+
+* version
+* uptime
+* average latency
+* error rate
+* health status
+
+The Orchestrator avoids unhealthy agents.
+
+---
+
+# Agent Metrics
+
+Metrics include:
+
+Tasks executed.
+
+Average execution time.
+
+Failure rate.
+
+Retry rate.
+
+Context size.
+
+Token usage.
+
+Memory retrieval accuracy.
+
+Metrics drive future optimization.
+
+---
+
+# Failure Isolation
+
+Agent failures should not terminate the entire investigation.
+
+Example
+
+Graph Agent fails.
+
+↓
+
+Evidence succeeds.
+
+↓
+
+Memory succeeds.
+
+↓
+
+Risk uses available information.
+
+↓
+
+User receives partial investigation.
+
+Graceful degradation is required.
+
+---
+
+# Agent Security
+
+Agents must:
+
+* validate permissions
+* reject unauthorized requests
+* sanitize context
+* ignore prompt injections
+* maintain execution logs
+* respect organization boundaries
+
+Agents never bypass platform security.
+
+---
+
+# Collaboration Workflow
+
+Typical investigation:
+
+```text id="e4j2pn"
+Conversation Agent
+
+↓
+
+Orchestrator
+
+↓
+
+Investigation Agent
+
+↓
+
+Evidence Agent
+
+↓
+
+Memory Agent
+
+↓
+
+Knowledge Graph Agent
+
+↓
+
+Entity Resolution Agent
+
+↓
+
+Pattern Recognition Agent
+
+↓
+
+Risk Assessment Agent
+
+↓
+
+AI Reasoning Agent
+
+↓
+
+Report Generation Agent
+
+↓
+
+Conversation Agent
+
+↓
+
+User
+```
+
+Every investigation follows this coordinated workflow.
+
+---
+
+# Future Agents
+
+Future versions may introduce:
+
+* NFT Intelligence Agent
+* Smart Contract Analysis Agent
+* DeFi Position Agent
+* Governance Analysis Agent
+* Cross-Chain Correlation Agent
+* Threat Intelligence Agent
+* Compliance Agent
+* Autonomous Research Agent
+* Market Intelligence Agent
+
+The architecture should support adding agents without redesigning existing workflows.
+
+---
+
+# Guiding Principle
+
+Atlas succeeds because intelligence is distributed.
+
+Each agent becomes exceptionally good at one responsibility while the Orchestrator combines their outputs into a coherent investigation.
+
+This modular architecture improves scalability, explainability, testing, and long-term maintainability.
+
+As Atlas grows, new capabilities are added by introducing new agents rather than increasing the complexity of existing ones.
+
+---
+
+# Objectives for Document 30
+
+Document 30 will define the **Implementation Roadmap & Engineering Execution Plan**, providing a week-by-week development schedule, repository milestones, coding priorities, testing strategy, CI/CD pipeline, team responsibilities, and delivery checkpoints from hackathon MVP through production release.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* Every AI agent is defined with clear responsibilities.
+* Agent lifecycle, communication protocols, and orchestration rules are documented.
+* Context sharing, prompt governance, and tool permissions are established.
+* Failure handling, monitoring, metrics, and security are included.
+* Collaboration between agents is fully specified.
+* The AI Agent Specifications provide an implementation-ready blueprint for Atlas's multi-agent architecture.

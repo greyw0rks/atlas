@@ -1,0 +1,637 @@
+# Document 18: Memory Lifecycle & Knowledge Evolution System
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+The Memory Lifecycle & Knowledge Evolution System defines how Atlas learns, remembers, updates, and eventually retires knowledge throughout its lifetime.
+
+Unlike a traditional database that simply stores records, Atlas maintains a living memory.
+
+Every investigation, every graph relationship, every entity attribution, every risk assessment, and every behavioral pattern contributes to a continuously evolving knowledge base.
+
+Memory is not static.
+
+Memory grows, adapts, and becomes more accurate as new evidence arrives.
+
+---
+
+# Core Philosophy
+
+Atlas should become more intelligent after every investigation.
+
+No investigation should exist in isolation.
+
+Every completed investigation should:
+
+* improve future investigations
+* strengthen semantic search
+* refine entity understanding
+* update graph intelligence
+* increase reasoning quality
+* preserve historical context
+
+Learning is continuous.
+
+Forgetting is deliberate.
+
+---
+
+# Responsibilities
+
+The Memory Lifecycle System is responsible for:
+
+* creating memory
+* updating memory
+* versioning knowledge
+* preserving historical intelligence
+* refreshing stale information
+* archiving inactive knowledge
+* resolving conflicting memories
+* maintaining semantic embeddings
+* managing memory quality
+
+It does **not** perform investigations.
+
+It ensures the results of investigations remain useful.
+
+---
+
+# Memory Lifecycle
+
+Every memory follows the same lifecycle.
+
+```text id="7qp3xz"
+Created
+
+↓
+
+Validated
+
+↓
+
+Indexed
+
+↓
+
+Embedded
+
+↓
+
+Referenced
+
+↓
+
+Updated
+
+↓
+
+Versioned
+
+↓
+
+Archived
+
+↓
+
+Retired
+```
+
+Memory never disappears without trace.
+
+---
+
+# Memory Categories
+
+Atlas stores several types of memory.
+
+## Investigation Memory
+
+Stores completed investigations.
+
+Contains:
+
+* summary
+* evidence references
+* relationships
+* findings
+* recommendations
+
+---
+
+## Wallet Memory
+
+Stores long-term wallet knowledge.
+
+Examples:
+
+* activity profile
+* protocol usage
+* chain history
+* investigation history
+* behavioral evolution
+
+---
+
+## Entity Memory
+
+Stores entity profiles.
+
+Examples:
+
+* known wallets
+* ownership history
+* associated protocols
+* historical confidence
+
+---
+
+## Pattern Memory
+
+Stores learned behavioral patterns.
+
+Examples:
+
+* laundering workflow
+* bridge hopping
+* Sybil campaigns
+* phishing infrastructure
+
+---
+
+## Relationship Memory
+
+Stores validated graph relationships and their historical evolution.
+
+---
+
+## Semantic Memory
+
+Stores vector embeddings.
+
+Used for:
+
+* semantic search
+* retrieval
+* contextual reasoning
+
+---
+
+## Operational Memory
+
+Stores platform intelligence.
+
+Examples:
+
+* investigation performance
+* provider reliability
+* decoding improvements
+* workflow optimizations
+
+---
+
+# Memory Creation
+
+Memory is created only after validation.
+
+Sources include:
+
+* completed investigations
+* validated graph relationships
+* confirmed entities
+* approved pattern discoveries
+* investigator annotations
+
+Raw observations should not become permanent memory until validated.
+
+---
+
+# Memory Versioning
+
+Knowledge changes.
+
+Memory should preserve previous versions.
+
+Example
+
+Version 1
+
+Wallet classified as:
+
+Unknown
+
+↓
+
+Version 2
+
+Known Exchange
+
+↓
+
+Version 3
+
+Exchange Treasury
+
+Atlas preserves every version.
+
+Historical understanding is valuable intelligence.
+
+---
+
+# Knowledge Evolution
+
+Memory evolves through evidence.
+
+Example
+
+Initial Investigation
+
+↓
+
+Minimal Information
+
+↓
+
+Second Investigation
+
+↓
+
+Entity Identified
+
+↓
+
+Third Investigation
+
+↓
+
+Bridge Activity
+
+↓
+
+Fourth Investigation
+
+↓
+
+Confirmed Attribution
+
+Atlas should continuously refine rather than replace knowledge.
+
+---
+
+# Memory Freshness
+
+Not all knowledge ages equally.
+
+Examples:
+
+Recent exploit wallet
+
+↓
+
+Refresh frequently.
+
+Exchange treasury
+
+↓
+
+Refresh periodically.
+
+Inactive wallet
+
+↓
+
+Refresh only when new activity appears.
+
+Memory freshness policies should depend on object type and activity.
+
+---
+
+# Refresh Policies
+
+Memory may be refreshed by:
+
+* scheduled investigations
+* blockchain events
+* user requests
+* monitoring alerts
+* entity updates
+* graph changes
+
+Refreshing should avoid unnecessary recomputation.
+
+---
+
+# Memory Confidence
+
+Each memory object maintains confidence.
+
+Confidence evolves based on:
+
+* new evidence
+* investigation agreement
+* graph consistency
+* entity verification
+* historical stability
+
+Confidence belongs to the current memory version.
+
+Historical versions preserve their original confidence.
+
+---
+
+# Conflicting Knowledge
+
+Atlas may discover conflicting information.
+
+Example
+
+Version 1
+
+Wallet belongs to:
+
+Unknown Entity
+
+↓
+
+Version 2
+
+Wallet belongs to:
+
+Exchange
+
+↓
+
+Version 3
+
+Evidence suggests:
+
+Market Maker
+
+Atlas preserves conflicting knowledge until sufficient evidence resolves the conflict.
+
+Nothing should be silently overwritten.
+
+---
+
+# Semantic Embedding Lifecycle
+
+Every semantic memory object follows its own lifecycle.
+
+```text id="5ld9nc"
+Create Summary
+
+↓
+
+Generate Embedding
+
+↓
+
+Store Vector
+
+↓
+
+Retrieve
+
+↓
+
+Regenerate If Changed
+```
+
+Embeddings should only be regenerated when meaning changes significantly.
+
+Minor metadata changes should not trigger expensive embedding updates.
+
+---
+
+# Memory Aging
+
+Knowledge naturally becomes less reliable over time.
+
+Atlas should track:
+
+* age
+* last verification
+* refresh count
+* stale status
+
+Older knowledge should remain searchable while indicating reduced freshness.
+
+---
+
+# Memory Archiving
+
+Rarely accessed memories may be archived.
+
+Archiving should:
+
+* preserve searchability
+* reduce operational cost
+* maintain evidence links
+* support restoration
+
+Archived knowledge remains part of Atlas's long-term intelligence.
+
+---
+
+# Memory Retirement
+
+Very few memories should be permanently retired.
+
+Examples:
+
+* corrupted records
+* invalid test data
+* administrator-approved removal
+
+Retired memories should remain referenced in audit logs.
+
+---
+
+# Knowledge Consolidation
+
+Repeated investigations often produce overlapping intelligence.
+
+Atlas periodically consolidates:
+
+* duplicate summaries
+* repeated findings
+* duplicate embeddings
+* obsolete metadata
+
+Consolidation should reduce redundancy without losing information.
+
+---
+
+# Memory Quality Metrics
+
+Atlas should monitor memory quality.
+
+Metrics include:
+
+* retrieval success
+* embedding relevance
+* investigation reuse
+* duplicate rate
+* stale memory ratio
+* confidence evolution
+
+These metrics guide future optimization.
+
+---
+
+# Collaboration with Other Agents
+
+## Investigation Agent
+
+Creates:
+
+* investigation memory
+
+Consumes:
+
+* historical memory
+
+---
+
+## Monitoring Engine
+
+Triggers:
+
+* memory refresh
+
+---
+
+## Knowledge Graph Agent
+
+Updates:
+
+* relationship memory
+
+---
+
+## Pattern Recognition Agent
+
+Updates:
+
+* behavioral memory
+
+---
+
+## Entity Resolution Engine
+
+Updates:
+
+* entity memory
+
+---
+
+## Risk Engine
+
+Uses:
+
+* historical memory
+* confidence history
+
+Returns:
+
+* updated assessments
+
+---
+
+# Performance Principles
+
+The Memory Lifecycle System should:
+
+* avoid duplicate memory
+* regenerate embeddings only when necessary
+* support incremental updates
+* optimize retrieval speed
+* maintain immutable history
+* scale to billions of memory objects
+
+Memory growth should improve intelligence rather than reduce performance.
+
+---
+
+# Failure Recovery
+
+If memory updates fail:
+
+* preserve the completed investigation
+* retry memory persistence
+* retain previous versions
+* avoid partial updates
+* maintain transactional consistency
+
+Atlas should never lose validated intelligence because of a storage failure.
+
+---
+
+# Security Considerations
+
+Memory should:
+
+* enforce access controls
+* encrypt sensitive metadata
+* validate update requests
+* maintain complete audit logs
+* prevent unauthorized modification
+
+Historical intelligence must remain trustworthy.
+
+---
+
+# Future Enhancements
+
+Future versions may include:
+
+* self-organizing semantic memory
+* automatic memory summarization
+* memory importance scoring
+* adaptive embedding models
+* long-term reasoning optimization
+* investigator-specific memory views
+* collaborative organizational memory
+* AI-assisted memory compression
+
+These capabilities should extend the existing memory architecture without changing its core lifecycle.
+
+---
+
+# Guiding Principle
+
+Memory is Atlas's greatest competitive advantage.
+
+Blockchain data is public.
+
+Knowledge is not.
+
+Every investigation enriches Atlas's understanding of wallets, entities, protocols, and behaviors.
+
+The longer Atlas operates, the more valuable its memory becomes, enabling faster investigations, stronger reasoning, better recommendations, and increasingly accurate blockchain intelligence.
+
+---
+
+# Objectives for Document 19
+
+Document 19 will define the **AI Reasoning & Decision Engine**, the orchestration layer that coordinates large language models with Atlas's deterministic systems. It will specify how AI reasons over evidence, graph intelligence, semantic memory, and structured data while preventing hallucinations, enforcing explainability, and ensuring that every AI-generated conclusion remains grounded in verifiable evidence.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* The complete memory lifecycle is documented.
+* Memory creation, evolution, versioning, and retirement are clearly defined.
+* Knowledge freshness and semantic embedding management are established.
+* Memory quality metrics and consolidation strategies are included.
+* Collaboration with all major agents is clearly described.
+* Security, recovery, and performance considerations are documented.
+* The Memory Lifecycle & Knowledge Evolution System establishes Atlas as a continuously learning blockchain intelligence platform whose value compounds over time.

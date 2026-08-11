@@ -1,0 +1,622 @@
+# Document 15: Entity Resolution Engine
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+The Entity Resolution Engine is responsible for determining when multiple blockchain identities belong to the same real-world actor.
+
+Blockchain addresses are not identities.
+
+One person, organization, exchange, protocol, or attacker may control hundreds or even thousands of wallets across multiple chains.
+
+The Entity Resolution Engine continuously analyzes evidence to determine whether seemingly unrelated blockchain objects should be associated with a single entity.
+
+Its goal is not certainty.
+
+Its goal is evidence-backed attribution with clearly defined confidence.
+
+---
+
+# Core Philosophy
+
+Atlas investigates **actors**, not addresses.
+
+A wallet is only one representation of an actor.
+
+Over time, Atlas should build increasingly accurate identity profiles by combining evidence from investigations, graph intelligence, behavioral analysis, and historical memory.
+
+Every attribution must remain explainable and reversible.
+
+---
+
+# Responsibilities
+
+The Entity Resolution Engine is responsible for:
+
+* identifying related wallets
+* resolving duplicate entities
+* linking blockchain identities
+* maintaining entity profiles
+* updating attribution confidence
+* detecting conflicting attributions
+* merging entity knowledge
+* preserving attribution history
+
+The engine never creates certainty where evidence is insufficient.
+
+---
+
+# What is an Entity?
+
+An entity represents a real-world actor or logical organization.
+
+Examples include:
+
+## Individual
+
+Single user controlling multiple wallets.
+
+---
+
+## Centralized Exchange
+
+Examples:
+
+* Binance
+* Coinbase
+* OKX
+* Bybit
+
+---
+
+## Protocol
+
+Examples:
+
+* Uniswap
+* Aave
+* Morpho
+* LayerZero
+
+---
+
+## DAO
+
+Examples:
+
+* MakerDAO
+* Arbitrum DAO
+
+---
+
+## Bridge
+
+Examples:
+
+* Across
+* Wormhole
+* Hyperlane
+
+---
+
+## Smart Contract System
+
+A collection of contracts operating as one application.
+
+---
+
+## Attacker
+
+An unidentified threat actor.
+
+---
+
+## Organization
+
+Examples:
+
+* Foundation treasury
+* Investment fund
+* Market maker
+
+---
+
+# Identity Objects
+
+Atlas may associate an entity with:
+
+* blockchain wallets
+* smart contracts
+* multisigs
+* ENS names
+* protocol addresses
+* bridge contracts
+* domains (future)
+* social identities (future)
+* investigator labels
+
+The entity becomes the parent object that unifies these identities.
+
+---
+
+# Resolution Pipeline
+
+```text id="e4j2qx"
+New Investigation
+
+↓
+
+Extract Identity Signals
+
+↓
+
+Retrieve Existing Entities
+
+↓
+
+Similarity Analysis
+
+↓
+
+Evidence Evaluation
+
+↓
+
+Confidence Calculation
+
+↓
+
+Match Existing Entity?
+
+↓
+
+Yes
+
+↓
+
+Update Entity
+
+↓
+
+No
+
+↓
+
+Create Candidate Entity
+```
+
+Every attribution follows this pipeline.
+
+---
+
+# Identity Signals
+
+The engine evaluates multiple independent signals.
+
+## Funding Relationships
+
+Examples:
+
+* repeated funding source
+* treasury funding
+* shared deposit wallets
+
+---
+
+## Behavioral Similarity
+
+Examples:
+
+* transaction timing
+* protocol preferences
+* bridge sequences
+* interaction frequency
+
+---
+
+## Infrastructure Signals
+
+Examples:
+
+* multisig membership
+* deployer relationships
+* contract ownership
+* governance permissions
+
+---
+
+## Graph Signals
+
+Examples:
+
+* repeated graph proximity
+* common counterparties
+* shared investigation history
+
+---
+
+## Pattern Signals
+
+Examples:
+
+* same laundering workflow
+* repeated bridge path
+* phishing infrastructure
+* identical Sybil strategy
+
+---
+
+## Historical Memory
+
+Atlas compares previous investigations and entity history before creating new entities.
+
+---
+
+# Confidence Model
+
+Every attribution receives a confidence score.
+
+Confidence depends on:
+
+* quantity of evidence
+* quality of evidence
+* consistency over time
+* corroborating investigations
+* graph density
+* semantic agreement
+
+Confidence should never rely on one signal alone.
+
+---
+
+# Candidate Entities
+
+Atlas avoids creating permanent entities too early.
+
+Example
+
+Investigation 1
+
+↓
+
+Possible Exchange Wallet
+
+↓
+
+Candidate Entity
+
+↓
+
+Investigation 2
+
+↓
+
+Additional Evidence
+
+↓
+
+Confidence Increases
+
+↓
+
+Investigation 3
+
+↓
+
+Official Entity
+
+This reduces false attribution.
+
+---
+
+# Entity Profiles
+
+Each entity maintains a living profile.
+
+Profile fields include:
+
+* entity ID
+* name
+* entity type
+* description
+* confidence
+* known wallets
+* known contracts
+* supported chains
+* first observed
+* last verified
+* investigation count
+* pattern associations
+* risk history
+
+Profiles evolve over time without losing historical versions.
+
+---
+
+# Entity Merging
+
+Two entities may later prove to be the same.
+
+Example
+
+Entity A
+
+↓
+
+Wallet Cluster
+
+Entity B
+
+↓
+
+Treasury Cluster
+
+↓
+
+Evidence Appears
+
+↓
+
+Merge
+
+The merge process must:
+
+* preserve history
+* preserve evidence
+* preserve investigations
+* redirect references
+* create a merge audit record
+
+Nothing should be silently discarded.
+
+---
+
+# Entity Splitting
+
+Incorrect attributions must be reversible.
+
+Example
+
+Entity
+
+↓
+
+Wallet A
+
+Wallet B
+
+↓
+
+New Evidence
+
+↓
+
+Wallet B Belongs Elsewhere
+
+↓
+
+Split Entity
+
+Historical records should clearly document when and why a split occurred.
+
+---
+
+# Entity Relationships
+
+Entities connect to other entities.
+
+Examples
+
+Exchange
+
+↓
+
+Operates
+
+↓
+
+Bridge
+
+Protocol
+
+↓
+
+Governed By
+
+↓
+
+DAO
+
+Foundation
+
+↓
+
+Controls
+
+↓
+
+Treasury
+
+These relationships become part of the Knowledge Graph.
+
+---
+
+# Unknown Entities
+
+Not every actor can be identified.
+
+Atlas should support:
+
+Unknown Actor 001
+
+Unknown Actor 002
+
+Unknown Organization
+
+Unknown Bridge Operator
+
+As evidence accumulates, these placeholders may later become identified entities.
+
+---
+
+# Investigator Attribution
+
+Future versions should allow investigators to propose:
+
+* names
+* descriptions
+* classifications
+* notes
+
+Manual attributions should always remain distinguishable from automated ones.
+
+---
+
+# Explainability
+
+Every entity attribution should answer:
+
+Why are these wallets grouped together?
+
+Supporting evidence:
+
+Confidence:
+
+Alternative explanations:
+
+Historical changes:
+
+Nothing should appear as a "black box" decision.
+
+---
+
+# Collaboration with Other Agents
+
+## Investigation Agent
+
+Provides:
+
+* discovered identities
+* investigation findings
+
+Receives:
+
+* known entity context
+
+---
+
+## Memory Agent
+
+Stores:
+
+* entity profiles
+* attribution history
+
+---
+
+## Knowledge Graph Agent
+
+Maintains:
+
+* entity relationships
+* graph connections
+
+---
+
+## Pattern Recognition Agent
+
+Provides:
+
+* behavioral similarities
+* recurring infrastructure
+
+---
+
+## Risk Engine
+
+Uses:
+
+* entity reputation
+* entity history
+* associated patterns
+
+---
+
+# Performance Principles
+
+The Entity Resolution Engine should:
+
+* avoid duplicate entities
+* support incremental updates
+* cache frequently used profiles
+* prioritize high-confidence evidence
+* delay expensive comparisons until necessary
+
+Scalability should support millions of identities.
+
+---
+
+# Failure Recovery
+
+If entity resolution fails:
+
+* preserve the investigation
+* create temporary candidate entities
+* retry asynchronously
+* never discard collected evidence
+
+Entity attribution should improve over time rather than blocking investigations.
+
+---
+
+# Future Enhancements
+
+Future versions may include:
+
+* machine learning-assisted entity clustering
+* investigator approval workflows
+* organization hierarchy support
+* decentralized identity integration
+* ENS and domain intelligence
+* exchange infrastructure mapping
+* social graph enrichment
+* cross-platform attribution
+
+These capabilities should integrate naturally with the existing architecture.
+
+---
+
+# Guiding Principle
+
+An address is not an identity.
+
+The Entity Resolution Engine helps Atlas understand the real-world actors behind blockchain activity by combining evidence, memory, graph intelligence, and behavioral analysis.
+
+Every attribution remains transparent, evidence-backed, and capable of evolving as new information emerges.
+
+---
+
+# Objectives for Document 16
+
+Document 16 will define the **Monitoring & Alerting Engine**, which enables Atlas to continuously monitor wallets, entities, contracts, and patterns. It will describe real-time event processing, watchlists, alert generation, memory updates, and autonomous investigations triggered by significant blockchain activity.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* The Entity Resolution Engine is clearly defined.
+* Identity signals and attribution workflows are documented.
+* Candidate entities, merging, and splitting strategies are established.
+* Entity profiles and confidence evolution are supported.
+* Explainability is enforced for every attribution.
+* Collaboration with all major agents is clearly described.
+* The Entity Resolution Engine positions Atlas to investigate real-world actors instead of isolated blockchain addresses.

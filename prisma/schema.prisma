@@ -3,11 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  // Pooled (PgBouncer) endpoint for queries; direct endpoint for migrations,
-  // which need a session-level connection the pooler won't give.
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
 }
 
 enum TraceStatus {
@@ -30,6 +27,13 @@ enum BridgeRole {
 enum MatchType {
   DETERMINISTIC
   HEURISTIC
+}
+
+enum ObservationSource {
+  BRIDGE_CONTRACT
+  CEX_HEURISTIC
+  USER
+  LLM
 }
 
 model TraceJob {
@@ -151,3 +155,102 @@ model RateLimitBucket {
 
   @@index([windowStart])
 }
+
+// ---------------------------------------------------------------------------
+// Persistent memory. Everything below survives a trace and makes the next one
+// better. The unit worth remembering is not the traced address but everything
+// the trace incidentally observed.
+// ---------------------------------------------------------------------------
+
+model Investigation {
+  id            String   @id @default(cuid())
+  rootAddress   String
+  chainIds      Int[]
+  transferCount Int      @default(0)
+  hopCount      Int      @default(0)
+  truncated     Boolean  @default(false)
+  durationMs    Int      @default(0)
+  // Human-facing prose from Claude. Never embedded — see AddressProfile.
+  narrative     String?
+  createdAt     DateTime @default(now())
+
+  retrievals MemoryRetrieval[]
+
+  @@index([rootAddress, createdAt])
+}
+
+model AddressProfile {
+  address         String   @id
+  firstSeenAt     DateTime @default(now())
+  lastSeenAt      DateTime @updatedAt
+  // How many separate investigations have touched this address. Drives the
+  // embedding gate — one-off counterparties are never embedded.
+  observationCount Int     @default(1)
+  chainIds        Int[]
+  bridgeProtocols String[]
+  degree          Int      @default(0)
+  topTokens       String[]
+  // Built from a deterministic template over the structured columns above, so
+  // re-running a trace yields a byte-identical string and a stable vector.
+  // An LLM-written summary here would make neighbourhoods drift between runs.
+  behaviorText    String   @default("")
+  // Prisma has no vector type on any provider. Written only via $executeRaw
+  // with a ::vector cast; including it in a typed create()/update() breaks the
+  // client. Read back only through ORDER BY ... <=> in $queryRaw.
+  behaviorEmbedding Unsupported("VECTOR(1024)")?
+  embeddedAt      DateTime?
+
+  observations EntityObservation[]
+
+  @@index([lastSeenAt])
+  @@index([degree])
+}
+
+model BridgeRoute {
+  id               String   @id @default(cuid())
+  protocol         String
+  srcChainId       Int
+  dstChainId       Int
+  tokenSymbol      String
+  observationCount Int      @default(1)
+  // Learned priors. These replace a hardcoded epsilon in the fuzzy matcher —
+  // this is where memory changes a decision rather than decorating output.
+  medianFeeBps     Decimal  @db.Decimal(10, 4)
+  medianLatencySec Int
+  p90LatencySec    Int
+  matchedCount     Int      @default(0)
+  orphanSendCount  Int      @default(0)
+  lastSeenAt       DateTime @updatedAt
+
+  @@unique([protocol, srcChainId, dstChainId, tokenSymbol])
+}
+
+model EntityObservation {
+  id         String            @id @default(cuid())
+  address    String
+  profile    AddressProfile    @relation(fields: [address], references: [address], onDelete: Cascade)
+  label      String
+  source     ObservationSource
+  confidence Decimal           @db.Decimal(3, 2)
+  evidence   Json
+  observedAt DateTime          @default(now())
+
+  @@unique([address, label, source])
+  @@index([label])
+}
+
+model MemoryRetrieval {
+  id              String        @id @default(cuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  // "prior_investigation" | "counterparty_labels" | "route_prior" | "vector_knn"
+  kind            String
+  queryText       String
+  hitIds          String[]
+  scores          Decimal[]     @db.Decimal(6, 5)
+  latencyMs       Int
+  createdAt       DateTime      @default(now())
+
+  @@index([investigationId])
+}
+

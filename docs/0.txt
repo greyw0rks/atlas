@@ -1,0 +1,366 @@
+# Document 0: Project Vision & Core Principles
+
+## Project Name
+
+**Atlas**
+
+**Tagline:**
+*A blockchain intelligence platform where every investigation becomes permanent knowledge.*
+
+---
+
+# Overview
+
+Atlas is an AI-powered blockchain investigation platform built around one core idea:
+
+**An AI investigator should never forget.**
+
+Traditional blockchain explorers treat every search as an isolated request. Every wallet investigation starts from zero, regardless of how much work has been done previously.
+
+Atlas is different.
+
+Every investigation permanently enriches a shared intelligence graph. Every wallet analyzed, every transaction traced, every entity identified, and every conclusion generated becomes long-term memory that improves future investigations.
+
+Memory is not an added feature.
+
+Memory is the product.
+
+---
+
+# The Problem
+
+Blockchain investigations are repetitive.
+
+Investigators repeatedly analyze the same wallets.
+
+The same scam patterns are rediscovered.
+
+Bridge routes are traced over and over.
+
+Money laundering techniques are manually reconstructed.
+
+Context is constantly lost.
+
+Most AI assistants also suffer from short-term memory. They only know what exists in the current conversation or temporary context window.
+
+Once the conversation ends, the knowledge disappears.
+
+This makes long-running investigations inefficient.
+
+---
+
+# Our Solution
+
+Atlas introduces persistent agentic memory.
+
+Instead of answering one question, the AI builds institutional knowledge.
+
+Every investigation creates new memories that can later be retrieved, connected, and expanded.
+
+Examples include:
+
+* wallet intelligence
+* transaction summaries
+* entity relationships
+* behavioral patterns
+* risk assessments
+* bridge usage
+* exchange interactions
+* historical conclusions
+* investigator notes
+* semantic embeddings
+
+Months later, the agent can reuse that knowledge automatically.
+
+---
+
+# Vision Statement
+
+Build the world's most intelligent blockchain investigation agent whose knowledge continuously grows instead of resetting after every interaction.
+
+---
+
+# Mission
+
+Provide investigators, researchers, compliance teams, auditors, and security analysts with an AI system that remembers every investigation and becomes smarter over time.
+
+---
+
+# Product Philosophy
+
+Everything in the system should reinforce these principles.
+
+## Principle 1
+
+Memory comes first.
+
+Every feature should ask:
+
+> What new knowledge should be remembered?
+
+If a feature produces useful information but does not store it, the feature is incomplete.
+
+---
+
+## Principle 2
+
+Knowledge compounds.
+
+The one-hundredth investigation should always be more intelligent than the first.
+
+The system should become increasingly useful as more investigations are performed.
+
+---
+
+## Principle 3
+
+Evidence over assumptions.
+
+Every AI conclusion should be linked to supporting evidence.
+
+Examples include:
+
+* transaction hashes
+* wallet addresses
+* smart contracts
+* bridge transactions
+* exchange deposits
+* previous investigations
+
+The AI should explain why it reached a conclusion.
+
+---
+
+## Principle 4
+
+Relationships matter more than isolated facts.
+
+Finding individual wallets is useful.
+
+Finding how those wallets connect is significantly more valuable.
+
+Atlas should prioritize discovering relationships between entities rather than storing disconnected observations.
+
+---
+
+## Principle 5
+
+Everything is searchable.
+
+Users should be able to search using:
+
+* wallet addresses
+* natural language
+* behaviors
+* investigation summaries
+* similar scam patterns
+* related entities
+* semantic meaning
+
+The platform should support both exact and semantic retrieval.
+
+---
+
+## Principle 6
+
+Transparency builds trust.
+
+Every AI-generated insight should include:
+
+* confidence level
+* evidence
+* reasoning
+* supporting data
+* investigation timestamp
+
+Users should always understand how a conclusion was reached.
+
+---
+
+# Core Capabilities
+
+Atlas should eventually support the following capabilities.
+
+### Wallet Investigation
+
+Analyze wallets across multiple blockchain networks.
+
+---
+
+### Transaction Intelligence
+
+Trace transaction histories and identify meaningful patterns.
+
+---
+
+### Cross-Chain Analysis
+
+Follow assets as they move across bridges and networks.
+
+---
+
+### Entity Resolution
+
+Identify groups of wallets likely belonging to the same organization or individual.
+
+---
+
+### Risk Assessment
+
+Generate explainable AI-assisted risk scores based on behavioral evidence.
+
+---
+
+### Semantic Memory
+
+Remember previous investigations and retrieve similar cases using vector search.
+
+---
+
+### Knowledge Graph
+
+Store relationships between wallets, contracts, exchanges, bridges, protocols, investigations, and entities.
+
+---
+
+### Continuous Learning
+
+Every completed investigation should improve future investigations.
+
+---
+
+# Target Users
+
+Primary users include:
+
+* blockchain investigators
+* compliance teams
+* security researchers
+* auditors
+* protocol security teams
+* exchanges
+* forensic analysts
+* Web3 developers
+* law enforcement (where legally appropriate)
+* researchers
+
+---
+
+# Success Criteria
+
+The project succeeds when:
+
+* investigations become faster over time
+* previous knowledge is automatically reused
+* relationships are discovered without manual searching
+* AI explanations remain grounded in evidence
+* semantic search consistently retrieves relevant historical investigations
+* users trust the AI because every conclusion is explainable
+
+---
+
+# What Makes This Different
+
+Atlas is **not**:
+
+* a blockchain explorer
+* a portfolio tracker
+* a wallet viewer
+* a chatbot
+* a traditional RAG application
+* a simple AI assistant
+
+Atlas is a persistent blockchain intelligence system.
+
+The investigation itself becomes part of the product.
+
+---
+
+# Hackathon Alignment
+
+This project directly demonstrates the concept of **Agentic Memory**.
+
+The AI agent continuously:
+
+* stores new knowledge
+* retrieves previous knowledge
+* reasons over historical investigations
+* updates long-term memory
+* discovers new relationships
+* improves future decisions
+
+CockroachDB serves as the persistent memory layer, while AWS provides the execution and AI infrastructure.
+
+Memory is not simply conversation history.
+
+Memory is structured intelligence.
+
+---
+
+# Long-Term Vision
+
+Future versions may include:
+
+* support for dozens of blockchains
+* collaborative investigations
+* autonomous monitoring agents
+* scam detection
+* sanctions screening
+* phishing detection
+* ransomware tracking
+* governance analysis
+* protocol intelligence
+* real-time blockchain event monitoring
+* automated investigation reports
+* API access for external platforms
+
+The architecture should always be designed with future expansion in mind.
+
+---
+
+# Non-Goals (Hackathon MVP)
+
+The first version will intentionally avoid:
+
+* live streaming of every blockchain event
+* support for every blockchain network
+* full Chainalysis-level functionality
+* complex user management
+* enterprise billing
+* advanced permissions
+* large-scale alerting
+* mobile applications
+* browser extensions
+
+The goal of the MVP is to prove that persistent memory significantly improves blockchain investigations.
+
+---
+
+# Guiding Principle for Every Development Decision
+
+When deciding whether a feature belongs in Atlas, ask one question:
+
+**"Does this feature help the AI remember, connect, retrieve, or improve knowledge across investigations?"**
+
+If the answer is yes, it belongs.
+
+If the answer is no, it should be reconsidered.
+
+---
+
+# Objectives for the Next Document
+
+The next document (Document 1) will define the complete technical architecture of Atlas, including every major component, how they communicate, the data flow between services, and how CockroachDB and AWS fit into the overall system.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* The project's purpose is unambiguous.
+* Persistent memory is clearly established as the core differentiator.
+* The target users and use cases are defined.
+* Product principles guide future implementation decisions.
+* The hackathon objectives are directly reflected in the vision.
+* The scope of the MVP is clearly limited while leaving room for future growth.

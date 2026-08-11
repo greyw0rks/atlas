@@ -1,0 +1,729 @@
+# Document 9: Knowledge Graph Agent
+
+## Project Name
+
+# Atlas
+
+**Version:** MVP 1.0
+
+---
+
+# Purpose
+
+The Knowledge Graph Agent is responsible for transforming isolated blockchain data into an interconnected intelligence network.
+
+Traditional blockchain explorers store data as disconnected records.
+
+Atlas stores knowledge as a living graph.
+
+Instead of simply knowing:
+
+> Wallet A transferred funds to Wallet B.
+
+Atlas understands:
+
+* who funded whom
+* which bridge was used
+* what protocol was involved
+* what entity controls the wallet
+* which investigations referenced it
+* which attack patterns it belongs to
+* how confidence has evolved over time
+
+The Knowledge Graph Agent continuously builds, validates, and expands this intelligence graph.
+
+---
+
+# Core Philosophy
+
+Knowledge becomes exponentially more valuable when connected.
+
+A wallet alone has limited value.
+
+A wallet connected to:
+
+* exchanges
+* protocols
+* investigations
+* attack patterns
+* entities
+* contracts
+* bridges
+* historical events
+
+becomes actionable intelligence.
+
+The Knowledge Graph Agent exists to build those connections.
+
+---
+
+# Responsibilities
+
+The Knowledge Graph Agent is responsible for:
+
+* creating graph nodes
+* creating graph relationships
+* validating proposed relationships
+* merging duplicate entities
+* expanding graph connections
+* resolving identities
+* traversing connected intelligence
+* maintaining graph integrity
+* discovering indirect relationships
+
+The Knowledge Graph Agent **does not investigate wallets**.
+
+It organizes the intelligence produced by other agents.
+
+---
+
+# Graph Model
+
+Atlas uses a property graph model.
+
+Everything is represented as either:
+
+## Nodes
+
+or
+
+## Relationships
+
+Nodes represent objects.
+
+Relationships represent how those objects interact.
+
+---
+
+# Supported Node Types
+
+The graph initially supports the following nodes.
+
+## Wallet
+
+Example
+
+```text id="g81dqp"
+0x123...
+```
+
+---
+
+## Entity
+
+Example
+
+```text id="d2l6g9"
+Coinbase
+
+Binance
+
+Uniswap
+
+LayerZero
+```
+
+---
+
+## Investigation
+
+Each completed investigation becomes a graph node.
+
+---
+
+## Smart Contract
+
+Example
+
+ERC20 contracts
+
+NFT collections
+
+Bridge contracts
+
+Governance contracts
+
+---
+
+## Protocol
+
+Examples
+
+Aave
+
+Uniswap
+
+Morpho
+
+Pendle
+
+---
+
+## Blockchain
+
+Ethereum
+
+Base
+
+Bitcoin
+
+Celo
+
+Arbitrum
+
+Polygon
+
+---
+
+## Pattern
+
+Examples
+
+Sybil Farming
+
+Bridge Hopping
+
+Wallet Splitting
+
+Phishing Campaign
+
+---
+
+## Evidence
+
+Transaction
+
+Event Log
+
+Block
+
+Decoded Call
+
+Document
+
+---
+
+# Relationship Types
+
+Atlas supports typed relationships.
+
+Examples include:
+
+```text id="9jlwmk"
+FUNDED
+
+TRANSFERRED_TO
+
+DEPLOYED
+
+OWNS
+
+USES
+
+INTERACTED_WITH
+
+PART_OF
+
+SIMILAR_TO
+
+RELATED_TO
+
+BRIDGED_TO
+
+MEMBER_OF
+
+GENERATED
+
+INVESTIGATED_IN
+
+MATCHES_PATTERN
+
+REFERENCES
+
+CONTROLS
+
+CONNECTED_TO
+```
+
+Every relationship is directional unless explicitly marked bidirectional.
+
+---
+
+# Relationship Properties
+
+Relationships are first-class intelligence.
+
+Each relationship stores:
+
+* confidence
+* evidence count
+* source
+* timestamp
+* version
+* status
+* explanation
+
+Relationships are not simple foreign keys.
+
+They are intelligence objects.
+
+---
+
+# Graph Construction Pipeline
+
+Every relationship follows the same lifecycle.
+
+```text id="0v7vke"
+Relationship Proposal
+
+↓
+
+Validate Evidence
+
+↓
+
+Check Existing Graph
+
+↓
+
+Duplicate Detection
+
+↓
+
+Confidence Calculation
+
+↓
+
+Relationship Creation
+
+↓
+
+Graph Expansion
+
+↓
+
+Notify Memory Agent
+```
+
+No relationship should bypass validation.
+
+---
+
+# Relationship Validation
+
+The Knowledge Graph Agent never accepts relationships blindly.
+
+Every proposal must answer:
+
+What evidence supports this?
+
+How confident are we?
+
+Has this relationship been observed before?
+
+Does contradictory evidence exist?
+
+If confidence is insufficient:
+
+Store as:
+
+**Unverified Relationship**
+
+instead of confirmed.
+
+---
+
+# Entity Resolution
+
+Multiple wallets may belong to the same real-world entity.
+
+Example
+
+```text id="9v9jlwm"
+Wallet A
+
+Wallet B
+
+Wallet C
+
+↓
+
+Binance
+```
+
+The Knowledge Graph Agent determines when separate nodes should belong to the same entity.
+
+Signals include:
+
+* shared ownership
+* exchange attribution
+* deployment history
+* funding relationships
+* operational behavior
+* verified investigations
+
+Entity resolution should be conservative.
+
+False merges are more harmful than missed connections.
+
+---
+
+# Graph Expansion
+
+One relationship often reveals many others.
+
+Example
+
+Wallet A
+
+↓
+
+Funds
+
+↓
+
+Wallet B
+
+↓
+
+Uses
+
+↓
+
+Bridge X
+
+↓
+
+Connected To
+
+↓
+
+Base
+
+↓
+
+Interacts With
+
+↓
+
+Protocol Y
+
+Graph expansion recursively discovers connected intelligence while respecting configurable depth limits.
+
+---
+
+# Traversal
+
+Atlas should support graph traversal.
+
+Example questions:
+
+Show every wallet connected to this phishing campaign.
+
+Find every protocol touched after Bridge X.
+
+How many hops separate Wallet A from Exchange B?
+
+Which investigations reference this entity?
+
+Traversal should support:
+
+* depth limits
+* relationship filtering
+* confidence filtering
+* chain filtering
+
+---
+
+# Multi-Hop Reasoning
+
+Atlas should reason beyond direct relationships.
+
+Example
+
+```text id="2jgqsb"
+Wallet A
+
+↓
+
+Funds
+
+↓
+
+Wallet B
+
+↓
+
+Uses
+
+↓
+
+Bridge
+
+↓
+
+Funds
+
+↓
+
+Wallet C
+
+↓
+
+Deposits Into
+
+↓
+
+Exchange
+```
+
+The Investigation Agent should be able to ask:
+
+> Show every wallet reachable within three hops.
+
+Multi-hop reasoning enables discovery of hidden relationships.
+
+---
+
+# Graph Integrity
+
+The graph should remain internally consistent.
+
+Rules include:
+
+* no orphaned nodes
+* no duplicate identifiers
+* valid relationship directions
+* consistent confidence values
+* evidence references must exist
+* deleted objects cannot retain active relationships
+
+Integrity checks should run continuously.
+
+---
+
+# Graph Versioning
+
+Relationships evolve.
+
+Example
+
+Version 1
+
+Wallet A
+
+↓
+
+Related To
+
+↓
+
+Wallet B
+
+Confidence:
+
+58%
+
+Version 2
+
+Wallet A
+
+↓
+
+Funds
+
+↓
+
+Wallet B
+
+Confidence:
+
+96%
+
+Atlas preserves both versions.
+
+Historical graph evolution is valuable intelligence.
+
+---
+
+# Graph Search
+
+Users should search by:
+
+* wallet
+* entity
+* investigation
+* protocol
+* bridge
+* pattern
+* contract
+* relationship type
+
+Graph search combines:
+
+* SQL filters
+* semantic search
+* graph traversal
+
+---
+
+# Temporal Graph
+
+Relationships change over time.
+
+Atlas records:
+
+* when a relationship first appeared
+* when it changed
+* when confidence changed
+* when it was deprecated
+
+Future versions may visualize graph evolution over months or years.
+
+---
+
+# Collaboration with Other Agents
+
+## Investigation Agent
+
+Provides:
+
+* relationship proposals
+
+Receives:
+
+* connected intelligence
+* graph expansions
+
+---
+
+## Memory Agent
+
+Provides:
+
+* historical graph state
+
+Receives:
+
+* validated graph updates
+
+---
+
+## Pattern Recognition Agent
+
+Provides:
+
+* pattern associations
+
+Receives:
+
+* graph context
+
+---
+
+## Risk Engine
+
+Consumes:
+
+* graph centrality
+* relationship density
+* entity associations
+* proximity to known malicious nodes
+
+---
+
+# Graph Metrics
+
+Future versions may calculate:
+
+* node degree
+* centrality
+* community detection
+* clustering coefficient
+* shortest path
+* influence score
+* bridge importance
+
+These metrics become additional intelligence signals rather than replacing evidence.
+
+---
+
+# Explainability
+
+Every graph connection should answer:
+
+Why are these nodes connected?
+
+Supporting evidence:
+
+Confidence:
+
+First observed:
+
+Last verified:
+
+Related investigations:
+
+Users should never see unexplained relationships.
+
+---
+
+# Failure Recovery
+
+If graph construction fails:
+
+* preserve investigation results
+* queue graph update
+* retry asynchronously
+* avoid partial graph writes
+* maintain transactional consistency
+
+The graph enhances Atlas but should never block successful investigations.
+
+---
+
+# Future Enhancements
+
+Future versions may include:
+
+* graph neural network-assisted relationship discovery
+* probabilistic relationship scoring
+* automatic community detection
+* temporal graph replay
+* cross-organization graph federation
+* graph-based recommendation engine
+* autonomous graph optimization
+
+The architecture should support these additions without requiring changes to the core graph model.
+
+---
+
+# Guiding Principle
+
+The Knowledge Graph Agent transforms isolated facts into connected intelligence.
+
+It does not create knowledge.
+
+It reveals how existing knowledge relates.
+
+Every new node and every validated relationship makes Atlas better at understanding blockchain ecosystems, uncovering hidden connections, and accelerating future investigations.
+
+---
+
+# Objectives for Document 10
+
+Document 10 will define the **Risk Engine**, responsible for producing explainable risk assessments by combining deterministic rules, graph intelligence, semantic memory, historical investigations, and AI-assisted reasoning into transparent, evidence-backed risk scores.
+
+---
+
+# Acceptance Criteria
+
+This document is complete when:
+
+* The property graph model is clearly defined.
+* Supported node and relationship types are established.
+* Relationship validation and entity resolution workflows are documented.
+* Graph traversal and multi-hop reasoning are supported.
+* Graph integrity and versioning are defined.
+* Collaboration boundaries with all other agents are clear.
+* The Knowledge Graph is established as the interconnected intelligence layer that enables Atlas to reason beyond isolated blockchain events.
