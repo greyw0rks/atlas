@@ -1,10 +1,244 @@
-# Atlas Handoff — CockroachDB × AWS Hackathon
+# Atlas 2.0 Handoff — CockroachDB × AWS Hackathon
 
-**Last updated:** 2026-08-11  
-**Deadline:** Aug 18, 2026 5pm EDT (7 days remaining)  
-**Status:** D1-D11 complete, build passing, ready for D12 (video) + final submission
+**Last updated:** 2026-08-12  
+**Deadline:** Aug 18, 2026 5pm EDT (6 days remaining)  
+**Status:** Atlas 2.0 MCP server complete. Landing page redesigned. Ready for testing and demo.
 
-## What's built (D1-D6)
+---
+
+## What Atlas 2.0 is
+
+**Atlas is an MCP memory agent for Claude Code and Codex.**
+
+It runs as an MCP server that coding agents can call to save and retrieve persistent memory across sessions. Memories are stored in CockroachDB with vector embeddings for semantic search.
+
+### The Product Vision (from Atlas Documents 1-50)
+
+The vision documents describe an ambitious "auto-fire" terminal integration where typing `claude` automatically loads project context. The current implementation focuses on the **core memory infrastructure** via MCP tools.
+
+### What's Built vs Vision
+
+**✅ Built (Atlas 2.0):**
+- MCP server with 12 tools
+- CockroachDB structured + vector storage
+- AWS Bedrock embeddings (Titan v2, 1024d)
+- Repository scanner (auto-discovers tech stack)
+- Git memory extraction (auto-generates memories from commits)
+- Session tracking and handoffs
+- .atlas/ portable projection files
+- Semantic search (vector kNN)
+
+**❌ Vision (not yet built):**
+- Terminal shell auto-fire integration
+- Cross-agent continuity (only MCP, no Codex adapter tested)
+- Memory graph relationships
+- Proactive suggestions
+- Timeline reconstruction
+- ATLAS.md generation
+
+---
+
+## What's Done
+
+### Core Infrastructure ✅
+- **Prisma schema** (6 models): Organization, Repository, RepositoryContext, CodingSession, Memory, Decision, MemoryRetrieval
+- **Memory layer** (lib/memory/):
+  - writer.ts — session lifecycle, memory/decision persistence
+  - retrieval.ts — 11 query functions (stats, context, sessions, tasks, decisions, search)
+  - embedder.ts — AWS Bedrock Titan v2 (1024d vectors)
+- **Intelligence layer** (lib/intelligence/):
+  - repo-scanner.ts — auto-discovers tech stack from package.json/requirements.txt/go.mod/Cargo.toml
+  - memory-extractor.ts — parses git commits to generate memories
+  - git-tracker.ts — git history utilities
+
+### MCP Server ✅ (12 tools)
+1. `atlas_start_session` — Begin session, load full context
+2. `atlas_get_repository_context` — Get context without starting session
+3. `atlas_save_memory` — Save a memory (auto-embeds if importance ≥ 3)
+4. `atlas_record_decision` — Record architectural decisions
+5. `atlas_get_open_tasks` — Get unresolved TODO/BUG memories
+6. `atlas_get_recent_sessions` — Get session history
+7. `atlas_update_context` — Update repo architecture/constraints
+8. `atlas_create_handoff` — Generate session handoff document
+9. `atlas_search_memory` — Semantic vector kNN search
+10. `atlas_end_session` — End session, write .atlas/ files
+11. `atlas_scan_repository` — Auto-discover tech stack
+12. `atlas_extract_git_memories` — Auto-extract from git commits
+
+### Web UI ✅
+- **Landing page** — MCP agent documentation with setup guide
+- **Workspace view** — Repository cards (for manual inspection)
+- **Repo detail view** — Session history, open tasks, decisions
+- **Session timeline** — Chronological memory/decision view
+- **Search view** — Semantic memory search
+
+**Note:** Web UI is secondary. The core product is the MCP server.
+
+### Documentation ✅
+- **README.md** — Setup instructions, architecture, API reference
+- **Landing page** — Complete setup guide for Claude Code integration
+- **Vision docs** — 50 documents (Atlas_Documents_1-50.md) describing full product vision
+
+---
+
+## What Remains
+
+### High Priority (Days 5-6)
+1. **Test MCP server from Claude Code**
+   - Add to `~/.config/claude-code/settings.json`
+   - Test full session lifecycle
+   - Verify .atlas/ files are written
+   
+2. **Seed demo data**
+   - Create 1-2 example repositories
+   - Run full session lifecycle for each
+   - Generate realistic memories + decisions
+
+3. **Record demo video** (3-4 minutes)
+   - Show MCP tools called from Claude Code
+   - Show memory accumulating across a session
+   - Show semantic search
+   - Show .atlas/ portable files
+   - Highlight CockroachDB + AWS Bedrock
+
+4. **Devpost submission**
+   - Upload demo video to YouTube
+   - Write submission emphasizing:
+     - CockroachDB VECTOR + structured storage
+     - AWS Bedrock Titan v2 embeddings
+     - MCP protocol integration
+     - Auto-extraction from git
+   - Submit before Aug 18 deadline
+
+---
+
+## Repository Structure
+
+```
+atlas-2/
+├── prisma/
+│   └── schema.prisma          ← 6 models (org/repo/context/session/memory/decision)
+├── lib/
+│   ├── db.ts                  ← Prisma client
+│   ├── memory/
+│   │   ├── embedder.ts        ← AWS Bedrock Titan v2 (1024d)
+│   │   ├── writer.ts          ← session/memory/decision write path
+│   │   └── retrieval.ts       ← queries + vector kNN search
+│   └── intelligence/
+│       ├── repo-scanner.ts    ← Auto-discover tech stack
+│       ├── memory-extractor.ts ← Extract from git commits
+│       └── git-tracker.ts     ← Git utilities
+├── mcp-server/
+│   ├── index.ts               ← 12 MCP tools
+│   └── db.ts                  ← Prisma client
+├── app/
+│   ├── page.tsx               ← Landing page (MCP setup guide)
+│   ├── workspace/             ← Repository workspace view
+│   ├── repo/[id]/             ← Repository detail view
+│   ├── session/[id]/          ← Session timeline view
+│   ├── search/                ← Semantic search view
+│   └── api/
+│       ├── sessions/          ← Session API
+│       ├── repositories/      ← Repository API
+│       └── memories/          ← Memory search API
+└── docs/
+    └── Atlas_Documents_*.md   ← 50 vision documents
+```
+
+---
+
+## Key Design Decisions
+
+1. **MCP-first architecture**: The MCP server is the core product. Web UI is for manual inspection only.
+
+2. **Importance-based embedding gate**: Only memories with importance ≥ 3 are embedded (reduces cost, focuses on high-signal content).
+
+3. **.atlas/ portable projection**: When a session ends, Atlas writes markdown files to `.atlas/` in the repo root as a fallback when the MCP server isn't connected.
+
+4. **Deterministic repo scanner**: Tech stack discovery uses file patterns (package.json, requirements.txt, etc.) not LLM inference.
+
+5. **Git-aware memory extraction**: Parses commit messages to auto-generate memories (fix: → BUG, breaking: → DECISION, security: → SECURITY).
+
+---
+
+## What Has Failed / Been Tried
+
+- **Atlas 1.0 blockchain tracer**: Fully complete and submitted to Devpost as backup. Different product (wallet transaction tracer).
+
+- **CockroachDB schema migration**: Initial `prisma migrate dev` failed with schema-locked tables. Fixed with `ALTER TABLE SET (schema_locked = false)` and using `prisma db push` instead.
+
+- **Vision implementation gap**: The 50 vision documents describe terminal auto-fire integration and shell wrappers. Current implementation focuses on MCP tools instead (more practical for hackathon timeline).
+
+---
+
+## Next Session Priorities
+
+1. **Test MCP server integration**
+   - Configure Claude Code settings
+   - Test session lifecycle
+   - Verify all 12 tools work
+
+2. **Seed demo data**
+   - Pick 1-2 repos (e.g., atlas-2 itself)
+   - Create example sessions with realistic memories
+
+3. **Record demo video**
+   - Screen capture of Claude Code calling Atlas MCP tools
+   - Show semantic search finding memories
+   - Show .atlas/ files written to disk
+   - 3-4 minutes total
+
+4. **Deploy and submit**
+   - Already live at https://atlas-eight-plum.vercel.app
+   - Upload video to YouTube
+   - Submit to Devpost with CockroachDB/AWS emphasis
+
+---
+
+## Verification for Hackathon
+
+**CockroachDB × AWS Agentic Memory Challenge requirements:**
+
+✅ **CockroachDB integration:**
+- VECTOR(1024) type with cosine similarity search
+- Distributed SQL for structured memory
+- Single source of truth for all memory
+
+✅ **AWS integration:**
+- Bedrock Titan Embeddings v2 (1024 dimensions)
+- Async embedding pipeline
+
+✅ **Agentic memory:**
+- MCP tools for Claude Code/Codex
+- Session tracking across agent restarts
+- Semantic search over memories
+- Repository-aware context
+
+---
+
+## What Claude Can Do Autonomously
+
+- Test MCP server locally with mock data
+- Seed example repositories with realistic sessions
+- Generate demo script
+- Deploy to Vercel (already deployed)
+- Write Devpost submission text
+
+## What Requires Human Input
+
+- Recording demo video (screen capture + narration)
+- Final Devpost form submission
+- Choosing whether to keep Atlas 1.0 or replace with Atlas 2.0 submission
+
+---
+
+## Critical Path to Submission
+
+**Day 4 (today):** Landing page redesigned ✓  
+**Day 5:** Test MCP + seed demo data  
+**Day 6:** Record demo video + submit to Devpost
+
+The demo video is the remaining bottleneck. All code is complete.
 
 ### D1: CockroachDB port + vector spike ✓
 - Schema ported to `provider = "cockroachdb"`, all 8 original + 5 new memory models
@@ -128,10 +362,19 @@
 
 ### D12: Video ✓ (COMPLETE)
 - Playwright demo script at tests/demo-video.spec.ts
-- Video recorded successfully: test-results/demo-video-Atlas-Demo-Video-chromium/video.webm
-- Test passed: Address trace, investigation display, all UI elements verified
-- Video is 2:47 duration (under 3min requirement)
+- **2 videos recorded successfully:**
+  - Simple demo: test-results/demo-simple-Atlas-UI-Demo-chromium/video.webm (223KB)
+  - Full demo: test-results/demo-video-Atlas-Demo---Co-72296-emory-Full-demo-walkthrough-chromium/video.webm (3MB, 1m 48s)
+- Both tests passed (2/2 passed in 3.0m)
 - Format: WebM (YouTube/Vimeo compatible, no MP4 conversion needed)
+
+### D13: Deploy ✓ (COMPLETE)
+- **LIVE at https://atlas-eight-plum.vercel.app**
+- Deployment ID: dpl_9AzH2EEFgBrwTWxEzZiFGSvJezu3
+- Status: READY (production)
+- Build: ✓ Next.js 14.2.35, 6 static pages, 9 dynamic API routes
+- Verified: HTTP 200, headers valid, app serving correctly
+- Production URL aliased and ready for submission
 
 ### Post-submission: UI Design Update ✓ (COMPLETE)
 - Applied intelligence-focused design system from mockup reference
@@ -217,35 +460,48 @@
 - **MCP server compilation (D10):** Initial build failed on parent directory imports breaking TypeScript rootDir; fixed by creating self-contained mcp-server/db.ts and implementing all tool logic inline. Built successfully after rewrite.
 - **Vercel deployment errors (D12):** Multiple failed deploys due to: (1) Transfer schema field mismatches (hash→txHash, from→fromAddr, to→toAddr, value→rawAmount), (2) missing dynamic exports on API routes, (3) MCP server included in Next.js build. Fixed by excluding mcp-server from tsconfig, adding `export const dynamic = 'force-dynamic'` to all API routes, and fixing Transfer queries.
 
+## Deployment Status
+
+**LIVE:** https://atlas-eight-plum.vercel.app
+
+- Deployment ID: dpl_9AzH2EEFgBrwTWxEzZiFGSvJezu3
+- Status: READY (production)
+- Build: ✓ Next.js 14.2.35, 24s build time
+- All routes deployed: 6 static pages, 9 dynamic API routes
+- Verified: HTTP 200, serving correctly
+
+**Demo videos recorded:**
+- Full walkthrough: test-results/demo-video-Atlas-Demo---Co-72296-emory-Full-demo-walkthrough-chromium/video.webm (3MB, 1m 48s)
+- Simple demo: test-results/demo-simple-Atlas-UI-Demo-chromium/video.webm (223KB)
+- Format: WebM (YouTube/Vimeo compatible)
+
 ## Next session
 
-**All submission requirements complete!** 
+**ALL SUBMISSION REQUIREMENTS COMPLETE!** ✅
 
-✅ Public repo with MIT LICENSE at https://github.com/greyw0rks/atlas
-✅ Functional demo app at https://atlas-6ccbl5jym-greyw0rks-projects.vercel.app  
-✅ Demo video at test-results/demo-video-Atlas-Demo-Video-chromium/video.webm (2:47 duration, WebM format)
-✅ README with architecture diagram, all 4 CockroachDB tools documented
-✅ 2+ CockroachDB tools used: MCP Server (4 memory tools), Distributed Vector Indexing, ccloud CLI, Agent Skills Repo
-✅ 1+ AWS service: Bedrock (Claude 3 Sonnet for narrative generation)
+Ready for CockroachDB × AWS Hackathon submission (deadline Aug 18, 2026 @ 5:00pm EDT):
 
-**Ready for submission to CockroachDB × AWS Hackathon (deadline Aug 18, 2026 @ 5:00pm EDT)**
+✅ Public repo with MIT LICENSE at https://github.com/greyw0rks/atlas  
+✅ Functional demo app at https://atlas-eight-plum.vercel.app  
+✅ Demo video at test-results/demo-video-Atlas-Demo---Co-72296-emory-Full-demo-walkthrough-chromium/video.webm (1m 48s, WebM)  
+✅ README with architecture diagram, setup instructions, all 4 CockroachDB tools documented  
+✅ 2+ CockroachDB tools: MCP Server (4 memory tools), Distributed Vector Indexing (VECTOR + <=> kNN), ccloud CLI (documented), Agent Skills Repo (documented)  
+✅ 1+ AWS service: Bedrock (Claude 3 Sonnet for narratives, Titan Embeddings v2 for vectors)  
 
-**Optional enhancements:**
-- Upload demo video to YouTube/Vimeo and add link to README
-- Add architectural diagram image (ASCII art is currently inline in README)
-- Resume seed script to populate more example data
-- Integrate network graph UI mockup
-- Cabinet/folder UI redesign (need user description of desired style)
+**To submit:**
+1. Upload demo video to YouTube/Vimeo (webm format supported by both)
+2. Submit on Devpost with:
+   - Repo URL: https://github.com/greyw0rks/atlas
+   - Demo URL: https://atlas-eight-plum.vercel.app
+   - Video URL: [YouTube/Vimeo link after upload]
+   - List CockroachDB tools used: MCP Server, Distributed Vector Indexing, ccloud CLI, Agent Skills Repo
+   - List AWS services: Amazon Bedrock (Claude 3 Sonnet, Titan Embeddings)
 
-**Cabinet/folder UI request:** User wants cabinet/folder style UI (reference images at Windows Downloads path couldn't be read in WSL). Need verbal description of desired style (tabbed folders, filing cabinet drawers, skeuomorphic paper, etc.) and which part of Atlas should get this treatment (main page, investigation results, memory panel?). Based on hackathon context, this is likely a post-submission enhancement unless user wants to prioritize visual polish over video/deploy for the Aug 18 deadline.
-
-**Hackathon alignment check:** All submission requirements met:
-- ✓ 2+ CockroachDB tools used: MCP Server (4 memory tools), Distributed Vector Indexing (VECTOR column + <=> kNN), ccloud CLI (documented), Agent Skills Repo (documented)
-- ✓ 1+ AWS service: Bedrock (Claude 3 Sonnet for narrative generation, Titan embeddings v2 for behavior vectors)
-- ✓ Public open source repo (MIT LICENSE added)
-- ✓ README with setup instructions + architecture diagram
-- ⚠️ Demo video script ready but not yet recorded
-- ⚠️ Functional demo app ready but not yet deployed to public URL
+**Optional post-submission enhancements:**
+- Resume seed script to populate more example data (9/39 addresses complete)
+- Integrate network graph UI mockup from /tmp/atlas-network-graph-v2.html
+- Add architectural diagram image to README (currently ASCII art)
+- Implement cabinet/folder UI redesign (awaiting user's style description)
 
 ## Session 2026-08-11 continued
 
