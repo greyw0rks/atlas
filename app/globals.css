@@ -3,17 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --background: #0A0B1E;
+  --background: #05070C;
+  --surface-1: #0A0D12;
+  --surface-2: #0F131C;
+  --surface-3: #161D2B;
+  --surface-4: #1E2636;
   --foreground: #E8E9F3;
-  --card: #1A1B2E;
-  --card-hover: #252641;
-  --border: #2A2B45;
+  --border: #1E2636;
   --primary: #8B5CF6;
   --primary-dark: #6D28D9;
   --accent: #3B82F6;
   --success: #10B981;
   --warning: #F59E0B;
-  --danger: #EF4444;
+  --danger: #DC2626;
   --muted: #64748B;
 }
 
@@ -120,7 +122,7 @@ body {
 
 /* Metric cards */
 .metric-card {
-  background: var(--card);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.5rem;
@@ -128,7 +130,7 @@ body {
 }
 
 .metric-card:hover {
-  background: var(--card-hover);
+  background: var(--surface-3);
   border-color: var(--primary);
   transform: translateY(-2px);
 }
@@ -196,7 +198,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--card);
+  background: var(--surface-1);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -284,13 +286,13 @@ body {
 }
 
 .btn-secondary {
-  background: var(--card);
+  background: var(--surface-2);
   color: var(--foreground);
   border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
-  background: var(--card-hover);
+  background: var(--surface-3);
   border-color: var(--primary);
 }
 

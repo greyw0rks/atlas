@@ -1,20 +1,40 @@
 {
   "name": "atlas-mcp-server",
   "version": "1.0.0",
+  "description": "Persistent memory system for coding agents via Model Context Protocol",
   "type": "module",
-  "bin": {
-    "atlas-mcp": "./index.ts"
+  "author": "greyw0rks",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/greyw0rks/atlas.git"
   },
+  "keywords": ["mcp", "memory", "coding-agent", "ai", "claude", "context"],
+  "bin": {
+    "atlas-mcp": "./dist/mcp-server/index.js"
+  },
+  "files": [
+    "dist",
+    "prisma"
+  ],
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js"
+    "build": "tsc && tsc-alias && node fix-imports.js",
+    "start": "node dist/mcp-server/index.js",
+    "dev": "npm run build && npm start",
+    "postinstall": "prisma generate",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",
-    "@prisma/client": "^6.1.0"
+    "@prisma/client": "^5.22.0",
+    "prisma": "^5.22.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "tsc-alias": "^1.9.2",
     "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

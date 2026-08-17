@@ -8,29 +8,23 @@ const client = new BedrockRuntimeClient({
 const TITAN_MODEL_ID = "amazon.titan-embed-text-v2:0";
 
 /**
- * Embeds behaviorText using Amazon Titan and writes the vector to AddressProfile.
- * Only called when observationCount >= 2 OR degree >= 3 (don't embed one-off counterparties).
+ * Generate a 1024-dimensional embedding using Amazon Titan v2.
+ * Returns the normalized vector or null on failure.
  */
-export async function embedBehaviorText(
-  address: string,
-  behaviorText: string,
-): Promise<void> {
-  if (!behaviorText.trim()) {
-    console.warn(`[embedder] skipping empty behaviorText for ${address}`);
-    return;
+export async function generateEmbedding(text: string): Promise<number[] | null> {
+  if (!text.trim()) {
+    console.warn("[embedder] skipping empty text");
+    return null;
   }
 
-  const startMs = Date.now();
-
   try {
-    // Call Titan embedding model
     const response = await client.send(
       new InvokeModelCommand({
         modelId: TITAN_MODEL_ID,
         contentType: "application/json",
         accept: "application/json",
         body: JSON.stringify({
-          inputText: behaviorText,
+          inputText: text,
           dimensions: 1024,
           normalize: true,
         }),
@@ -41,45 +35,100 @@ export async function embedBehaviorText(
     const embedding: number[] = responseBody.embedding;
 
     if (!Array.isArray(embedding) || embedding.length !== 1024) {
-      throw new Error(
-        `Unexpected embedding shape: ${embedding?.length || "null"}`,
-      );
+      throw new Error(`Unexpected embedding shape: ${embedding?.length || "null"}`);
     }
 
-    // Write vector via $executeRaw (Prisma doesn't support VECTOR type in typed queries)
-    const vectorLiteral = `[${embedding.join(",")}]`;
-    await prisma.$executeRaw`
-      UPDATE "AddressProfile"
-      SET "behaviorEmbedding" = ${vectorLiteral}::vector,
-          "embeddedAt" = NOW()
-      WHERE address = ${address}
-    `;
-
-    const embedMs = Date.now() - startMs;
-    console.log(
-      `[embedder] embedded ${address} in ${embedMs}ms (${behaviorText.length} chars → 1024d vector)`,
-    );
+    return embedding;
   } catch (error) {
-    console.error(`[embedder] failed to embed ${address}:`, error);
-    // Don't throw — embedding is best-effort, trace should still complete
+    console.error("[embedder] failed to generate embedding:", error);
+    return null;
   }
 }
 
 /**
- * Batch embedding for seed scripts.
- * Processes up to 25 addresses in parallel (Bedrock default concurrency).
+ * Embed a Memory record's content and write to the database.
+ * Only called when importance >= 3.
+ */
+export async function embedMemory(memoryId: string, content: string): Promise<void> {
+  const startMs = Date.now();
+  const embedding = await generateEmbedding(content);
+
+  if (!embedding) {
+    console.warn(`[embedder] skipping memory ${memoryId} (embedding failed)`);
+    return;
+  }
+
+  try {
+    const vectorLiteral = `[${embedding.join(",")}]`;
+    await prisma.$executeRaw`
+      UPDATE "Memory"
+      SET embedding = ${vectorLiteral}::vector,
+          "embeddedAt" = NOW()
+      WHERE id = ${memoryId}
+    `;
+
+    const embedMs = Date.now() - startMs;
+    console.log(
+      `[embedder] embedded memory ${memoryId} in ${embedMs}ms (${content.length} chars → 1024d)`,
+    );
+  } catch (error) {
+    console.error(`[embedder] failed to write embedding for memory ${memoryId}:`, error);
+  }
+}
+
+/**
+ * Embed repository context and write to the database.
+ * Called when sessionCount >= 2 or when explicitly requested.
+ */
+export async function embedRepositoryContext(
+  repoId: string,
+  contextText: string,
+): Promise<void> {
+  const startMs = Date.now();
+  const embedding = await generateEmbedding(contextText);
+
+  if (!embedding) {
+    console.warn(`[embedder] skipping repo ${repoId} (embedding failed)`);
+    return;
+  }
+
+  try {
+    const vectorLiteral = `[${embedding.join(",")}]`;
+    await prisma.$executeRaw`
+      UPDATE "RepositoryContext"
+      SET "contextEmbedding" = ${vectorLiteral}::vector,
+          "embeddedAt" = NOW()
+      WHERE "repoId" = ${repoId}
+    `;
+
+    const embedMs = Date.now() - startMs;
+    console.log(
+      `[embedder] embedded repo context ${repoId} in ${embedMs}ms (${contextText.length} chars → 1024d)`,
+    );
+  } catch (error) {
+    console.error(`[embedder] failed to write embedding for repo ${repoId}:`, error);
+  }
+}
+
+/**
+ * Batch embedding for migration scripts.
+ * Processes up to 25 items in parallel (Bedrock default concurrency).
  */
 export async function embedBatch(
-  profiles: Array<{ address: string; behaviorText: string }>,
+  items: Array<{ id: string; text: string; type: "memory" | "repo" }>,
 ): Promise<void> {
   const BATCH_SIZE = 25;
-  for (let i = 0; i < profiles.length; i += BATCH_SIZE) {
-    const batch = profiles.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < items.length; i += BATCH_SIZE) {
+    const batch = items.slice(i, i + BATCH_SIZE);
     await Promise.all(
-      batch.map((p) => embedBehaviorText(p.address, p.behaviorText)),
+      batch.map((item) =>
+        item.type === "memory"
+          ? embedMemory(item.id, item.text)
+          : embedRepositoryContext(item.id, item.text),
+      ),
     );
     console.log(
-      `[embedder] batch ${i / BATCH_SIZE + 1}/${Math.ceil(profiles.length / BATCH_SIZE)} complete`,
+      `[embedder] batch ${i / BATCH_SIZE + 1}/${Math.ceil(items.length / BATCH_SIZE)} complete`,
     );
   }
 }

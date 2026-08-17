@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/mcp-server/node_modules
 /.pnp
 .pnp.js
 .yarn/install-state.gz
@@ -15,10 +16,12 @@
 
 # production
 /build
+/mcp-server/dist
 
 # misc
 .DS_Store
 *.pem
+*:Zone.Identifier
 
 # debug
 npm-debug.log*
@@ -27,6 +30,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
 
 # vercel
 .vercel
@@ -34,4 +38,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.env
+
+# Atlas runtime
+.atlas/
+.mcp.json
+
+# MCP server build artifacts
+mcp-server/prisma/migrations
