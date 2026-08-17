@@ -31,6 +31,11 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.*
+.env.bak
+.env.backup
+*credentials*
+*secrets*
 
 # vercel
 .vercel
