@@ -1,0 +1,137 @@
+<svg width="1200" height="900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .box { fill: #0F172A; stroke: #38BDF8; stroke-width: 2; }
+      .title { fill: #F8FAFC; font-family: 'IBM Plex Sans', monospace; font-size: 16px; font-weight: 600; }
+      .subtitle { fill: #94A3B8; font-family: 'IBM Plex Sans', monospace; font-size: 13px; }
+      .arrow { stroke: #38BDF8; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .label { fill: #22D3EE; font-family: 'IBM Plex Sans', monospace; font-size: 12px; }
+      .accent-box { fill: #1E293B; stroke: #F97316; stroke-width: 2; }
+      .accent-title { fill: #F97316; font-family: 'IBM Plex Sans', monospace; font-size: 14px; font-weight: 600; }
+      .section-label { fill: #64748B; font-family: 'IBM Plex Sans', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#38BDF8" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="900" fill="#0B0E14"/>
+
+  <!-- Section Labels -->
+  <text x="600" y="30" class="section-label" text-anchor="middle">ATLAS 2.0 — PERSISTENT MEMORY FOR CODING AGENTS</text>
+
+  <!-- Layer 1: Agent Clients -->
+  <text x="60" y="80" class="section-label">AGENT CLIENTS</text>
+
+  <rect x="60" y="100" width="280" height="100" class="box" rx="8"/>
+  <text x="200" y="130" class="title" text-anchor="middle">Claude Code</text>
+  <text x="200" y="150" class="subtitle" text-anchor="middle">MCP Client</text>
+  <text x="200" y="170" class="subtitle" text-anchor="middle">~/.claude/settings.json</text>
+
+  <rect x="380" y="100" width="280" height="100" class="box" rx="8"/>
+  <text x="520" y="130" class="title" text-anchor="middle">OpenAI Codex / Cursor</text>
+  <text x="520" y="150" class="subtitle" text-anchor="middle">MCP Client</text>
+  <text x="520" y="170" class="subtitle" text-anchor="middle">.vscode/mcp.json</text>
+
+  <rect x="700" y="100" width="280" height="100" class="box" rx="8"/>
+  <text x="840" y="130" class="title" text-anchor="middle">Custom Agents</text>
+  <text x="840" y="150" class="subtitle" text-anchor="middle">Atlas SDK</text>
+  <text x="840" y="170" class="subtitle" text-anchor="middle">Direct API integration</text>
+
+  <!-- Arrow: Clients → MCP Server -->
+  <path d="M 200 200 L 200 270" class="arrow"/>
+  <path d="M 520 200 L 520 270" class="arrow"/>
+  <path d="M 840 200 L 840 270" class="arrow"/>
+
+  <text x="250" y="240" class="label">MCP Protocol</text>
+  <text x="570" y="240" class="label">MCP Protocol</text>
+  <text x="890" y="240" class="label">HTTP API</text>
+
+  <!-- Layer 2: MCP Server -->
+  <text x="60" y="260" class="section-label">MCP SERVER LAYER</text>
+
+  <rect x="60" y="280" width="920" height="140" class="box" rx="8"/>
+  <text x="520" y="310" class="title" text-anchor="middle">Atlas MCP Server (stdio)</text>
+  <text x="520" y="330" class="subtitle" text-anchor="middle">10 MCP Tools</text>
+
+  <!-- MCP Tools Grid -->
+  <text x="100" y="360" class="subtitle">• atlas_start_session</text>
+  <text x="100" y="380" class="subtitle">• atlas_save_memory</text>
+  <text x="100" y="400" class="subtitle">• atlas_record_decision</text>
+
+  <text x="350" y="360" class="subtitle">• atlas_scan_repository</text>
+  <text x="350" y="380" class="subtitle">• atlas_extract_git_memories</text>
+  <text x="350" y="400" class="subtitle">• atlas_search_memory</text>
+
+  <text x="650" y="360" class="subtitle">• atlas_end_session</text>
+  <text x="650" y="380" class="subtitle">• atlas_generate_atlas_md</text>
+  <text x="650" y="400" class="subtitle">• atlas_reconstruct_timeline</text>
+
+  <!-- Arrow: MCP Server → Memory Layer -->
+  <path d="M 520 420 L 520 490" class="arrow"/>
+  <text x="540" y="460" class="label">Prisma Client</text>
+
+  <!-- Layer 3: Memory Layer -->
+  <text x="60" y="480" class="section-label">MEMORY LAYER</text>
+
+  <rect x="60" y="500" width="280" height="120" class="box" rx="8"/>
+  <text x="200" y="530" class="title" text-anchor="middle">writer.ts</text>
+  <text x="200" y="550" class="subtitle" text-anchor="middle">• Session lifecycle</text>
+  <text x="200" y="570" class="subtitle" text-anchor="middle">• Memory persistence</text>
+  <text x="200" y="590" class="subtitle" text-anchor="middle">• Decision tracking</text>
+
+  <rect x="380" y="500" width="280" height="120" class="box" rx="8"/>
+  <text x="520" y="530" class="title" text-anchor="middle">retrieval.ts</text>
+  <text x="520" y="550" class="subtitle" text-anchor="middle">• 11 query functions</text>
+  <text x="520" y="570" class="subtitle" text-anchor="middle">• Vector kNN search</text>
+  <text x="520" y="590" class="subtitle" text-anchor="middle">• Timeline assembly</text>
+
+  <rect x="700" y="500" width="280" height="120" class="box" rx="8"/>
+  <text x="840" y="530" class="title" text-anchor="middle">embedder.ts</text>
+  <text x="840" y="550" class="subtitle" text-anchor="middle">• AWS Bedrock client</text>
+  <text x="840" y="570" class="subtitle" text-anchor="middle">• Titan v2 embeddings</text>
+  <text x="840" y="590" class="subtitle" text-anchor="middle">• 1024-dim vectors</text>
+
+  <!-- Arrow: Memory Layer → Database -->
+  <path d="M 200 620 L 200 690" class="arrow"/>
+  <path d="M 520 620 L 520 690" class="arrow"/>
+
+  <!-- Arrow: embedder → AWS Bedrock -->
+  <path d="M 840 620 L 840 690" class="arrow"/>
+  <text x="860" y="660" class="label">API Call</text>
+
+  <!-- Layer 4: Infrastructure -->
+  <text x="60" y="680" class="section-label">INFRASTRUCTURE</text>
+
+  <!-- CockroachDB -->
+  <rect x="60" y="700" width="540" height="160" class="accent-box" rx="8"/>
+  <text x="330" y="730" class="accent-title" text-anchor="middle">CockroachDB Cloud (Source of Truth)</text>
+
+  <text x="100" y="760" class="subtitle">Structured Memory:</text>
+  <text x="100" y="780" class="subtitle">• Repository (repoId, name, path)</text>
+  <text x="100" y="800" class="subtitle">• CodingSession (sessionId, agentId, summary)</text>
+  <text x="100" y="820" class="subtitle">• Memory (kind, content, importance, resolved)</text>
+  <text x="100" y="840" class="subtitle">• Decision (title, rationale, alternatives[])</text>
+
+  <text x="400" y="760" class="subtitle">Semantic Memory:</text>
+  <text x="400" y="780" class="subtitle">• VECTOR(1024) column</text>
+  <text x="400" y="800" class="subtitle">• Cosine similarity kNN</text>
+  <text x="400" y="820" class="subtitle">• Distributed indexing</text>
+  <text x="400" y="840" class="subtitle">• Multi-repo search</text>
+
+  <!-- AWS Bedrock -->
+  <rect x="640" y="700" width="340" height="160" class="accent-box" rx="8"/>
+  <text x="810" y="730" class="accent-title" text-anchor="middle">AWS Bedrock</text>
+
+  <text x="680" y="760" class="subtitle">Titan Embeddings v2:</text>
+  <text x="680" y="780" class="subtitle">• amazon.titan-embed-text-v2:0</text>
+  <text x="680" y="800" class="subtitle">• 1024-dimensional vectors</text>
+  <text x="680" y="820" class="subtitle">• Importance threshold: ≥3</text>
+  <text x="680" y="840" class="subtitle">• Cost optimization</text>
+
+  <!-- Bottom Labels -->
+  <text x="330" y="885" class="section-label" text-anchor="middle">Deployed: CockroachDB Free Tier (EU Central 1)</text>
+  <text x="810" y="885" class="section-label" text-anchor="middle">Region: us-east-1</text>
+
+</svg>
