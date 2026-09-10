@@ -20,14 +20,14 @@ Atlas is a persistent, repository-aware memory infrastructure for autonomous cod
 └────────────────┬────────────────────────────────────────┘
                  │ MCP Protocol
 ┌────────────────▼────────────────────────────────────────┐
-│  Atlas MCP Server (10 tools)                           │
-│  - atlas_start_session                                 │
-│  - atlas_save_memory                                   │
-│  - atlas_record_decision                               │
-│  - atlas_scan_repository                               │
-│  - atlas_extract_git_memories                          │
-│  - atlas_search_memory                                 │
-│  - atlas_end_session                                   │
+│  Atlas MCP Server (14 tools)                            │
+│  Session:   start_session, end_session, create_handoff  │
+│  Write:     save_memory, record_decision, update_context│
+│  Read:      search_memory, get_repository_context,      │
+│             get_open_tasks, get_recent_sessions,        │
+│             reconstruct_timeline                        │
+│  Discover:  scan_repository, extract_git_memories,      │
+│             generate_atlas_md                           │
 └────────────────┬────────────────────────────────────────┘
                  │
 ┌────────────────▼────────────────────────────────────────┐
@@ -101,18 +101,29 @@ npx prisma db push
 
 # Generate Prisma Client
 npx prisma generate
+
+# Create the vector indexes — prisma db push cannot emit these, and without
+# them every semantic search is a full table scan. See the file for why
+# CockroachDB needs CREATE VECTOR INDEX rather than pgvector's USING hnsw.
+psql "$DATABASE_URL" -f prisma/manual/vector-indexes.sql
 ```
 
 ### 4. MCP Server Setup
 
-Add to your Claude Code settings (`~/.config/claude-code/settings.json`):
+Build the server and link the `atlas-mcp` binary:
+
+```bash
+cd mcp-server && npm run build && npm link
+```
+
+Then add Atlas to your agent's MCP config (`~/.claude/settings.json` for Claude
+Code):
 
 ```json
 {
   "mcpServers": {
     "atlas": {
-      "command": "node",
-      "args": ["/path/to/atlas-2/mcp-server/dist/index.js"],
+      "command": "atlas-mcp",
       "env": {
         "DATABASE_URL": "postgresql://...",
         "AWS_REGION": "us-east-1",
@@ -123,6 +134,11 @@ Add to your Claude Code settings (`~/.config/claude-code/settings.json`):
   }
 }
 ```
+
+> The IAM principal needs `bedrock:InvokeModel`, **and** model access for
+> `amazon.titan-embed-text-v2:0` must be enabled for the account in that region.
+> Without both, writes still succeed but `atlas_search_memory` returns an
+> access-denied error — memories are stored, just never embedded.
 
 ### 5. Auto-Fire Hook (optional)
 
@@ -184,8 +200,7 @@ Atlas speaks standard MCP — any agent that supports the Model Context Protocol
   "servers": {
     "atlas": {
       "type": "stdio",
-      "command": "node",
-      "args": ["/path/to/atlas-2/mcp-server/dist/index.js"],
+      "command": "atlas-mcp",
       "env": {
         "DATABASE_URL": "postgresql://...",
         "AWS_REGION": "us-east-1",
@@ -250,10 +265,15 @@ For team deployments, consider:
 
 ## Why CockroachDB?
 
-- **Vector indexing** — native VECTOR type with cosine similarity search
+- **Vector indexing** — native `VECTOR` type with cosine similarity search via
+  `CREATE VECTOR INDEX ... vector_cosine_ops` (C-SPANN, not pgvector's HNSW)
 - **Distributed SQL** — horizontal scalability without sharding complexity
 - **Prisma support** — type-safe queries with auto-generated client
 - **Free tier** — 5 GB storage, perfect for personal projects
+
+Two rough edges worth knowing: Prisma has no native vector type, so embeddings
+are written with `$executeRaw` and a `::vector` cast, and vector indexes have to
+be applied by hand from `prisma/manual/vector-indexes.sql`.
 
 ## Why Atlas 2.0?
 

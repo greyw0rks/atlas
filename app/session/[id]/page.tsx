@@ -1,8 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
+import {
+  ChevronLeft,
+  Compass,
+  ScrollText,
+  Terminal,
+  AlertTriangle,
+} from "lucide-react";
+import {
+  Frame,
+  Panel,
+  Card,
+  PillLink,
+  MetaLabel,
+  BrandMark,
+  Display,
+  KindBadge,
+  Importance,
+  Spinner,
+  EmptyState,
+} from "@/components/atlas/ui";
+import { formatDuration } from "@/components/atlas/format";
 
 interface SessionData {
   id: string;
@@ -40,7 +60,7 @@ export default function SessionPage() {
   const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterKind, setFilterKind] = useState<string>("all");
+  const [filterKind, setFilterKind] = useState("all");
 
   useEffect(() => {
     async function loadSession() {
@@ -63,22 +83,32 @@ export default function SessionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#05070C] flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-[#8B5CF6] border-t-transparent rounded-full" />
-      </div>
+      <Frame>
+        <div className="flex justify-center py-24">
+          <Spinner />
+        </div>
+      </Frame>
     );
   }
 
   if (error || !session) {
     return (
-      <div className="min-h-screen bg-[#05070C] flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-2xl font-bold mb-2">Session not found</div>
-          <Link href="/" className="text-[#8B5CF6] hover:text-[#A78BFA]">
-            ← Back to workspace
-          </Link>
-        </div>
-      </div>
+      <Frame>
+        <Panel>
+          <EmptyState
+            icon={<AlertTriangle className="h-5 w-5" />}
+            title="Session not found"
+            body={error ?? undefined}
+          >
+            <div className="flex justify-center">
+              <PillLink href="/workspace">
+                <ChevronLeft className="h-3.5 w-3.5 text-muted" />
+                <span>Back to workspace</span>
+              </PillLink>
+            </div>
+          </EmptyState>
+        </Panel>
+      </Frame>
     );
   }
 
@@ -89,233 +119,197 @@ export default function SessionPage() {
       : session.memories.filter((m) => m.kind === filterKind);
 
   return (
-    <div className="min-h-screen bg-[#05070C] text-[#E8E9F3]">
-      {/* Header */}
-      <header className="border-b border-[#1E2636] bg-[#0A0D12]/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+    <Frame>
+      <div className="flex flex-col gap-5">
+        <Panel className="flex flex-col gap-6 p-6 md:p-8">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link
-                href="/"
-                className="text-[#64748B] hover:text-[#E8E9F3] transition-colors"
-              >
-                ←
-              </Link>
-              <div>
-                <h1 className="text-xl font-bold">{session.repoName}</h1>
-                <p className="text-xs text-[#64748B]">
-                  Session by <span className="text-[#8B5CF6]">{session.agentId}</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div
-                className={`text-xs px-3 py-1 rounded-full ${
-                  session.completed
-                    ? "bg-[#10B981]/10 text-[#10B981]"
-                    : "bg-[#F59E0B]/10 text-[#F59E0B]"
-                }`}
-              >
-                {session.completed ? "Completed" : "In Progress"}
-              </div>
-            </div>
+            <BrandMark />
+            <PillLink href="/workspace" className="px-3 py-1.5">
+              <ChevronLeft className="h-3.5 w-3.5 text-muted" />
+              <span>Workspace</span>
+            </PillLink>
           </div>
-        </div>
-      </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Session Info */}
-        <div className="bg-[#0F131C] border border-[#1E2636] rounded-xl p-6 mb-8">
-          <div className="grid grid-cols-4 gap-6">
-            <div>
-              <div className="text-xs text-[#64748B] uppercase mb-1">Started</div>
-              <div className="text-sm">
-                {new Date(session.startedAt).toLocaleString()}
-              </div>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <Display className="text-3xl md:text-4xl">{session.repoName}</Display>
+              <span className="font-mono text-[11px] text-muted">
+                {session.agentId} · {new Date(session.startedAt).toLocaleString()}
+              </span>
             </div>
-            {session.endedAt && (
-              <div>
-                <div className="text-xs text-[#64748B] uppercase mb-1">Ended</div>
-                <div className="text-sm">
-                  {new Date(session.endedAt).toLocaleString()}
-                </div>
-              </div>
-            )}
-            {session.durationMs && (
-              <div>
-                <div className="text-xs text-[#64748B] uppercase mb-1">Duration</div>
-                <div className="text-sm">{formatDuration(session.durationMs)}</div>
-              </div>
-            )}
-            <div>
-              <div className="text-xs text-[#64748B] uppercase mb-1">Activity</div>
-              <div className="text-sm">
-                {session.memories.length} memories, {session.decisions.length}{" "}
-                decisions
-              </div>
-            </div>
+            <span
+              className={`rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
+                session.completed
+                  ? "border-stroke bg-raised text-muted"
+                  : "border-accent/30 bg-accent/10 text-accent"
+              }`}
+            >
+              {session.completed ? "Completed" : "In progress"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 border-t border-stroke-soft pt-6 md:grid-cols-4">
+            <Meta label="Memories" value={String(session.memories.length)} />
+            <Meta label="Decisions" value={String(session.decisions.length)} />
+            <Meta
+              label="Duration"
+              value={session.durationMs ? formatDuration(session.durationMs) : "—"}
+            />
+            <Meta
+              label="Ended"
+              value={
+                session.endedAt
+                  ? new Date(session.endedAt).toLocaleTimeString()
+                  : "still open"
+              }
+            />
           </div>
 
           {session.summary && (
-            <div className="mt-4 pt-4 border-t border-[#1E2636]">
-              <div className="text-xs text-[#64748B] uppercase mb-2">Summary</div>
-              <div className="text-sm">{session.summary}</div>
-            </div>
+            <Card className="p-5">
+              <MetaLabel>Summary</MetaLabel>
+              <p className="mt-2 text-sm leading-relaxed text-ink">{session.summary}</p>
+            </Card>
           )}
-        </div>
+        </Panel>
 
-        <div className="grid grid-cols-3 gap-6">
-          {/* Timeline - Left Column (2/3 width) */}
-          <div className="col-span-2">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold">Session Timeline</h2>
-              <div className="flex items-center gap-2">
-                <select
-                  value={filterKind}
-                  onChange={(e) => setFilterKind(e.target.value)}
-                  className="text-xs px-3 py-1 bg-[#0F131C] border border-[#1E2636] rounded-lg text-[#E8E9F3]"
-                >
-                  {kinds.map((kind) => (
-                    <option key={kind} value={kind}>
-                      {kind === "all" ? "All" : kind}
-                    </option>
-                  ))}
-                </select>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+          <Panel className="flex flex-col gap-5 p-6 md:p-8 lg:col-span-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Display className="text-2xl">Timeline</Display>
+              <div className="flex flex-wrap gap-1.5">
+                {kinds.map((kind) => {
+                  const active = filterKind === kind;
+                  return (
+                    <button
+                      key={kind}
+                      onClick={() => setFilterKind(kind)}
+                      className={`rounded-full border px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-wider transition-colors ${
+                        active
+                          ? "border-ink bg-ink text-canvas"
+                          : "border-stroke bg-raised text-muted hover:text-ink"
+                      }`}
+                    >
+                      {kind === "all" ? "All" : kind.replace(/_/g, " ")}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="space-y-4">
-              {filteredMemories.map((memory, index) => (
-                <div
-                  key={memory.id}
-                  className="bg-[#0F131C] border border-[#1E2636] rounded-xl p-4"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-[#05070C] rounded-full flex items-center justify-center text-xs text-[#64748B]">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div
-                          className={`px-2 py-1 rounded text-xs font-mono ${getKindColor(
-                            memory.kind
-                          )}`}
-                        >
-                          {memory.kind}
-                        </div>
-                        {memory.importance >= 3 && (
-                          <div className="text-xs text-[#F59E0B]">
-                            {"★".repeat(memory.importance)}
-                          </div>
-                        )}
-                        {memory.resolved && (
-                          <div className="text-xs text-[#10B981]">✓ Resolved</div>
-                        )}
+            {filteredMemories.length === 0 ? (
+              <p className="py-8 text-center text-xs text-muted">
+                No memories of this type.
+              </p>
+            ) : (
+              <ol className="flex flex-col gap-3">
+                {filteredMemories.map((memory, index) => (
+                  <li key={memory.id} className="flex gap-4">
+                    <span className="flex flex-col items-center pt-4">
+                      <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-stroke bg-raised font-mono text-[10px] text-muted">
+                        {index + 1}
+                      </span>
+                      {index < filteredMemories.length - 1 && (
+                        <span aria-hidden className="mt-1 w-px flex-1 bg-stroke" />
+                      )}
+                    </span>
+                    <Card className="flex-1 p-4">
+                      <div className="mb-2 flex flex-wrap items-center gap-2">
+                        <KindBadge kind={memory.kind} />
+                        <Importance value={memory.importance} />
+                        {memory.resolved && <MetaLabel>Resolved</MetaLabel>}
                       </div>
-                      <div className="text-sm mb-2">{memory.content}</div>
-                      <div className="flex items-center gap-2 text-xs text-[#64748B]">
-                        <span>
-                          {new Date(memory.createdAt).toLocaleTimeString()}
-                        </span>
+                      <p className="text-sm leading-relaxed text-ink">{memory.content}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[10px] text-muted">
+                        <span>{new Date(memory.createdAt).toLocaleTimeString()}</span>
                         {memory.tags.length > 0 && (
                           <>
-                            <span>•</span>
+                            <span>·</span>
                             <span>{memory.tags.join(", ")}</span>
                           </>
                         )}
                       </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                    </Card>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Panel>
 
-              {filteredMemories.length === 0 && (
-                <div className="text-center py-12 text-[#64748B]">
-                  No memories of this type
+          <div className="flex flex-col gap-5 lg:col-span-4">
+            <Panel className="flex flex-col gap-4 p-6 md:p-8">
+              <div className="flex items-center justify-between">
+                <MetaLabel className="text-ink">Decisions made</MetaLabel>
+                <Compass className="h-4 w-4 text-muted-soft" />
+              </div>
+
+              {session.decisions.length === 0 ? (
+                <p className="text-xs text-muted">No decisions recorded.</p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {session.decisions.map((decision) => (
+                    <Card key={decision.id} className="p-4">
+                      <p className="text-sm font-medium text-ink">{decision.title}</p>
+                      <p className="mt-2 text-xs leading-relaxed text-ink-soft">
+                        {decision.rationale}
+                      </p>
+                      {decision.alternatives.length > 0 && (
+                        <div className="mt-3 border-t border-stroke-soft pt-3">
+                          <MetaLabel>Alternatives</MetaLabel>
+                          <ul className="mt-1 flex flex-col gap-0.5 text-[11px] text-muted">
+                            {decision.alternatives.map((alt) => (
+                              <li key={alt}>{alt}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </Card>
+                  ))}
                 </div>
               )}
-            </div>
-          </div>
+            </Panel>
 
-          {/* Decisions - Right Column (1/3 width) */}
-          <div>
-            <h2 className="text-lg font-bold mb-4">Decisions Made</h2>
-            {session.decisions.length === 0 ? (
-              <div className="bg-[#0F131C] border border-[#1E2636] rounded-xl p-6 text-center text-[#64748B]">
-                No decisions recorded
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {session.decisions.map((decision) => (
-                  <div
-                    key={decision.id}
-                    className="bg-[#0F131C] border border-[#1E2636] rounded-xl p-4"
-                  >
-                    <div className="text-sm font-semibold mb-2">
-                      {decision.title}
-                    </div>
-                    <div className="text-xs text-[#64748B] mb-3">
-                      {decision.rationale}
-                    </div>
-                    {decision.alternatives.length > 0 && (
-                      <div className="text-xs text-[#64748B] pt-3 border-t border-[#1E2636]">
-                        <div className="mb-1">Alternatives:</div>
-                        <ul className="list-disc list-inside space-y-1">
-                          {decision.alternatives.map((alt, i) => (
-                            <li key={i}>{alt}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Handoff */}
-            {session.handoffText && (
-              <div className="mt-6">
-                <h2 className="text-lg font-bold mb-4">Handoff Document</h2>
-                <div className="bg-[#0F131C] border border-[#1E2636] rounded-xl p-4">
-                  <pre className="text-xs whitespace-pre-wrap font-mono text-[#E8E9F3]">
+            {session.handoffText ? (
+              <Panel className="flex flex-col gap-4 p-6 md:p-8">
+                <div className="flex items-center justify-between">
+                  <MetaLabel className="text-ink">Handoff</MetaLabel>
+                  <Terminal className="h-4 w-4 text-muted-soft" />
+                </div>
+                <Card className="overflow-x-auto p-4">
+                  <pre className="whitespace-pre-wrap font-mono text-[11px] leading-relaxed text-ink-soft">
                     {session.handoffText}
                   </pre>
+                </Card>
+              </Panel>
+            ) : (
+              <Panel className="flex flex-col gap-3 p-6 md:p-8">
+                <div className="flex items-center justify-between">
+                  <MetaLabel className="text-ink">Handoff</MetaLabel>
+                  <ScrollText className="h-4 w-4 text-muted-soft" />
                 </div>
-              </div>
+                <p className="text-xs leading-relaxed text-muted">
+                  No handoff written. These are generated by{" "}
+                  <code className="font-mono text-[11px] text-ink">
+                    atlas_create_handoff
+                  </code>{" "}
+                  and projected to{" "}
+                  <code className="font-mono text-[11px] text-ink">.atlas/sessions/</code>
+                  .
+                </p>
+              </Panel>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </Frame>
   );
 }
 
-function getKindColor(kind: string): string {
-  const colors: Record<string, string> = {
-    ARCHITECTURE: "bg-[#8B5CF6]/10 text-[#8B5CF6]",
-    DECISION: "bg-[#10B981]/10 text-[#10B981]",
-    BUG: "bg-[#DC2626]/10 text-[#DC2626]",
-    TODO: "bg-[#F59E0B]/10 text-[#F59E0B]",
-    WARNING: "bg-[#F59E0B]/10 text-[#F59E0B]",
-    IMPORTANT_FILE: "bg-[#3B82F6]/10 text-[#3B82F6]",
-    DEPENDENCY: "bg-[#64748B]/10 text-[#64748B]",
-    SECURITY: "bg-[#DC2626]/10 text-[#DC2626]",
-    CONTEXT: "bg-[#64748B]/10 text-[#64748B]",
-  };
-  return colors[kind] || "bg-[#64748B]/10 text-[#64748B]";
-}
-
-function formatDuration(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-
-  if (hours > 0) {
-    return `${hours}h ${minutes % 60}m`;
-  }
-  if (minutes > 0) {
-    return `${minutes}m ${seconds % 60}s`;
-  }
-  return `${seconds}s`;
+function Meta({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <MetaLabel>{label}</MetaLabel>
+      <span className="text-sm text-ink">{value}</span>
+    </div>
+  );
 }

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import type { MemoryKind } from "@prisma/client";
 
 /**
@@ -240,12 +241,14 @@ export async function searchMemories(
     }
   }
 
-  // Build WHERE clause dynamically
-  const whereClauses: string[] = [`m.embedding IS NOT NULL`];
-  if (repo) whereClauses.push(`m."repoId" = '${repo.id}'`);
-  if (kind) whereClauses.push(`m.kind = '${kind}'`);
-
-  const whereSQL = whereClauses.join(" AND ");
+  // Compose the filter with Prisma.sql fragments, not string concatenation.
+  // Interpolating a plain string into $queryRaw makes it a bind *parameter* —
+  // `WHERE $1` with a text argument, which CockroachDB rejects because WHERE
+  // needs a boolean. Prisma.join splices the SQL and merges the parameters.
+  // `kind::text` avoids having to name the enum type, which db push generated.
+  const filters: Prisma.Sql[] = [Prisma.sql`m.embedding IS NOT NULL`];
+  if (repo) filters.push(Prisma.sql`m."repoId" = ${repo.id}`);
+  if (kind) filters.push(Prisma.sql`m.kind::text = ${kind}`);
 
   const results = await prisma.$queryRaw<
     Array<{
@@ -272,7 +275,7 @@ export async function searchMemories(
       m.embedding <=> ${vectorLiteral}::vector AS distance
     FROM "Memory" m
     JOIN "Repository" r ON r.id = m."repoId"
-    WHERE ${whereSQL}
+    WHERE ${Prisma.join(filters, " AND ")}
     ORDER BY distance
     LIMIT ${limit}
   `;
@@ -292,6 +295,8 @@ export async function searchMemories(
 
 /**
  * Log a memory retrieval event for observability.
+ * Best-effort by design: an audit write must never fail the query it describes,
+ * so this swallows its own errors rather than propagating them to the caller.
  */
 export async function logRetrieval(
   kind: string,
@@ -300,17 +305,21 @@ export async function logRetrieval(
   scores: number[],
   latencyMs: number,
   repoId?: string,
-) {
-  await prisma.memoryRetrieval.create({
-    data: {
-      kind,
-      queryText,
-      repoId,
-      hitIds,
-      scores,
-      latencyMs,
-    },
-  });
+): Promise<void> {
+  try {
+    await prisma.memoryRetrieval.create({
+      data: {
+        kind,
+        queryText,
+        repoId,
+        hitIds,
+        scores,
+        latencyMs,
+      },
+    });
+  } catch (error) {
+    console.error("[retrieval] failed to write audit row:", error);
+  }
 }
 
 /**
