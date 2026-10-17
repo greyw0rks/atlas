@@ -1,0 +1,631 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   Atlas — cinematic landing page
+   All rules are scoped under .atl-root so the dashboard views (which share
+   globals.css) are never affected.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.atl-root {
+  --atl-bg: #090b10;
+  --atl-surface: #11141b;
+  --atl-surface-2: #161a24;
+  --atl-surface-3: #1b2030;
+  --atl-blue: #3175c6;
+  --atl-blue-bright: #6fb4ff;
+  --atl-violet: #8b7cff;
+  --atl-text: #f4f6fa;
+  --atl-muted: #a4adbd;
+  --atl-border: rgba(164, 173, 189, 0.16);
+  --atl-border-strong: rgba(164, 173, 189, 0.3);
+  --atl-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  position: relative;
+  z-index: 0;
+  background: var(--atl-bg);
+  color: var(--atl-text);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: clip;
+}
+
+.atl-root ::selection {
+  background: rgba(139, 124, 255, 0.32);
+}
+
+/* ── Typography ─────────────────────────────────────────────────────────── */
+
+.atl-eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--atl-muted);
+}
+
+.atl-display {
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.atl-lede {
+  color: var(--atl-muted);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.atl-mono {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-ligatures: none;
+}
+
+/* ── Section chrome ─────────────────────────────────────────────────────── */
+
+.atl-section {
+  position: relative;
+  border-top: 1px solid var(--atl-border);
+}
+
+.atl-section-num {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  color: var(--atl-violet);
+  letter-spacing: 0.08em;
+}
+
+.atl-section-label {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--atl-muted);
+}
+
+.atl-hairline {
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(
+    90deg,
+    var(--atl-border-strong) 0%,
+    rgba(164, 173, 189, 0.04) 100%
+  );
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+
+.atl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.6875rem 1.375rem;
+  border: 1px solid transparent;
+  transition:
+    transform 0.35s var(--atl-ease),
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.35s var(--atl-ease);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.atl-btn:hover {
+  transform: translateY(-1px);
+}
+
+.atl-btn:focus-visible {
+  outline: 2px solid var(--atl-violet);
+  outline-offset: 3px;
+}
+
+.atl-btn-primary {
+  background: linear-gradient(180deg, #f7f9fc 0%, #d9e2ee 100%);
+  color: #0b0e14;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 8px 26px -10px rgba(120, 170, 255, 0.65);
+}
+
+.atl-btn-primary:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 12px 34px -10px rgba(120, 170, 255, 0.85);
+}
+
+.atl-btn-ghost {
+  background: rgba(164, 173, 189, 0.04);
+  border-color: var(--atl-border-strong);
+  color: var(--atl-text);
+  backdrop-filter: blur(8px);
+}
+
+.atl-btn-ghost:hover {
+  background: rgba(164, 173, 189, 0.1);
+  border-color: rgba(139, 124, 255, 0.5);
+}
+
+.atl-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--atl-text);
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--atl-border-strong);
+  padding-bottom: 2px;
+  transition: border-color 0.25s ease, color 0.25s ease;
+}
+
+.atl-link:hover {
+  border-color: var(--atl-violet);
+  color: #fff;
+}
+
+/* ── Surfaces ───────────────────────────────────────────────────────────── */
+
+.atl-card {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid var(--atl-border);
+  background: linear-gradient(
+    160deg,
+    rgba(22, 26, 36, 0.9) 0%,
+    rgba(17, 20, 27, 0.65) 100%
+  );
+  backdrop-filter: blur(10px);
+}
+
+.atl-card-hover {
+  transition:
+    border-color 0.35s ease,
+    transform 0.5s var(--atl-ease),
+    box-shadow 0.5s var(--atl-ease);
+}
+
+.atl-card-hover:hover {
+  border-color: rgba(139, 124, 255, 0.42);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 50px -30px rgba(111, 180, 255, 0.7);
+}
+
+.atl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--atl-border);
+  background: rgba(164, 173, 189, 0.03);
+  padding: 0.375rem 0.75rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  color: var(--atl-muted);
+}
+
+/* ── 3D stage ───────────────────────────────────────────────────────────── */
+
+.atl-stage {
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+}
+
+.atl-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Feather the rendered glow into the page background. Without this the
+     additive halo is clipped by the canvas edge and the stage reads as a
+     brighter rectangle pasted onto the section. */
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 7%, #000 93%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 7%, #000 93%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* Cinematic vignette + scanline grain, drawn *over* the canvas so the
+   WebGL output blends into the page without needing post-processing. */
+.atl-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 90% at 50% 45%,
+      rgba(9, 11, 16, 0) 38%,
+      rgba(9, 11, 16, 0.55) 78%,
+      rgba(9, 11, 16, 0.92) 100%
+    );
+}
+
+/* Static stand-in used while the scene loads, on WebGL failure and under
+   prefers-reduced-motion when we want a calm, non-animated composition. */
+.atl-stage-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(
+      42% 42% at 50% 50%,
+      rgba(111, 180, 255, 0.16) 0%,
+      rgba(139, 124, 255, 0.08) 42%,
+      rgba(9, 11, 16, 0) 72%
+    );
+  transition: opacity 0.9s ease;
+}
+
+/* Once the live scene is drawing, the gradient stand-in fades away so the
+   transparent canvas composites straight onto the page background. */
+.atl-stage-live .atl-stage-fallback {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.atl-stage-fallback span {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(164, 173, 189, 0.42);
+}
+
+/* Floating HTML labels anchored over a 3D stage */
+.atl-float-label {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--atl-border-strong);
+  background: rgba(13, 16, 23, 0.72);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 0.8125rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--atl-text);
+  white-space: nowrap;
+  box-shadow:
+    0 0 0 1px rgba(9, 11, 16, 0.6),
+    0 14px 40px -22px rgba(111, 180, 255, 0.9);
+  animation: atl-float 7s ease-in-out infinite;
+}
+
+.atl-float-label::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--atl-violet);
+  box-shadow: 0 0 10px 1px rgba(139, 124, 255, 0.9);
+  flex: none;
+}
+
+@keyframes atl-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Larger glass cards used over the hero, matching the reference composition. */
+.atl-float-card {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 11.5rem;
+  border-radius: 14px;
+  border: 1px solid var(--atl-border-strong);
+  background: linear-gradient(
+    155deg,
+    rgba(23, 28, 40, 0.82) 0%,
+    rgba(13, 16, 23, 0.72) 100%
+  );
+  backdrop-filter: blur(12px);
+  padding: 0.625rem 0.875rem;
+  box-shadow:
+    0 0 0 1px rgba(9, 11, 16, 0.55),
+    0 18px 50px -24px rgba(111, 180, 255, 0.85);
+  animation: atl-float 7s ease-in-out infinite;
+  white-space: nowrap;
+}
+
+.atl-float-icon {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+  border-radius: 9px;
+  border: 1px solid rgba(139, 124, 255, 0.32);
+  background: radial-gradient(
+    circle at 50% 40%,
+    rgba(139, 124, 255, 0.28),
+    rgba(49, 117, 198, 0.12)
+  );
+  color: #c9c0ff;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.atl-float-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.atl-float-copy strong {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--atl-text);
+}
+
+.atl-float-copy em {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-style: normal;
+  font-size: 0.5625rem;
+  letter-spacing: 0.04em;
+  color: var(--atl-muted);
+}
+
+/* ── Install panel ──────────────────────────────────────────────────────── */
+
+.atl-terminal {
+  border-radius: 14px;
+  border: 1px solid var(--atl-border-strong);
+  background: rgba(6, 8, 12, 0.86);
+  overflow: hidden;
+}
+
+.atl-terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--atl-border);
+  background: rgba(164, 173, 189, 0.04);
+}
+
+.atl-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.atl-tab {
+  padding: 0.4375rem 0.8125rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--atl-muted);
+  border: 1px solid transparent;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.atl-tab[aria-selected="true"] {
+  color: var(--atl-text);
+  background: rgba(139, 124, 255, 0.14);
+  border-color: rgba(139, 124, 255, 0.4);
+}
+
+.atl-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 8px;
+  border: 1px solid var(--atl-border);
+  background: rgba(164, 173, 189, 0.06);
+  color: var(--atl-muted);
+  font-size: 0.6875rem;
+  padding: 0.3125rem 0.5625rem;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.atl-copy:hover {
+  color: var(--atl-text);
+  border-color: rgba(139, 124, 255, 0.5);
+  background: rgba(139, 124, 255, 0.12);
+}
+
+/* ── Reveal-on-scroll ───────────────────────────────────────────────────── */
+
+.atl-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.95s var(--atl-ease),
+    transform 0.95s var(--atl-ease);
+  transition-delay: var(--atl-delay, 0ms);
+}
+
+.atl-reveal[data-in="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Ambient page glow ──────────────────────────────────────────────────── */
+
+.atl-aura {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.5;
+  z-index: -1;
+}
+
+/* ── Navigation ─────────────────────────────────────────────────────────── */
+
+.atl-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid transparent;
+  background: rgba(9, 11, 16, 0.72);
+  backdrop-filter: blur(14px) saturate(1.1);
+  transition: border-color 0.4s ease, background-color 0.4s ease;
+}
+
+.atl-nav[data-scrolled="true"] {
+  border-bottom-color: var(--atl-border);
+  background: rgba(9, 11, 16, 0.88);
+}
+
+.atl-nav-link {
+  font-size: 0.8125rem;
+  color: var(--atl-muted);
+  transition: color 0.2s ease;
+}
+
+.atl-nav-link:hover {
+  color: var(--atl-text);
+}
+
+.atl-nav-link:focus-visible {
+  outline: 2px solid var(--atl-violet);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── Stage sizing ───────────────────────────────────────────────────────── */
+/* The canvas fills the stage, so the wrapper owns the height. */
+
+.atl-stage-frame {
+  min-height: 360px;
+}
+
+@media (min-width: 640px) {
+  .atl-stage-frame {
+    min-height: 460px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .atl-stage-frame {
+    min-height: 560px;
+  }
+}
+
+.atl-stage-hero {
+  min-height: 380px;
+}
+
+@media (min-width: 640px) {
+  .atl-stage-hero {
+    min-height: 460px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .atl-stage-hero {
+    min-height: min(78vh, 720px);
+  }
+}
+
+/* ── Floating label / chip lists ────────────────────────────────────────── */
+
+.atl-label-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* ── Install steps ──────────────────────────────────────────────────────── */
+
+.atl-step {
+  display: flex;
+  gap: 0.875rem;
+  align-items: flex-start;
+}
+
+.atl-step-num {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--atl-border-strong);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
+  color: var(--atl-muted);
+}
+
+.atl-kbd {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  padding: 0.0625rem 0.3125rem;
+  border-radius: 4px;
+  border: 1px solid var(--atl-border);
+  background: rgba(164, 173, 189, 0.06);
+  color: var(--atl-text);
+}
+
+/* ── Film grain ─────────────────────────────────────────────────────────── */
+/* An inline SVG turbulence tile — generated locally, never fetched. */
+
+.atl-noise {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.031;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+
+.atl-footer {
+  border-top: 1px solid var(--atl-border);
+  color: var(--atl-muted);
+}
+
+/* ── Anchor scrolling ───────────────────────────────────────────────────── */
+
+.atl-root [id] {
+  scroll-margin-top: 88px;
+}
+
+html:has(.atl-root) {
+  scroll-behavior: smooth;
+  background: #090b10;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .atl-float-label {
+    animation: none !important;
+  }
+
+  .atl-btn:hover,
+  .atl-card-hover:hover {
+    transform: none;
+  }
+
+  .atl-noise {
+    display: none;
+  }
+
+  html:has(.atl-root) {
+    scroll-behavior: auto;
+  }
+}
