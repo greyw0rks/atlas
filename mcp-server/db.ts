@@ -1,9 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+// The MCP server and the Next.js dashboard share ONE Prisma client and ONE
+// SQLite database. Re-exporting the root singleton (instead of constructing a
+// second client here) guarantees both surfaces read and write the same index —
+// and keeps a single connection pool per process.
+export { prisma } from "../lib/db.js";

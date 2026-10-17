@@ -19,7 +19,7 @@ echo "Installing from: $ATLAS_DIR"
 echo ""
 
 # Step 1: Check prerequisites
-echo "[1/8] Checking prerequisites..."
+echo "[1/9] Checking prerequisites..."
 
 if ! command -v node &> /dev/null; then
     echo -e "${RED}✗ Node.js not found. Please install Node.js 20+ first.${NC}"
@@ -43,17 +43,19 @@ echo -e "${GREEN}✓ npm $(npm -v)${NC}"
 echo ""
 
 # Step 2: Check .env file
-echo "[2/8] Checking environment configuration..."
+echo "[2/9] Checking environment configuration..."
 
 if [ ! -f "$ATLAS_DIR/.env" ]; then
     echo -e "${YELLOW}⚠ No .env file found${NC}"
     echo ""
-    echo "Please create $ATLAS_DIR/.env with:"
+    echo "Please create $ATLAS_DIR/.env (copy .env.example) with:"
     echo ""
-    echo "DATABASE_URL=\"postgresql://user:pass@host:26257/db?sslmode=require\""
-    echo "AWS_REGION=\"us-east-1\""
-    echo "AWS_ACCESS_KEY_ID=\"your-key\""
-    echo "AWS_SECRET_ACCESS_KEY=\"your-secret\""
+    echo "DATABASE_URL=\"file:./dev.db\""
+    echo "MEMWAL_PRIVATE_KEY=\"<delegate private key>\""
+    echo "MEMWAL_ACCOUNT_ID=\"0x<MemWal account object id>\""
+    echo "TATUM_API_KEY=\"\"   # optional: sent as x-api-key; keyless works today"
+    echo ""
+    echo "See .env.example for the full list."
     echo ""
     read -p "Press Enter after creating .env file, or Ctrl+C to exit..."
 fi
@@ -67,21 +69,21 @@ fi
 echo ""
 
 # Step 3: Install root dependencies
-echo "[3/8] Installing root dependencies..."
+echo "[3/9] Installing root dependencies..."
 cd "$ATLAS_DIR"
 npm install --silent
 echo -e "${GREEN}✓ Root dependencies installed${NC}"
 echo ""
 
 # Step 4: Install MCP server dependencies
-echo "[4/8] Installing MCP server dependencies..."
+echo "[4/9] Installing MCP server dependencies..."
 cd "$ATLAS_DIR/mcp-server"
 npm install --silent
 echo -e "${GREEN}✓ MCP server dependencies installed${NC}"
 echo ""
 
 # Step 5: Setup database
-echo "[5/8] Setting up database..."
+echo "[5/9] Setting up database..."
 cd "$ATLAS_DIR"
 
 echo "  → Generating Prisma client..."
@@ -94,16 +96,10 @@ if npx prisma db push > /dev/null 2>&1; then
 else
     echo -e "${YELLOW}  ⚠ Database push failed - check DATABASE_URL in .env${NC}"
 fi
-
-cd "$ATLAS_DIR/mcp-server"
-echo "  → Generating Prisma client for MCP server..."
-ln -sf ../prisma prisma 2>/dev/null || true
-npx prisma generate > /dev/null 2>&1
-echo -e "${GREEN}  ✓ MCP server Prisma client generated${NC}"
 echo ""
 
 # Step 6: Build and install globally
-echo "[6/8] Building and installing globally..."
+echo "[6/9] Building and installing globally..."
 cd "$ATLAS_DIR/mcp-server"
 
 echo "  → Building TypeScript..."
@@ -123,7 +119,7 @@ fi
 echo ""
 
 # Step 7: Configure Claude Code settings
-echo "[7/8] Configuring Claude Code..."
+echo "[7/9] Configuring Claude Code..."
 
 SETTINGS_FILE="$HOME/.claude/settings.json"
 SETTINGS_BACKUP="$HOME/.claude/settings.json.backup-$(date +%Y%m%d-%H%M%S)"
@@ -151,7 +147,7 @@ fi
 echo ""
 
 # Step 8: Install /atlas skill
-echo "[8/8] Installing /atlas skill..."
+echo "[8/9] Installing /atlas skill..."
 
 SKILL_DIR="$HOME/.claude/skills/atlas"
 mkdir -p "$SKILL_DIR"
@@ -217,43 +213,34 @@ echo "[9/9] Updating global CLAUDE.md to use Atlas..."
 
 mkdir -p "$HOME/.claude"
 
-cat > "$HOME/.claude/CLAUDE.md" << 'CLAUDE_EOF'
-# Claude Code Instructions
+CLAUDE_MD="$HOME/.claude/CLAUDE.md"
+if [ -f "$CLAUDE_MD" ] && grep -q "atlas:begin" "$CLAUDE_MD"; then
+    echo -e "${GREEN}  ✓ Atlas instructions already present in CLAUDE.md${NC}"
+else
+    if [ -f "$CLAUDE_MD" ]; then
+        cp "$CLAUDE_MD" "$CLAUDE_MD.backup-$(date +%Y%m%d-%H%M%S)"
+        printf '\n' >> "$CLAUDE_MD"
+    fi
 
-## Session Management
+    cat >> "$CLAUDE_MD" << 'CLAUDE_EOF'
+<!-- atlas:begin -->
+## Atlas memory
 
-On session start:
-
-Start an Atlas session using the atlas_start_session MCP tool:
+On session start, call the atlas_start_session MCP tool:
 - repoPath: current working directory
 - repoName: directory name
 - agentId: "claude-code"
 
-Atlas will return the full context: last session summary, open tasks, decisions, and tech stack. Use this as your starting point — do not read or create tasks/HANDOFF.md.
+Atlas returns the full context: last session summary, open tasks, decisions, and tech stack. Use it as your starting point.
 
-If Atlas MCP tools are unavailable, fall back to reading tasks/HANDOFF.md if it exists.
+If Atlas MCP tools are unavailable, carry on normally.
 
-## Project Conventions
-
-Commits: Follow conventional commits (feat/fix/docs/refactor/chore).
-PRs: squash-merge; keep title ≤ 72 chars.
-Tests: run existing test suite before marking a task done.
-Lint: run linter before commits.
-
-## Task Tracking
-
-Tasks are tracked in Atlas memory via the atlas_save_memory MCP tool with kind: "TODO" or kind: "BUG". Use /atlas to view open tasks.
-
-## Communication Style
-
-Respond concisely. Skip preamble. Act, then report. If blocked, say why in one sentence.
-
-## End of Session
-
-Before stopping, call atlas_end_session MCP tool with a brief summary of what was accomplished.
+To remember something durable, call atlas_save_memory (kind: TODO or BUG for tasks). Before stopping, call atlas_end_session with a brief summary.
+<!-- atlas:end -->
 CLAUDE_EOF
 
-echo -e "${GREEN}✓ Global CLAUDE.md updated to use Atlas${NC}"
+    echo -e "${GREEN}  ✓ Atlas instructions appended to CLAUDE.md${NC}"
+fi
 echo ""
 
 # Final summary

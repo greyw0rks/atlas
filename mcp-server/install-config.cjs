@@ -39,37 +39,29 @@ try {
     command: "atlas-mcp"
   };
 
-  // Fix SessionStart hook to use Atlas instead of HANDOFF.md
+  // Remove only hooks that reference HANDOFF.md; keep everything else the user
+  // configured. Never wipe the hooks arrays wholesale.
   settings.hooks = settings.hooks || {};
 
-  // Remove any existing HANDOFF.md hooks
-  if (settings.hooks.SessionStart) {
-    settings.hooks.SessionStart = settings.hooks.SessionStart.filter(hook => {
-      if (hook.hooks && hook.hooks.length > 0) {
-        const hasHandoffCommand = hook.hooks.some(h =>
-          h.command && h.command.includes('HANDOFF.md')
-        );
-        return !hasHandoffCommand;
-      }
-      return true;
+  const stripHandoffHooks = (hooks) =>
+    (hooks || []).filter((hook) => {
+      if (!hook.hooks || hook.hooks.length === 0) return true;
+      return !hook.hooks.some((h) => h.command && h.command.includes('HANDOFF.md'));
     });
-  }
 
-  // Don't add automatic SessionStart - users should manually start sessions
-  // SessionStart hooks can't use prompts (no conversation context yet)
-  settings.hooks.SessionStart = [];
+  settings.hooks.SessionStart = stripHandoffHooks(settings.hooks.SessionStart);
+  settings.hooks.Stop = stripHandoffHooks(settings.hooks.Stop);
 
-  // Don't add automatic Stop hook either - let users end sessions manually
-  settings.hooks.Stop = [];
+  // Atlas sessions are started by the agent (or /atlas), not by a fire-and-forget
+  // shell hook, so no new hook is installed here.
 
   // Write updated settings
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2));
 
   console.log('✓ Settings updated successfully');
   console.log('  - Added Atlas MCP server');
-  console.log('  - Configured SessionStart hook for Atlas');
-  console.log('  - Configured Stop hook for Atlas');
-  console.log('  - Removed conflicting HANDOFF.md hooks');
+  console.log('  - Removed any hooks that referenced HANDOFF.md');
+  console.log('  - Left your other hooks untouched');
 
 } catch (error) {
   console.error('✗ Failed to update settings:', error.message);

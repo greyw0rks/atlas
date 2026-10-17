@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// Must be first: loads .env before other modules construct Prisma / read keys.
+import "./env.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -27,10 +29,18 @@ import {
   logRetrieval,
   getRepoTimeline
 } from "../lib/memory/retrieval.js";
-import { generateEmbedding } from "../lib/memory/embedder.js";
 import { scanRepository } from "../lib/intelligence/repo-scanner.js";
+import { decodeStringList } from "../lib/memory/kinds.js";
 import { extractFromGitHistory } from "../lib/intelligence/memory-extractor.js";
 import { getRecentCommits, isGitRepo } from "../lib/intelligence/git-tracker.js";
+import {
+  extractSuiReferences,
+  formatVerification,
+  tatumConfigured,
+  tatumRpcUrl,
+  verifyReferences,
+  type SuiReference,
+} from "../lib/chain/tatum.js";
 import * as fs from "fs/promises";
 import * as path from "path";
 
@@ -94,7 +104,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "atlas_save_memory",
         description:
-          "Save a memory (fact, observation, note) to the current coding session. Memories with importance >= 3 are automatically embedded for semantic search.",
+          "Save a memory (fact, observation, note) to the current coding session. Every memory is written to Walrus Memory on Sui Mainnet and indexed locally in SQLite; the returned blob id is the onchain proof.",
         inputSchema: {
           type: "object",
           properties: {
@@ -117,7 +127,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             importance: {
               type: "number",
-              description: "1-5 importance (>=3 triggers embedding), default 1",
+              description: "1-5 importance, used to rank what survives a context reset; default 1",
             },
             tags: {
               type: "array",
@@ -197,7 +207,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "atlas_update_context",
         description:
-          "Update a field in RepositoryContext (architecture, constraints, techStack, importantFiles). Regenerates contextText and triggers re-embedding.",
+          "Update a field in RepositoryContext (architecture, constraints, techStack, importantFiles). Regenerates the deterministic contextText.",
         inputSchema: {
           type: "object",
           properties: {
@@ -245,7 +255,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "atlas_search_memory",
         description:
-          "Semantic search over memories using vector kNN. Returns memories ranked by similarity to the query text.",
+          "Semantic recall over memories stored in Walrus Memory on Sui Mainnet. Results are hydrated with local metadata and, when present, the Tatum-verified onchain provenance.",
         inputSchema: {
           type: "object",
           properties: {
@@ -385,6 +395,33 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["repoPath"],
         },
       },
+      {
+        name: "atlas_verify_onchain",
+        description:
+          "Verify Sui object ids and transaction digests through Tatum's Sui RPC gateway. Atlas runs this automatically when a memory mentions onchain references; this tool lets you check a fact before saving it. Pass free text (references are extracted) or explicit refs.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            text: {
+              type: "string",
+              description:
+                "Text containing Sui object ids (0x + 64 hex) or labelled transaction digests (e.g. 'tx: <digest>')",
+            },
+            refs: {
+              type: "array",
+              description: "Explicit references to verify instead of extracting them from text",
+              items: {
+                type: "object",
+                properties: {
+                  kind: { type: "string", enum: ["object", "transaction"] },
+                  id: { type: "string" },
+                },
+                required: ["kind", "id"],
+              },
+            },
+          },
+        },
+      },
     ],
   };
 });
@@ -462,7 +499,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           tags?: string[];
         };
 
-        const { memoryId } = await saveMemory(sessionId, repoId, {
+        const { memoryId, blobId, chainVerification } = await saveMemory(sessionId, repoId, {
           kind,
           content,
           importance,
@@ -476,7 +513,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               text: JSON.stringify({
                 success: true,
                 memoryId,
-                willEmbed: (importance ?? 1) >= 3,
+                // Walrus blob id — the onchain proof of this memory. null means
+                // the relayer was unreachable and only the local index was written.
+                blobId,
+                storedOnWalrus: blobId !== null,
+                // Tatum's Sui RPC answer for any object ids / tx digests named in
+                // the memory. null = the memory named no Sui references. The
+                // gateway answers keyless; rejections land in `.errors`.
+                chainVerification,
               }, null, 2),
             },
           ],
@@ -492,7 +536,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           alternatives?: string[];
         };
 
-        const { decisionId } = await recordDecision(sessionId, repoId, {
+        const { decisionId, blobId, chainVerification } = await recordDecision(sessionId, repoId, {
           title,
           rationale,
           alternatives,
@@ -505,6 +549,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               text: JSON.stringify({
                 success: true,
                 decisionId,
+                blobId,
+                storedOnWalrus: blobId !== null,
+                chainVerification,
               }, null, 2),
             },
           ],
@@ -598,13 +645,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
 
         const startMs = Date.now();
-        const embedding = await generateEmbedding(query);
 
-        if (!embedding) {
-          throw new Error("Failed to generate query embedding");
-        }
-
-        const results = await searchMemories(embedding, repoPath, kind, limit);
+        // Semantic recall runs server-side on the Walrus Memory relayer.
+        const results = await searchMemories(query, repoPath, kind, limit);
         const latencyMs = Date.now() - startMs;
 
         await logRetrieval(
@@ -747,6 +790,57 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: "text",
               text: JSON.stringify({ repoPath, days: timeline.length, timeline }, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "atlas_verify_onchain": {
+        const { text, refs } = args as {
+          text?: string;
+          refs?: SuiReference[];
+        };
+
+        const references =
+          refs && refs.length > 0 ? refs : extractSuiReferences(text ?? "");
+
+        if (references.length === 0) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(
+                  {
+                    verified: false,
+                    reason:
+                      "No Sui references found. Pass object ids (0x + 64 hex) or transaction digests labelled 'tx:'.",
+                    rpcUrl: tatumRpcUrl(),
+                  },
+                  null,
+                  2,
+                ),
+              },
+            ],
+          };
+        }
+
+        const verification = await verifyReferences(references);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  verified: true,
+                  rpcUrl: tatumRpcUrl(),
+                  auth: tatumConfigured() ? "api-key" : "keyless",
+                  summary: formatVerification(verification),
+                  verification,
+                },
+                null,
+                2,
+              ),
             },
           ],
         };
@@ -1004,10 +1098,11 @@ async function writeAtlasProjection(repoPath: string, sessionId: string, handoff
       contextLines.push(repo.context.architecture);
       contextLines.push("");
     }
-    if (repo.context.techStack.length > 0) {
+    const techStack = decodeStringList(repo.context.techStack);
+    if (techStack.length > 0) {
       contextLines.push("## Tech Stack");
       contextLines.push("");
-      repo.context.techStack.forEach((t: string) => contextLines.push(`- ${t}`));
+      techStack.forEach((t: string) => contextLines.push(`- ${t}`));
       contextLines.push("");
     }
     if (repo.context.constraints) {

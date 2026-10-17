@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { WalrusProof, type ChainVerification } from "@/components/WalrusProof";
 
 interface SearchResult {
   id: string;
@@ -13,6 +14,8 @@ interface SearchResult {
   createdAt: string;
   repoName: string;
   similarity: number;
+  blobId: string | null;
+  chainVerification: ChainVerification | null;
 }
 
 export default function SearchPage() {
@@ -65,7 +68,7 @@ export default function SearchPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Link
-                href="/"
+                href="/workspace"
                 className="text-[#64748B] hover:text-[#E8E9F3] transition-colors"
               >
                 ←
@@ -166,7 +169,12 @@ export default function SearchPage() {
 
                 <div className="text-sm mb-3">{result.content}</div>
 
-                <div className="flex items-center gap-3 text-xs text-[#64748B]">
+                <WalrusProof
+                  blobId={result.blobId}
+                  chainVerification={result.chainVerification}
+                />
+
+                <div className="flex items-center gap-3 text-xs text-[#64748B] mt-3">
                   <span className="text-[#8B5CF6]">{result.repoName}</span>
                   <span>•</span>
                   <span>{new Date(result.createdAt).toLocaleDateString()}</span>
@@ -194,7 +202,8 @@ export default function SearchPage() {
             </div>
             <h2 className="text-2xl font-bold mb-2">Semantic Memory Search</h2>
             <p className="text-[#64748B] max-w-md mb-6">
-              Search uses vector embeddings to find memories by meaning, not just keywords.
+              Search finds memories by meaning, not just keywords — ranked over
+              your Walrus Memory namespaces.
             </p>
             <div className="grid grid-cols-2 gap-4 max-w-2xl">
               <div className="bg-[#0F131C] border border-[#1E2636] rounded-xl p-4 text-left">
@@ -213,10 +222,10 @@ export default function SearchPage() {
                   How it works
                 </div>
                 <ul className="text-xs text-[#64748B] space-y-1">
-                  <li>• Embeddings via AWS Bedrock Titan</li>
-                  <li>• 1024-dimensional vectors</li>
-                  <li>• Cosine similarity ranking</li>
-                  <li>• CockroachDB vector indexing</li>
+                  <li>• Query embedded server-side by the relayer</li>
+                  <li>• Vector search over Walrus Memory</li>
+                  <li>• SEAL-encrypted blobs, released to the delegate key</li>
+                  <li>• Ranked by cosine distance</li>
                 </ul>
               </div>
             </div>

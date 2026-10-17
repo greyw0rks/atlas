@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateEmbedding } from "@/lib/memory/embedder";
 import { searchMemories, logRetrieval } from "@/lib/memory/retrieval";
 
 export const dynamic = "force-dynamic";
 
 /**
  * GET /api/memories/search?query=...&repoPath=...&kind=...&limit=...
- * Semantic search over memories using vector kNN
+ * Semantic search over memories, ranked by the Walrus Memory relayer.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -24,17 +23,8 @@ export async function GET(request: NextRequest) {
     }
 
     const startMs = Date.now();
-    const embedding = await generateEmbedding(query);
-
-    if (!embedding) {
-      return NextResponse.json(
-        { error: "Failed to generate query embedding" },
-        { status: 500 }
-      );
-    }
-
     const results = await searchMemories(
-      embedding,
+      query,
       repoPath,
       kind as any,
       limit

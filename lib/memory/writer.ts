@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
-import { embedMemory, embedRepositoryContext } from "./embedder";
-import type { MemoryKind } from "@prisma/client";
+import { type MemoryKind, encodeList, decodeStringList } from "./kinds";
+import { rememberToWalrus } from "./memwal";
+import { verifyMemoryText, formatVerification, type ChainVerification } from "@/lib/chain/tatum";
 
 interface MemoryInput {
   kind: MemoryKind;
@@ -13,6 +14,15 @@ interface DecisionInput {
   title: string;
   rationale: string;
   alternatives?: string[];
+}
+
+/** Derive a stable MemWal namespace from a repo name (lowercase slug). */
+export function namespaceForRepo(repoName: string): string {
+  const slug = repoName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || "default";
 }
 
 /**
@@ -58,13 +68,30 @@ function generateContextText(data: {
 
 /**
  * Save a memory to a coding session.
- * If importance >= 3, triggers embedding asynchronously.
+ *
+ * Walrus Memory (MemWal) is the Mainnet system-of-record: we write the memory
+ * text there and store the returned Walrus `blob_id` on the local SQLite row as
+ * onchain proof. If Walrus is unavailable the memory still lands in SQLite.
  */
 export async function saveMemory(
   sessionId: string,
   repoId: string,
   input: MemoryInput,
-): Promise<{ memoryId: string }> {
+): Promise<{ memoryId: string; blobId: string | null; chainVerification: ChainVerification | null }> {
+  const repo = await prisma.repository.findUnique({ where: { id: repoId } });
+  const namespace = repo ? namespaceForRepo(repo.name) : "default";
+
+  // If the memory names Sui objects or transactions, ask Tatum what they are and
+  // append the verified facts to the Walrus copy. Local SQLite keeps the original
+  // text plus the structured provenance.
+  const chain = await verifyMemoryText(input.content);
+  const walrusText = chain.verification
+    ? `${input.content}\n\n${formatVerification(chain.verification)}`
+    : input.content;
+
+  // Write to Walrus Memory on Mainnet first so we can persist the blob id.
+  const walrus = await rememberToWalrus(walrusText, namespace);
+
   const memory = await prisma.memory.create({
     data: {
       sessionId,
@@ -72,7 +99,10 @@ export async function saveMemory(
       kind: input.kind,
       content: input.content,
       importance: input.importance ?? 1,
-      tags: input.tags ?? [],
+      tags: encodeList(input.tags),
+      blobId: walrus?.blobId ?? null,
+      namespace: walrus?.namespace ?? namespace,
+      chainVerification: chain.verification ? JSON.stringify(chain.verification) : null,
     },
   });
 
@@ -84,40 +114,56 @@ export async function saveMemory(
     });
   }
 
-  // Trigger embedding if importance >= 3 (best-effort, don't block)
-  if ((input.importance ?? 1) >= 3) {
-    embedMemory(memory.id, input.content).catch((err) =>
-      console.error(`[writer] background embedding failed for memory ${memory.id}:`, err),
-    );
-  }
-
-  return { memoryId: memory.id };
+  return {
+    memoryId: memory.id,
+    blobId: walrus?.blobId ?? null,
+    chainVerification: chain.verification,
+  };
 }
 
 /**
- * Record a decision made during a coding session.
+ * Record a decision made during a coding session. Mirrored to Walrus Memory.
  */
 export async function recordDecision(
   sessionId: string,
   repoId: string,
   input: DecisionInput,
-): Promise<{ decisionId: string }> {
+): Promise<{ decisionId: string; blobId: string | null; chainVerification: ChainVerification | null }> {
+  const repo = await prisma.repository.findUnique({ where: { id: repoId } });
+  const namespace = repo ? namespaceForRepo(repo.name) : "default";
+
+  const alternatives = input.alternatives ?? [];
+  const body =
+    `Decision: ${input.title}\nRationale: ${input.rationale}` +
+    (alternatives.length ? `\nAlternatives considered: ${alternatives.join(", ")}` : "");
+  const chain = await verifyMemoryText(body);
+  const walrusText = chain.verification
+    ? `${body}\n\n${formatVerification(chain.verification)}`
+    : body;
+  const walrus = await rememberToWalrus(walrusText, namespace);
+
   const decision = await prisma.decision.create({
     data: {
       sessionId,
       repoId,
       title: input.title,
       rationale: input.rationale,
-      alternatives: input.alternatives ?? [],
+      alternatives: encodeList(alternatives),
+      blobId: walrus?.blobId ?? null,
+      chainVerification: chain.verification ? JSON.stringify(chain.verification) : null,
     },
   });
 
-  return { decisionId: decision.id };
+  return {
+    decisionId: decision.id,
+    blobId: walrus?.blobId ?? null,
+    chainVerification: chain.verification,
+  };
 }
 
 /**
  * Update a field on RepositoryContext (architecture, constraints, techStack, etc.).
- * Regenerates contextText and triggers re-embedding if sessionCount >= 2.
+ * Regenerates deterministic contextText.
  */
 export async function updateRepositoryContext(
   repoId: string,
@@ -138,12 +184,12 @@ export async function updateRepositoryContext(
     throw new Error(`RepositoryContext not found for repoId=${repoId}`);
   }
 
-  // Merge updates
+  // Merge updates (stored list fields are JSON-encoded strings on SQLite)
   const merged = {
     architecture: updates.architecture ?? context.architecture,
     constraints: updates.constraints ?? context.constraints,
-    techStack: updates.techStack ?? context.techStack,
-    importantFiles: updates.importantFiles ?? context.importantFiles,
+    techStack: updates.techStack ?? decodeStringList(context.techStack),
+    importantFiles: updates.importantFiles ?? decodeStringList(context.importantFiles),
   };
 
   // Regenerate deterministic contextText
@@ -160,17 +206,13 @@ export async function updateRepositoryContext(
   await prisma.repositoryContext.update({
     where: { repoId },
     data: {
-      ...merged,
+      architecture: merged.architecture,
+      constraints: merged.constraints,
+      techStack: encodeList(merged.techStack),
+      importantFiles: encodeList(merged.importantFiles),
       contextText,
     },
   });
-
-  // Trigger embedding if sessionCount >= 2 (best-effort)
-  if (context.sessionCount >= 2) {
-    embedRepositoryContext(repoId, contextText).catch((err) =>
-      console.error(`[writer] background embedding failed for repo ${repoId}:`, err),
-    );
-  }
 }
 
 /**

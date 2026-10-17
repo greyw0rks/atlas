@@ -9,24 +9,31 @@
     "type": "git",
     "url": "https://github.com/greyw0rks/atlas.git"
   },
-  "keywords": ["mcp", "memory", "coding-agent", "ai", "claude", "context"],
+  "keywords": [
+    "mcp",
+    "memory",
+    "coding-agent",
+    "ai",
+    "claude",
+    "context"
+  ],
   "bin": {
     "atlas-mcp": "./dist/mcp-server/index.js"
   },
   "files": [
-    "dist",
-    "prisma"
+    "dist"
   ],
   "scripts": {
     "build": "tsc && tsc-alias && node fix-imports.js",
     "start": "node dist/mcp-server/index.js",
     "dev": "npm run build && npm start",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate --schema ../prisma/schema.prisma",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",
-    "@prisma/client": "^5.22.0",
+    "@mysten-incubation/memwal": "^0.1.8",
+    "dotenv": "^18.0.8",
     "prisma": "^5.22.0"
   },
   "devDependencies": {
