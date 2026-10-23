@@ -1,128 +1,45 @@
-# Atlas MCP Server
+# Atlas MCP server
 
-**Persistent memory for coding agents via Model Context Protocol**
+This directory contains Atlas’s TypeScript server for the Model Context Protocol (MCP). Its 15 tools manage coding sessions, memories, decisions, semantic recall, repository inspection, handoffs, and Sui verification.
 
-Atlas gives AI coding assistants the ability to remember context, decisions, and tasks across sessions. Built for Claude Code, compatible with any MCP client.
+The server uses Walrus Memory for remote memory text and semantic recall, Tatum Sui RPC for blockchain lookups, and Prisma with SQLite for local records. See the [Atlas README](../README.md) for the architecture, tool reference, and storage limits.
 
-## Quick Start
+## Install from the repository
 
-### 1. Install globally
-
-```bash
-npm install -g atlas-mcp-server
-```
-
-### 2. Clone the full repository for setup
-
-```bash
-git clone https://github.com/greyw0rks/atlas.git
-cd atlas
-```
-
-### 3. Create your credentials
-
-Create `atlas/.env`:
-
-```env
-DATABASE_URL="postgresql://user:pass@host:26257/db?sslmode=require"
-AWS_REGION="us-east-1"
-AWS_ACCESS_KEY_ID="AKIA..."
-AWS_SECRET_ACCESS_KEY="..."
-```
-
-### 4. Run the installer
+Use Node.js 20 or newer. From the repository root, configure `.env` using [.env.example](../.env.example), then run:
 
 ```bash
 ./install.sh
 ```
 
-This will:
-- ✅ Install dependencies
-- ✅ Generate Prisma client
-- ✅ Push database schema
-- ✅ Configure `~/.claude/settings.json`
-- ✅ Install `/atlas` skill
-- ✅ Update `~/.claude/CLAUDE.md` to use Atlas
+The installer builds this package, links its `atlas-mcp` binary, and registers it with Claude Code and Codex. See [the installation guide](../INSTALL.md) for manual configuration.
 
-### 5. Restart Claude Code
+## Build and run the server
 
-That's it! Now when you open Claude Code in any project, say:
-
-```
-Start an Atlas session
-```
-
-Atlas will remember everything.
-
-## What It Does
-
-- **Remembers context** — tech stack, architecture, file structure
-- **Tracks decisions** — "why did we choose X over Y?" with full rationale
-- **Maintains tasks** — TODOs and bugs that persist between sessions
-- **Auto-discovers projects** — scans repositories to understand what you're building
-- **Semantic search** — find relevant past conversations via vector embeddings
-
-## How It Works
-
-Atlas is an MCP (Model Context Protocol) server that provides 12 tools:
-
-1. `atlas_start_session` — begin a coding session
-2. `atlas_end_session` — close session with summary
-3. `atlas_save_memory` — store important context
-4. `atlas_get_memories` — retrieve past memories
-5. `atlas_search_memories` — semantic search via embeddings
-6. `atlas_record_decision` — log architectural choices
-7. `atlas_get_decisions` — retrieve past decisions
-8. `atlas_save_task` — create TODO/BUG entries
-9. `atlas_get_open_tasks` — view pending work
-10. `atlas_scan_repository` — auto-discover tech stack
-11. `atlas_get_repository_context` — load full context
-12. `atlas_get_recent_sessions` — view session history
-
-## Architecture
-
-- **Database:** CockroachDB (distributed SQL + vector storage)
-- **Embeddings:** AWS Bedrock Titan (1536-dim vectors)
-- **MCP:** Standardized protocol for agent tools
-- **Portable:** `.atlas/` projection files (git-committable markdown)
-
-## Requirements
-
-- Node.js 18+
-- CockroachDB Cloud account (free tier works)
-- AWS Bedrock access (optional, for semantic search)
-
-## Documentation
-
-Full docs at: https://github.com/greyw0rks/atlas
-
-- [Installation Guide](https://github.com/greyw0rks/atlas/blob/master/INSTALL.md)
-- [How to Use](https://github.com/greyw0rks/atlas/blob/master/HOW_TO_USE.md)
-- [Verification](https://github.com/greyw0rks/atlas/blob/master/VERIFICATION.md)
-
-## Verification
-
-Test that it works:
+From the repository root, rebuild the server after source changes:
 
 ```bash
-atlas-mcp
-# Should output: Atlas MCP Server running on stdio
+npm run build --prefix mcp-server
 ```
 
-In Claude Code:
+To start the compiled server directly from that directory:
 
-```
-/atlas
+```bash
+node mcp-server/dist/mcp-server/index.js
 ```
 
-Shows repository status, open tasks, and recent sessions.
+The server communicates over standard input and output. Starting it directly does not open the dashboard; use an MCP client to call its tools.
+
+## Configure environment loading
+
+The compiled server loads the first existing `.env` from these locations:
+
+1. The directory set by `ATLAS_HOME`
+2. The Atlas checkout containing the compiled server
+3. The current working directory
+
+Existing process environment variables take precedence over file values. Keep the server and dashboard configured to use the same SQLite file.
 
 ## License
 
-MIT
-
-## Links
-
-- GitHub: https://github.com/greyw0rks/atlas
-- Issues: https://github.com/greyw0rks/atlas/issues
-- Live Demo: https://atlas-eight-plum.vercel.app
+Atlas uses the [MIT license](../LICENSE).

@@ -1,133 +1,186 @@
 # Atlas
 
-**Your coding agent forgets when the session ends. Atlas doesn't.**
+Persistent project memory for AI coding agents, built with Walrus Memory and Tatum.
 
-Atlas is a persistent memory layer for coding agents. It plugs into Claude Code, Codex, Cursor, or any MCP-capable client and gives the agent a place to write down what it learned: the architecture it reverse-engineered, the bug it spent an hour on, the decision it made and the options it rejected.
+Atlas helps your coding agent resume work with the decisions, bugs, tasks, and context from previous sessions. It connects through the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) and works with Claude Code, Codex, Cursor, and other MCP clients.
 
-Those memories are written to **Walrus Memory on Sui Mainnet**, so they outlive the session, the terminal, and the laptop. A local SQLite file is kept only as a fast, disposable index over them.
+[Public website](https://atlas-git-feat-cinematic-landing-greyw0rks-projects.vercel.app) · [Demo video](demo-video/renders/demo-video_2026-10-22_19-32-55.mp4) · [Installation guide](INSTALL.md) · [Architecture walkthrough](docs/blog/total-recall.md)
 
-Built for the **Tatum × Walrus "Total Recall" hackathon — Track 02, Smart Agents for Real Life.**
+Built for the Tatum × Walrus **Total Recall** hackathon, Track 02: Smart Agents for Real Life.
 
----
+## What you can do
 
-## The problem
+Atlas records project knowledge through 15 MCP tools:
 
-Every coding session starts from zero. The agent re-reads the same files, re-discovers the same constraints, and sometimes re-makes a decision the last agent already rejected. Context windows end; projects don't.
+- **Resume a project**: retrieve the previous session summary, open tasks, decisions, and recorded project context
+- **Preserve reasoning**: save decisions with their rationale and the alternatives considered
+- **Find past knowledge**: search memories by meaning through Walrus Memory
+- **Track work**: record bugs and TODOs with importance scores and tags
+- **Verify Sui references**: look up object details and transaction status through Tatum
+- **Prepare a handoff**: generate a session brief and local Markdown files for another agent or a teammate
 
-Notes in a markdown file don't fix this either: they are unstructured, they don't follow the repo, and they can't be searched by meaning.
+Sessions record which agent did the work. Claude Code and Codex can use the same Atlas installation and local index.
 
-## What Atlas does
+## Install and start a session
 
-- **Remembers across sessions.** Start a session and the agent receives the last session's summary, open tasks, key decisions, tech stack, and constraints before it writes a line of code.
-- **Writes memory onchain.** Every memory and decision is uploaded to Walrus Memory on Sui Mainnet. The returned Walrus blob id is stored next to the local row — a verifiable pointer to the actual memory text.
-- **Recalls by meaning.** Search is semantic, not keyword. The Walrus Memory relayer embeds and indexes each memory, so "how does auth work here?" finds the memory that says "sessions are JWT-signed in middleware.ts".
-- **Checks its own claims.** When a memory names a Sui object id or transaction digest, Atlas asks **Tatum's Sui RPC** what that object or transaction actually is, and stores the answer as provenance. A memory that says "the package is live at 0x…" can be backed by an object lookup instead of trust.
-- **Hands off cleanly.** Sessions end with a structured handoff: what I did, what failed, what's next. The same brief is projected to `.atlas/` files and `ATLAS.md` so a human or a non-MCP agent can pick it up.
-- **Works across agents.** Claude Code and Codex can share the same memory. Each session records which agent wrote it.
+Use Node.js **20 or newer**, npm, and an MCP client. For remote memory storage and semantic recall, create a delegate key and account in the [Walrus Memory dashboard](https://memory.walrus.xyz/dashboard). A [Tatum API key](https://tatum.io/) is recommended for blockchain verification.
 
-## Architecture
+### 1. Get the current release
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│  Claude Code · Codex · Cursor · any MCP client               │
-└───────────────────────────┬──────────────────────────────────┘
-                            │ MCP (stdio, 15 tools)
-┌───────────────────────────▼──────────────────────────────────┐
-│  Atlas MCP server                                            │
-│  sessions · memories · decisions · search · handoff          │
-└──────────────┬───────────────────────────────┬───────────────┘
-               │                               │
-┌──────────────▼──────────────┐   ┌────────────▼───────────────┐
-│  Walrus Memory (MemWal)     │   │  Tatum Sui RPC             │
-│  Sui Mainnet                │   │  object + transaction      │
-│  embed → SEAL encrypt →     │   │  lookups for any onchain   │
-│  upload blob → semantic     │   │  reference in a memory     │
-│  recall                     │   │                            │
-└──────────────┬──────────────┘   └────────────────────────────┘
-               │ blob id
-┌──────────────▼───────────────────────────────────────────────┐
-│  SQLite index (Prisma)                                       │
-│  rebuildable cache of the blobs: sessions, kinds, tags,      │
-│  importance, timestamps, chain provenance                    │
-└──────────────────────────────────────────────────────────────┘
+The hackathon implementation is on `feat/cinematic-landing`. Clone that branch and create your configuration file:
+
+```bash
+git clone --branch feat/cinematic-landing https://github.com/greyw0rks/atlas.git
+cd atlas
+cp .env.example .env
 ```
 
-The important inversion: **Walrus is the system of record, SQLite is the cache.** Wipe the database and the memory text is still on Mainnet, addressed by the blob ids; the local index holds no fact that isn't recoverable from Walrus.
+### 2. Configure your credentials
 
-## Memory model
+Edit `.env` using the variables documented in [.env.example](.env.example):
 
-Each memory has a kind, an importance from 1 to 5, tags, and a resolution flag (so a fixed bug keeps its history instead of disappearing).
-
-| Kind | Example |
+| Variable | Purpose |
 | --- | --- |
-| `ARCHITECTURE` | "The MCP server and dashboard share one Prisma client." |
-| `DECISION` | "Chose Walrus over a local vector DB because…" |
-| `BUG` | "MemWal returns 401 when the account id is the delegate pubkey." |
-| `TODO` | "Wire Tatum health into the status endpoint." |
-| `WARNING` | "Sui public fullnode JSON-RPC is deprecated; use gRPC." |
-| `IMPORTANT_FILE` | "`lib/memory/memwal.ts` is the only relayer entrypoint." |
-| `DEPENDENCY` | "`@mysten-incubation/memwal` ^0.1.8, Prisma 5.22." |
-| `SECURITY` | "The delegate key is a Mainnet signing key; server-side only." |
-| `CONTEXT` | Hackathon constraints, deadlines, product framing. |
+| `DATABASE_URL` | Local SQLite file; keep `file:./dev.db` for the default setup |
+| `MEMWAL_PRIVATE_KEY` | Your Walrus Memory delegate private key |
+| `MEMWAL_ACCOUNT_ID` | The onchain `MemWalAccount` object ID |
+| `TATUM_API_KEY` | API key sent to Tatum as `x-api-key`, when configured |
 
-Decisions are recorded separately with a rationale and the alternatives that were considered — because "why" is the part that gets lost first.
+**Use the account object ID for `MEMWAL_ACCOUNT_ID`.** Supplying the delegate public key causes HTTP 401 responses. Find the ID in the Memory dashboard or the `account_id` field of the `account::DelegateKeyAdded` event.
 
-## Onchain verification with Tatum
+Keep your delegate private key in `.env`; this file is ignored by Git.
 
-A memory is only as useful as it is true. Atlas extracts Sui references from memory text:
+### 3. Run the installer
 
-- object ids — `0x` followed by 64 hex characters
-- transaction digests — base58, only when explicitly labelled (`tx: …`)
-
-It resolves them through Tatum's Sui RPC gateway (`sui_getObject`, `sui_getTransactionBlock` with a `sui_getTransaction` fallback), records the object type/owner and the transaction status, and appends a one-line provenance note to the copy that is written to Walrus. The dashboard shows a **Tatum verified** badge on those memories.
-
-If the gateway rejects a request, the failure is recorded as provenance instead of being hidden. A Tatum API key is optional: when present it is sent as `x-api-key`, and the gateway also answers keyless requests today.
-
-## The dashboard
-
-- **Workspace** — every repository Atlas knows, with session and open-task counts.
-- **Repository** — pick-up-where-you-left-off widget, recent sessions, open tasks, key decisions.
-- **Session** — chronological timeline of memories and decisions, each with its Walrus blob link (the mainnet aggregator serves the encrypted blob) and Tatum verification badge.
-- **Search** — semantic recall across one repo or all of them.
-
-## Install
-
-See [INSTALL.md](INSTALL.md). The short version:
+From the Atlas checkout, run:
 
 ```bash
 ./install.sh
 ```
 
-You need Node 18+, a Walrus Memory delegate key and account id, and optionally a Tatum API key. The gateway answers keyless requests today; a key is recommended for rate limits.
+The installer installs dependencies, creates the SQLite schema, builds the MCP server, and links the `atlas-mcp` command. It also registers Atlas with Claude Code and Codex and adds session instructions to their global configuration.
 
-`./install.sh` configures Atlas in both Claude Code (`~/.claude/settings.json` +
-`CLAUDE.md`) and Codex (`~/.codex/config.toml` + `AGENTS.md`). For a manual
-Codex-only setup:
+It backs up existing Claude settings before editing them and removes hooks that reference `HANDOFF.md`. Read [the installation guide](INSTALL.md) for configuration details, manual setup, and rollback instructions.
+
+### 4. Ask your agent to use Atlas
+
+Restart your MCP client, open the project you want to work on, and ask:
+
+```text
+Start an Atlas session for this repository.
+Summarize the previous session, open tasks, and key decisions.
+```
+
+During work, ask it to record facts and reasoning:
+
+```text
+Save an ARCHITECTURE memory explaining how the API and dashboard share data.
+Record this decision with its rationale and alternatives.
+Search Atlas for previous decisions about authentication.
+```
+
+Before finishing, ask it to write a handoff and end the session:
+
+```text
+Create a handoff with what changed, what failed, and what should happen next.
+End the Atlas session with that handoff and a summary.
+```
+
+The agent calls the tools; Atlas does not automatically record every conversation. To generate a separate project brief, ask it to run `atlas_generate_atlas_md`.
+
+## How Walrus Memory and Tatum fit together
+
+Atlas combines remote memory storage with a local index for your dashboard and session history:
+
+```mermaid
+flowchart LR
+    Agent["Coding agent"] <--> MCP["Atlas MCP server"]
+    MCP <--> Walrus["Walrus Memory: storage and semantic recall"]
+    MCP --> Tatum["Tatum: Sui object and transaction lookups"]
+    MCP <--> SQLite["SQLite: local records and metadata"]
+    Dashboard["Local dashboard"] <--> SQLite
+```
+
+### Walrus Memory stores and recalls memory text
+
+Atlas sends memory and decision text to [Walrus Memory](https://memory.walrus.xyz/) on Sui Mainnet. The relayer handles embeddings, SEAL encryption, storage on Walrus, and semantic recall. Successful writes return a blob ID, which Atlas saves alongside the local record.
+
+The dashboard links that ID to the Mainnet aggregator. The aggregator serves the encrypted blob; opening the link does not reveal readable memory text. Atlas retrieves text through authenticated Memory recall.
+
+### Tatum checks blockchain references
+
+Atlas extracts Sui object IDs and explicitly labelled transaction digests from memory text. It queries Tatum’s Sui remote procedure call (RPC) gateway for object type, owner, and version, or transaction execution status.
+
+Atlas saves the structured result locally, including its network and timestamp. It appends a summary of the check to the text uploaded to Walrus. Failed lookups remain visible in the verification record.
+
+These checks establish facts about the referenced objects and transactions at the time of lookup. They do not validate every claim in a memory. The integration uses Tatum’s RPC service directly.
+
+## Open your local dashboard
+
+The dashboard shows repositories, recent sessions, open tasks, decisions, and semantic search results. Memory and decision entries include Walrus blob links and Tatum verification details when available.
+
+Start it from your configured Atlas checkout:
 
 ```bash
-codex mcp add atlas -- node $PWD/mcp-server/dist/mcp-server/index.js
-codex mcp list
+npm run dev
 ```
 
-## Public website and local dashboard
+Open [the local workspace](http://localhost:3000/workspace). The dashboard and MCP server read the same SQLite file.
 
-The Vercel site introduces Atlas and explains installation. Run `npm run dev`
-in your configured checkout and open <http://localhost:3000/workspace> to use
-the memory dashboard. Vercel dashboard links open the local setup guide;
-the memory API is only available locally.
+The Vercel deployment serves the public website and [local dashboard instructions](https://atlas-git-feat-cinematic-landing-greyw0rks-projects.vercel.app/local-dashboard). Hosted dashboard routes redirect to that guide, and hosted memory API routes return HTTP 403. Your local database and signing credentials are excluded from the deployment.
 
-## Source layout
+## Storage behavior and current limits
 
+The current implementation separates uploaded memory text from local project records:
+
+- SQLite stores memory copies, repository context, session history, tags, importance scores, task status, and structured verification details. Full reconstruction of this metadata from Walrus is not implemented; keep a backup of your SQLite file.
+- When credentials are missing or a Walrus write fails, Atlas keeps the record locally with `blobId: null` and reports `storedOnWalrus: false`. That record has no confirmed remote copy.
+- Semantic search requires Walrus Memory. Local records remain available in the dashboard, but there is no local semantic search fallback.
+- Machines using the same Memory account can recall uploaded text. Their local session histories and metadata do not automatically synchronize.
+- Memory namespaces derive from repository names. Use distinct names for projects that should have separate recall namespaces.
+
+## MCP tool reference
+
+The server exposes these tools:
+
+| Task | Tools |
+| --- | --- |
+| Start, review, and end sessions | `atlas_start_session`, `atlas_get_recent_sessions`, `atlas_end_session` |
+| Read and update project context | `atlas_get_repository_context`, `atlas_update_context` |
+| Save, search, and query work | `atlas_save_memory`, `atlas_search_memory`, `atlas_get_open_tasks` |
+| Record decisions | `atlas_record_decision` |
+| Generate handoffs and briefs | `atlas_create_handoff`, `atlas_generate_atlas_md` |
+| Inspect repositories and history | `atlas_scan_repository`, `atlas_extract_git_memories`, `atlas_reconstruct_timeline` |
+| Verify Sui references | `atlas_verify_onchain` |
+
+Memories use nine [kinds](lib/memory/kinds.ts): `ARCHITECTURE`, `DECISION`, `BUG`, `TODO`, `WARNING`, `IMPORTANT_FILE`, `DEPENDENCY`, `SECURITY`, and `CONTEXT`. Each memory has an importance score from 1 to 5 and optional tags. Decisions record a title, rationale, and alternatives.
+
+Ending a session writes `.atlas/` context, task, decision, and handoff files when the corresponding data exists. `atlas_generate_atlas_md` separately writes `ATLAS.md`.
+
+## Develop Atlas
+
+Atlas uses TypeScript, Node.js, Next.js, Prisma, SQLite, the MCP SDK, Walrus Memory, and Tatum Sui RPC.
+
+After installation, run the checks from the repository root:
+
+```bash
+npm run lint
+npm run build
+npm run build --prefix mcp-server
 ```
-lib/memory/memwal.ts      Walrus Memory client (the only relayer entrypoint)
-lib/memory/writer.ts      session lifecycle, memory + decision writes
-lib/memory/retrieval.ts   recall, hydration, timelines, stats
-lib/chain/tatum.ts        Sui reference extraction + Tatum RPC verification
-mcp-server/               MCP server (15 tools, stdio)
-app/                      Next.js dashboard
-prisma/                   SQLite schema — a rebuildable index
-```
+
+The source is organized around these responsibilities:
+
+| Path | Responsibility |
+| --- | --- |
+| [mcp-server/](mcp-server/) | MCP tools, environment loading, and Markdown exports |
+| [lib/memory/memwal.ts](lib/memory/memwal.ts) | Walrus Memory writes and recall |
+| [lib/memory/writer.ts](lib/memory/writer.ts) | Sessions, memory writes, and decisions |
+| [lib/memory/retrieval.ts](lib/memory/retrieval.ts) | Context queries and recall result hydration |
+| [lib/chain/tatum.ts](lib/chain/tatum.ts) | Sui reference extraction and verification |
+| [app/](app/) | Public website, local dashboard, and API routes |
+| [prisma/schema.prisma](prisma/schema.prisma) | Local database schema |
 
 ## License
 
-MIT
+Atlas is available under the [MIT license](LICENSE).

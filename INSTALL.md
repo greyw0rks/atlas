@@ -2,7 +2,7 @@
 
 ## What you need
 
-- **Node.js 18+** and npm
+- **Node.js 20+** and npm, as required by the Walrus Memory SDK
 - A **Walrus Memory delegate key** and its **account object id** — create them at <https://memory.walrus.xyz/dashboard>
 - Optional: a **Tatum API key** (Sui RPC). The gateway also answers keyless requests today; a key is recommended for rate limits and production use.
 
