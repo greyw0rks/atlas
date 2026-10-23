@@ -1,0 +1,56 @@
+{
+  "provider": "kitten-tts-2",
+  "model": "KittenML/kitten-tts-2",
+  "sample_rate": 24000,
+  "duration": 86.0,
+  "lines": [
+    {
+      "id": "s1",
+      "start": 0.9,
+      "end": 7.402875,
+      "text": "Every session starts from zero. Your agent relearns the codebase. Atlas fixes that."
+    },
+    {
+      "id": "s2",
+      "start": 8.7,
+      "end": 18.46045833333333,
+      "text": "Atlas is a memory layer for coding agents. Fifteen MCP tools store memories on Walrus Mainnet, and verify Sui facts through Tatum."
+    },
+    {
+      "id": "s3",
+      "start": 21.9,
+      "end": 39.616458333333334,
+      "text": "Start a session, and Atlas returns the last summary, open tasks, and past decisions. Here, the agent recovers three tasks and the decision to keep SQLite as a disposable index. Before writing code, it knows where the last session stopped."
+    },
+    {
+      "id": "s4",
+      "start": 41.9,
+      "end": 55.273208333333336,
+      "text": "Save a memory about a Sui package. Atlas writes it to Walrus Mainnet and returns a blob ID. Tatum checks the object: a package, immutable, version one. The memory carries its own provenance."
+    },
+    {
+      "id": "s5-session",
+      "start": 60.0,
+      "end": 64.79520833333333,
+      "text": "The dashboard shows blob links and verified badges."
+    },
+    {
+      "id": "s5-search",
+      "start": 65.8,
+      "end": 72.24058333333333,
+      "text": "Ask in plain language, and semantic search finds the memory, with the same proof attached."
+    },
+    {
+      "id": "s6",
+      "start": 73.6,
+      "end": 79.04083333333334,
+      "text": "Claude Code, Cursor, and Codex share one project memory."
+    },
+    {
+      "id": "s6-end",
+      "start": 80.3,
+      "end": 84.4855,
+      "text": "Atlas. Memory that outlives the session."
+    }
+  ]
+}

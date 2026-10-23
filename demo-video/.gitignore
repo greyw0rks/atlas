@@ -1,0 +1,9 @@
+node_modules/
+.hyperframes/
+__pycache__/
+.thumbnails/
+.waveform-cache/
+renders/*
+!renders/demo-video_2026-10-22_19-32-55.mp4
+!renders/demo-video_2026-10-22_19-32-55.meta.json
+assets/audio/voice/raw/previous/

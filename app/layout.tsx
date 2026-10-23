@@ -15,7 +15,7 @@ const geistMono = localFont({
 });
 
 const DESCRIPTION =
-  "Atlas helps AI coding agents retain project context, decisions, and knowledge across working sessions. An MCP server for Claude Code, with memories written to Walrus Memory on mainnet.";
+  "Atlas helps AI coding agents retain project context, decisions, and knowledge across working sessions. An MCP server for Claude Code and Codex, with memories written to Walrus Memory on mainnet.";
 
 export const metadata: Metadata = {
   title: {
@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     "AI agent memory",
     "MCP server",
     "Claude Code",
+    "Codex",
     "Walrus Memory",
     "project context",
   ],

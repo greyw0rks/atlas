@@ -441,12 +441,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         const { sessionId, repoId } = await startSession(repoPath, repoName, agentId, orgId);
 
-        // Load full context
+        // Load full context. The session just created is the newest row, so
+        // exclude it: "last session" must mean the one before this, otherwise
+        // a resumed agent is handed its own empty session and loses the
+        // summary/handoff it came back for. Prefer a completed session.
         const context = await getRepositoryContext(repoPath);
-        const recentSessions = await getRecentSessions(repoPath, 1);
+        const recentSessions = await getRecentSessions(repoPath, 10);
+        const previousSessions = recentSessions.filter((s) => s.id !== sessionId);
+        const lastSession =
+          previousSessions.find((s) => s.completed) ?? previousSessions[0] ?? null;
         const openTasks = await getOpenTasks(repoPath);
         const decisions = await getDecisions(repoPath, 5);
-        const suggestions = buildSuggestions(openTasks, recentSessions[0] || null);
+        const suggestions = buildSuggestions(openTasks, lastSession);
 
         return {
           content: [
@@ -456,7 +462,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 sessionId,
                 repoId,
                 context: context?.context,
-                lastSession: recentSessions[0] || null,
+                lastSession,
                 openTasks: openTasks.slice(0, 10),
                 recentDecisions: decisions.slice(0, 5),
                 suggestions,

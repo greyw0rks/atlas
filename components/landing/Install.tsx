@@ -41,7 +41,7 @@ export default function Install() {
         <div className="min-w-0 lg:sticky lg:top-24">
           <Reveal>
             <h2 className="atl-display text-[clamp(1.9rem,4.2vw,3rem)]">
-              Install Atlas in four commands.
+              Install Atlas in a few commands.
             </h2>
             <p className="atl-lede mt-5 max-w-[46ch]">
               Requires Node 18 or newer, a Walrus Memory delegate key and its

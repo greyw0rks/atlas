@@ -1,0 +1,15 @@
+{
+  "name": "demo-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/run_hyperframes.mjs npx --yes hyperframes@0.8.185 preview",
+    "check": "node scripts/run_hyperframes.mjs npx --yes hyperframes@0.8.185 check",
+    "render": "node scripts/run_hyperframes.mjs npx --yes hyperframes@0.8.185 render",
+    "publish": "node scripts/run_hyperframes.mjs npx --yes hyperframes@0.8.185 publish"
+  },
+  "devDependencies": {
+    "@hyperframes/core": "0.8.185",
+    "hyperframes": "0.8.185"
+  }
+}

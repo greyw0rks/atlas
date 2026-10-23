@@ -1,0 +1,12 @@
+{
+  "text": "Atlas is a memory layer for coding agents. Fifteen MCP tools store memories on Walrus Mainnet, and verify Sui facts through Tatum.",
+  "model": "KittenML/kitten-tts-2",
+  "revision": "f2eee74f4467855ad58fe16f1fb7b7df473263fd",
+  "reference_sha256": "8c0ad2140a3e871d6d446e925924544dec2ec2908f6bff10091a1b1b4efd20ac",
+  "preset": "stable",
+  "seed": 20261023,
+  "cpu_int8": true,
+  "sample_rate": 24000,
+  "duration": 10.08,
+  "generation_seconds": 140.261
+}

@@ -1,0 +1,16 @@
+# Local configuration and memory never belong in a website deployment.
+.env
+.env.*
+!.env.example
+.atlas/
+*.db
+*.db-journal
+prisma/*.db*
+
+# These projects are published to GitHub, not bundled with the website.
+demo-video/
+brag-output/
+mcp-server/
+docs/
+scripts/
+.git/

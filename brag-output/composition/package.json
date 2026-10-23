@@ -1,0 +1,10 @@
+{
+  "name": "atlas-brag",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/run_hyperframes.mjs npx --yes hyperframes@0.8.186 preview",
+    "check": "node scripts/run_hyperframes.mjs npx --yes hyperframes@0.8.186 check",
+    "render": "node scripts/run_hyperframes.mjs npx --yes hyperframes@0.8.186 render"
+  }
+}

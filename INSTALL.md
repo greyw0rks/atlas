@@ -26,8 +26,10 @@ The installer:
 6. registers the MCP server in `~/.claude/settings.json` (after backing it up)
 7. installs the `/atlas` skill
 8. appends an Atlas block to `~/.claude/CLAUDE.md` without overwriting your existing instructions
+9. registers the same MCP server in Codex (`~/.codex/config.toml`) and appends
+   an Atlas block to `~/.codex/AGENTS.md`
 
-Restart Claude Code afterwards.
+Restart Claude Code and Codex afterwards.
 
 ## Environment
 
@@ -72,7 +74,29 @@ Then add Atlas to your MCP client configuration:
 }
 ```
 
-For Codex / VS Code agent mode, the same entry goes in `.vscode/mcp.json` under `"servers"` with `"type": "stdio"`.
+For Codex, register it via the CLI (this writes `~/.codex/config.toml`):
+
+```bash
+codex mcp add atlas -- atlas-mcp
+# or, without the global link:
+codex mcp add atlas -- node $PWD/mcp-server/dist/mcp-server/index.js
+# see what got written
+codex mcp list
+```
+
+Or add the table by hand to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.atlas]
+command = "atlas-mcp"
+```
+
+The installer (`./install.sh`) does step 6 (global build + link) and this Codex
+registration automatically (step 7b), plus appends an Atlas block to
+`~/.codex/AGENTS.md` so Codex starts sessions with the right agent id.
+
+For VS Code agent mode, the same entry goes in `.vscode/mcp.json` under
+`"servers"` with `"type": "stdio"`.
 
 ## Run the dashboard
 
@@ -80,7 +104,12 @@ For Codex / VS Code agent mode, the same entry goes in `.vscode/mcp.json` under 
 npm run dev
 ```
 
-Open <http://localhost:3000>. The dashboard reads the same SQLite index as the MCP server, so memories written by your agent appear immediately.
+Open <http://localhost:3000/workspace>. The dashboard reads the same SQLite index as the MCP server, so memories written by your agent appear immediately.
+
+The Vercel deployment serves the public website and a local dashboard guide.
+Dashboard URLs redirect to that guide, and memory API routes are unavailable
+there. Run the dashboard locally with your own `.env`; no local memory index
+or Walrus signing credentials are uploaded to Vercel.
 
 ## Verify
 

@@ -19,13 +19,14 @@
  */
 
 export const REPO_URL = "https://github.com/greyw0rks/atlas";
-export const DOCS_URL = "https://github.com/greyw0rks/atlas/tree/master/docs";
+export const DOCS_URL = "https://github.com/greyw0rks/atlas/tree/feat/cinematic-landing/docs";
 export const CLONE_COMMAND = `git clone ${REPO_URL}.git`;
 
 /** The four commands from `install.sh`, in the order a new user runs them. */
 export const AUTOMATED_INSTALL = [
   CLONE_COMMAND,
   "cd atlas",
+  "git checkout feat/cinematic-landing",
   "cp .env.example .env   # MemWal delegate key + account id; Tatum key optional",
   "./install.sh",
 ].join("\n");
@@ -33,7 +34,9 @@ export const AUTOMATED_INSTALL = [
 /** The individual steps `install.sh` performs, for a manual setup. */
 export const MANUAL_INSTALL = [
   CLONE_COMMAND,
-  "cd atlas && npm install && npm install --prefix mcp-server",
+  "cd atlas && git checkout feat/cinematic-landing",
+  "cp .env.example .env   # Fill in your MemWal credentials before continuing",
+  "npm install && npm install --prefix mcp-server",
   "npx prisma generate && npx prisma db push",
   "npm run build --prefix mcp-server && npm link --prefix mcp-server",
 ].join("\n");
@@ -51,6 +54,7 @@ export const INSTALL_EFFECTS = [
   "Removes hooks that reference HANDOFF.md, leaving your other hooks intact",
   "Installs the /atlas skill to ~/.claude/skills/atlas",
   "Appends an Atlas block to ~/.claude/CLAUDE.md, keeping your instructions",
+  "Registers Atlas in ~/.codex/config.toml and appends instructions to ~/.codex/AGENTS.md",
 ];
 
 /**

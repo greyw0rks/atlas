@@ -1,0 +1,5 @@
+{"id":"image_001","type":"image","path":"assets/img/landing.png","source":"existing","description":"landing","provenance":{"provider":"local","adopted":true}}
+{"id":"bgm_001","type":"bgm","path":"assets/music/bed.mp3","source":"existing","description":"bed","provenance":{"provider":"local","adopted":true}}
+{"id":"sfx_001","type":"sfx","path":"assets/sfx/click.ogg","source":"existing","description":"click","provenance":{"provider":"local","adopted":true}}
+{"id":"sfx_002","type":"sfx","path":"assets/sfx/reveal.ogg","source":"existing","description":"reveal","provenance":{"provider":"local","adopted":true}}
+{"id":"sfx_003","type":"sfx","path":"assets/sfx/success.ogg","source":"existing","description":"success","provenance":{"provider":"local","adopted":true}}

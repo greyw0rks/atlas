@@ -1,0 +1,1 @@
+Built Atlas so coding agents can remember across sessions. Decisions, bugs, and handoffs — stored in Walrus Memory on Sui Mainnet.

@@ -45,8 +45,8 @@ const STEPS: Record<TabKey, Array<{ title: string; body: string }>> = {
       body: "It installs dependencies, creates the SQLite index, builds the server, and links the global atlas-mcp command.",
     },
     {
-      title: "Restart Claude Code",
-      body: "The atlas server is read from settings.json on the next launch. Sessions are started by you, not by a hook.",
+      title: "Restart your coding agent",
+      body: "The installer registers Atlas with Claude Code and Codex. Restart your client, then ask it to start an Atlas session.",
     },
   ],
   manual: [
@@ -286,6 +286,9 @@ export default function InstallPanel() {
       </div>
 
       <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <a href="/local-dashboard" className="atl-link">
+          Run the local dashboard
+        </a>
         <a href={DOCS_URL} target="_blank" rel="noreferrer" className="atl-link">
           Read the documentation
         </a>

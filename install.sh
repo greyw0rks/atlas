@@ -146,6 +146,30 @@ else
 fi
 echo ""
 
+# Step 7b: Configure Codex
+echo "[7b/9] Configuring Codex..."
+
+CODEX_CONFIG="$HOME/.codex/config.toml"
+mkdir -p "$HOME/.codex"
+
+if command -v codex &>/dev/null && codex mcp add atlas -- node "$ATLAS_DIR/mcp-server/dist/mcp-server/index.js" 2>/dev/null; then
+    echo -e "${GREEN}  ✓ Codex MCP server registered (via codex mcp add)${NC}"
+else
+    echo -e "${YELLOW}  → codex mcp add unavailable; updating config.toml directly${NC}"
+    if ! grep -q '\[mcp_servers\.atlas\]' "$CODEX_CONFIG" 2>/dev/null; then
+        {
+            echo ""
+            echo "[mcp_servers.atlas]"
+            echo "command = \"node\""
+            echo "args = [\"$ATLAS_DIR/mcp-server/dist/mcp-server/index.js\"]"
+        } >> "$CODEX_CONFIG"
+        echo -e "${GREEN}  ✓ Codex config.toml updated${NC}"
+    else
+        echo -e "${GREEN}  ✓ Codex MCP server already configured${NC}"
+    fi
+fi
+echo ""
+
 # Step 8: Install /atlas skill
 echo "[8/9] Installing /atlas skill..."
 
@@ -243,6 +267,36 @@ CLAUDE_EOF
 fi
 echo ""
 
+# ─── 9b. Global Codex AGENTS.md ─────────────────────────────────────────────
+echo "[9b/9] Updating global Codex AGENTS.md to use Atlas..."
+
+mkdir -p "$HOME/.codex"
+
+CODEX_MD="$HOME/.codex/AGENTS.md"
+if [ -f "$CODEX_MD" ] && grep -q "atlas:begin" "$CODEX_MD"; then
+    echo -e "${GREEN}  ✓ Atlas instructions already present in AGENTS.md${NC}"
+else
+    if [ -f "$CODEX_MD" ]; then
+        cp "$CODEX_MD" "$CODEX_MD.bak-$(date +%Y%m%d-%H%M%S)"
+        printf '\n' >> "$CODEX_MD"
+    fi
+
+    cat >> "$CODEX_MD" << 'CODEX_EOF'
+<!-- atlas:begin -->
+## Atlas memory
+
+Atlas MCP tools (`atlas_*`) are available via the `atlas` MCP server:
+- On session start, call atlas_start_session (repoPath = cwd, repoName = dir name, agentId = "codex").
+- Use atlas_get_repository_context to read prior architecture, tasks, decisions.
+- To remember something durable, call atlas_save_memory (TODO/BUG for tasks, ARCHITECTURE for structure, DECISION for choices).
+- Before stopping, call atlas_end_session with a brief summary.
+- If Atlas MCP tools are unavailable, carry on normally.
+<!-- atlas:end -->
+CODEX_EOF
+    echo -e "${GREEN}  ✓ Atlas instructions appended to AGENTS.md${NC}"
+fi
+echo ""
+
 # Final summary
 echo "======================================"
 echo "  ✅ Atlas Installation Complete!"
@@ -251,11 +305,14 @@ echo ""
 echo "What was configured:"
 echo "  • Global command: atlas-mcp"
 echo "  • MCP server: added to ~/.claude/settings.json"
+echo "  • Codex: MCP server added to ~/.codex/config.toml"
 echo "  • /atlas skill: installed at ~/.claude/skills/atlas/"
 echo "  • CLAUDE.md: updated to use Atlas on session start"
+echo "  • Codex AGENTS.md: updated to use Atlas on session start"
 echo ""
 echo "Next steps:"
 echo "  1. Restart Claude Code"
+echo "  1b. Restart Codex (or start a new Codex session)"
 echo "  2. Navigate to any project directory"
 echo "  3. Type: Start an Atlas session"
 echo "  4. Or type: /atlas"

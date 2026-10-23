@@ -100,7 +100,23 @@ See [INSTALL.md](INSTALL.md). The short version:
 
 You need Node 18+, a Walrus Memory delegate key and account id, and optionally a Tatum API key. The gateway answers keyless requests today; a key is recommended for rate limits.
 
-## Repository layout
+`./install.sh` configures Atlas in both Claude Code (`~/.claude/settings.json` +
+`CLAUDE.md`) and Codex (`~/.codex/config.toml` + `AGENTS.md`). For a manual
+Codex-only setup:
+
+```bash
+codex mcp add atlas -- node $PWD/mcp-server/dist/mcp-server/index.js
+codex mcp list
+```
+
+## Public website and local dashboard
+
+The Vercel site introduces Atlas and explains installation. Run `npm run dev`
+in your configured checkout and open <http://localhost:3000/workspace> to use
+the memory dashboard. Vercel dashboard links open the local setup guide;
+the memory API is only available locally.
+
+## Source layout
 
 ```
 lib/memory/memwal.ts      Walrus Memory client (the only relayer entrypoint)

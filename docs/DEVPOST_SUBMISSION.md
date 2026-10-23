@@ -41,7 +41,7 @@ Atlas is an MCP server for Claude Code, Codex, Cursor, and any MCP-capable clien
 
 - More than ten memories and a recorded decision stored on Walrus Memory Mainnet, each with a blob id — for example `4SqEO_Ef4vBzoJ2xWHOqng7HZ7_0OMMMv7S_YZqckqo`, which is also the Tatum-verified memory below.
 - Fifteen MCP tools, a Next.js dashboard, and an installer that is safe to run on an existing Claude Code setup.
-- Live Tatum verification against Sui Mainnet: a memory naming the Walrus Memory package was resolved through the gateway (object type and owner recorded), written to Walrus with the provenance attached, and the resulting blob fetched back from the mainnet aggregator. The call ran keyless.
+- Live Tatum verification against Sui Mainnet: a memory naming the Walrus Memory package was resolved through the gateway (object type and owner recorded), written to Walrus with the provenance attached, and the resulting blob fetched back from the mainnet aggregator. The gateway answered keyless during development; the submission build also sends an API key as `x-api-key`, and the live check reports `auth: api-key`.
 - End-to-end typecheck and production build green.
 
 ## What's next

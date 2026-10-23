@@ -40,7 +40,7 @@ export default function FinalCta() {
               Give your AI a memory.
             </h2>
             <p className="atl-lede mx-auto mt-5 max-w-[42ch]">
-              Atlas runs as an MCP server inside Claude Code. Your context stays
+              Atlas runs as an MCP server inside Claude Code and Codex. Your context stays
               where you put it, and it is still there next session.
             </p>
           </div>
