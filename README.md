@@ -1,271 +1,186 @@
-# Atlas 2.0 — Persistent Memory for Coding Agents
+# Atlas
 
-Atlas gives coding agents a memory. Your AI can write code. Atlas makes it remember why.
+Persistent project memory for AI coding agents, built with Walrus Memory and Tatum.
 
-## What is Atlas?
+Atlas helps your coding agent resume work with the decisions, bugs, tasks, and context from previous sessions. It connects through the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) and works with Claude Code, Codex, Cursor, and other MCP clients.
 
-Atlas is a persistent, repository-aware memory infrastructure for autonomous coding agents. It uses CockroachDB as a durable system of record for both structured and semantic memory, enabling agents to:
+[Public website](https://atlas-git-feat-cinematic-landing-greyw0rks-projects.vercel.app) · [Demo video](demo-video/renders/demo-video_2026-10-22_19-32-55.mp4) · [Installation guide](INSTALL.md) · [Architecture walkthrough](docs/blog/total-recall.md)
 
-- **Remember across sessions** — context survives agent restarts
-- **Learn from git history** — auto-extract memories from commits
-- **Search semantically** — vector kNN over AWS Bedrock embeddings
-- **Hand off work** — structured context transfer between agents
-- **Track decisions** — why choices were made, what alternatives existed
+Built for the Tatum × Walrus **Total Recall** hackathon, Track 02: Smart Agents for Real Life.
 
-## Architecture
+## What you can do
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  Claude Code / Codex / Cursor (MCP Client)             │
-└────────────────┬────────────────────────────────────────┘
-                 │ MCP Protocol
-┌────────────────▼────────────────────────────────────────┐
-│  Atlas MCP Server (10 tools)                           │
-│  - atlas_start_session                                 │
-│  - atlas_save_memory                                   │
-│  - atlas_record_decision                               │
-│  - atlas_scan_repository                               │
-│  - atlas_extract_git_memories                          │
-│  - atlas_search_memory                                 │
-│  - atlas_end_session                                   │
-└────────────────┬────────────────────────────────────────┘
-                 │
-┌────────────────▼────────────────────────────────────────┐
-│  Atlas Memory Layer                                     │
-│  - writer.ts  (session lifecycle, memory persistence)  │
-│  - retrieval.ts (11 query functions)                   │
-│  - embedder.ts (AWS Bedrock Titan v2, 1024d vectors)  │
-└────────────────┬────────────────────────────────────────┘
-                 │
-┌────────────────▼────────────────────────────────────────┐
-│  CockroachDB Cloud (Source of Truth)                   │
-│  - Structured memory (Prisma models)                   │
-│  - Semantic memory (VECTOR + kNN)                      │
-└─────────────────────────────────────────────────────────┘
-```
+Atlas records project knowledge through 15 MCP tools:
 
-## Features
+- **Resume a project**: retrieve the previous session summary, open tasks, decisions, and recorded project context
+- **Preserve reasoning**: save decisions with their rationale and the alternatives considered
+- **Find past knowledge**: search memories by meaning through Walrus Memory
+- **Track work**: record bugs and TODOs with importance scores and tags
+- **Verify Sui references**: look up object details and transaction status through Tatum
+- **Prepare a handoff**: generate a session brief and local Markdown files for another agent or a teammate
 
-### Core Memory System
-- **Session tracking** — every coding session has a timeline of memories + decisions
-- **Memory types** — ARCHITECTURE, DECISION, BUG, TODO, WARNING, IMPORTANT_FILE, DEPENDENCY, SECURITY, CONTEXT
-- **Importance gating** — only memories with importance ≥ 3 are embedded (reduces cost)
-- **Resolution tracking** — TODOs and BUGs can be marked resolved without deletion
+Sessions record which agent did the work. Claude Code and Codex can use the same Atlas installation and local index.
 
-### Intelligent Extraction
-- **Repository scanner** — auto-discovers tech stack from package.json, requirements.txt, go.mod, Cargo.toml
-- **Git memory extraction** — parses commit messages and file changes to generate memories
-- **Architecture discovery** — extracts system design from README.md
-- **Important files** — identifies critical files (config, schema, manifests)
+## Install and start a session
 
-### Semantic Search
-- **Vector kNN** — powered by AWS Bedrock Titan Embeddings v2
-- **Multi-repo search** — search across all repositories or restrict to one
-- **Kind filtering** — filter by memory type
-- **Audit log** — every retrieval is logged for observability
+Use Node.js **20 or newer**, npm, and an MCP client. For remote memory storage and semantic recall, create a delegate key and account in the [Walrus Memory dashboard](https://memory.walrus.xyz/dashboard). A [Tatum API key](https://tatum.io/) is recommended for blockchain verification.
 
-### Agent Handoff
-- **Structured handoffs** — "What I Did / What Failed / What's Next"
-- **.atlas/ projection files** — portable fallback when MCP server isn't connected
-- **Pick up where you left off** — UI surfaces last session summary, open tasks, key decisions
+### 1. Get the current release
 
-## Setup
-
-### 1. Prerequisites
-- Node.js 18+
-- CockroachDB Cloud account (free tier works)
-- AWS account with Bedrock access (Titan Embeddings v2)
-
-### 2. Environment Variables
-
-Create `.env`:
+The hackathon implementation is on `feat/cinematic-landing`. Clone that branch and create your configuration file:
 
 ```bash
-# CockroachDB connection string
-DATABASE_URL="postgresql://user:password@cluster.cockroachlabs.cloud:26257/defaultdb?sslmode=require"
-
-# AWS Bedrock (for embeddings)
-AWS_REGION="us-east-1"
-AWS_ACCESS_KEY_ID="your-key"
-AWS_SECRET_ACCESS_KEY="your-secret"
+git clone --branch feat/cinematic-landing https://github.com/greyw0rks/atlas.git
+cd atlas
+cp .env.example .env
 ```
 
-### 3. Database Setup
+### 2. Configure your credentials
+
+Edit `.env` using the variables documented in [.env.example](.env.example):
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Local SQLite file; keep `file:./dev.db` for the default setup |
+| `MEMWAL_PRIVATE_KEY` | Your Walrus Memory delegate private key |
+| `MEMWAL_ACCOUNT_ID` | The onchain `MemWalAccount` object ID |
+| `TATUM_API_KEY` | API key sent to Tatum as `x-api-key`, when configured |
+
+**Use the account object ID for `MEMWAL_ACCOUNT_ID`.** Supplying the delegate public key causes HTTP 401 responses. Find the ID in the Memory dashboard or the `account_id` field of the `account::DelegateKeyAdded` event.
+
+Keep your delegate private key in `.env`; this file is ignored by Git.
+
+### 3. Run the installer
+
+From the Atlas checkout, run:
 
 ```bash
-# Install dependencies
-npm install
-
-# Apply schema to CockroachDB
-npx prisma db push
-
-# Generate Prisma Client
-npx prisma generate
+./install.sh
 ```
 
-### 4. MCP Server Setup
+The installer installs dependencies, creates the SQLite schema, builds the MCP server, and links the `atlas-mcp` command. It also registers Atlas with Claude Code and Codex and adds session instructions to their global configuration.
 
-Add to your Claude Code settings (`~/.config/claude-code/settings.json`):
+It backs up existing Claude settings before editing them and removes hooks that reference `HANDOFF.md`. Read [the installation guide](INSTALL.md) for configuration details, manual setup, and rollback instructions.
 
-```json
-{
-  "mcpServers": {
-    "atlas": {
-      "command": "node",
-      "args": ["/path/to/atlas-2/mcp-server/dist/index.js"],
-      "env": {
-        "DATABASE_URL": "postgresql://...",
-        "AWS_REGION": "us-east-1",
-        "AWS_ACCESS_KEY_ID": "...",
-        "AWS_SECRET_ACCESS_KEY": "..."
-      }
-    }
-  }
-}
+### 4. Ask your agent to use Atlas
+
+Restart your MCP client, open the project you want to work on, and ask:
+
+```text
+Start an Atlas session for this repository.
+Summarize the previous session, open tasks, and key decisions.
 ```
 
-### 5. Auto-Fire Hook (optional)
+During work, ask it to record facts and reasoning:
 
-Install the SessionStart hook so Atlas context is injected automatically every time you start a Claude Code session — no manual `atlas_start_session` call needed:
-
-```bash
-bash scripts/install-autofire.sh
+```text
+Save an ARCHITECTURE memory explaining how the API and dashboard share data.
+Record this decision with its rationale and alternatives.
+Search Atlas for previous decisions about authentication.
 ```
 
-This writes a `SessionStart` hook to `~/.config/claude-code/settings.json`. When you open Claude Code in any repo that has `.atlas/` files or an `ATLAS.md`, the context is printed at session start. The hook stays silent for repos Atlas hasn't seen yet.
+Before finishing, ask it to write a handoff and end the session:
 
-### 6. Start the UI
+```text
+Create a handoff with what changed, what failed, and what should happen next.
+End the Atlas session with that handoff and a summary.
+```
+
+The agent calls the tools; Atlas does not automatically record every conversation. To generate a separate project brief, ask it to run `atlas_generate_atlas_md`.
+
+## How Walrus Memory and Tatum fit together
+
+Atlas combines remote memory storage with a local index for your dashboard and session history:
+
+```mermaid
+flowchart LR
+    Agent["Coding agent"] <--> MCP["Atlas MCP server"]
+    MCP <--> Walrus["Walrus Memory: storage and semantic recall"]
+    MCP --> Tatum["Tatum: Sui object and transaction lookups"]
+    MCP <--> SQLite["SQLite: local records and metadata"]
+    Dashboard["Local dashboard"] <--> SQLite
+```
+
+### Walrus Memory stores and recalls memory text
+
+Atlas sends memory and decision text to [Walrus Memory](https://memory.walrus.xyz/) on Sui Mainnet. The relayer handles embeddings, SEAL encryption, storage on Walrus, and semantic recall. Successful writes return a blob ID, which Atlas saves alongside the local record.
+
+The dashboard links that ID to the Mainnet aggregator. The aggregator serves the encrypted blob; opening the link does not reveal readable memory text. Atlas retrieves text through authenticated Memory recall.
+
+### Tatum checks blockchain references
+
+Atlas extracts Sui object IDs and explicitly labelled transaction digests from memory text. It queries Tatum’s Sui remote procedure call (RPC) gateway for object type, owner, and version, or transaction execution status.
+
+Atlas saves the structured result locally, including its network and timestamp. It appends a summary of the check to the text uploaded to Walrus. Failed lookups remain visible in the verification record.
+
+These checks establish facts about the referenced objects and transactions at the time of lookup. They do not validate every claim in a memory. The integration uses Tatum’s RPC service directly.
+
+## Open your local dashboard
+
+The dashboard shows repositories, recent sessions, open tasks, decisions, and semantic search results. Memory and decision entries include Walrus blob links and Tatum verification details when available.
+
+Start it from your configured Atlas checkout:
 
 ```bash
 npm run dev
 ```
 
-Visit `http://localhost:3000` to see the Atlas dashboard.
+Open [the local workspace](http://localhost:3000/workspace). The dashboard and MCP server read the same SQLite file.
 
-## Usage
+The Vercel deployment serves the public website and [local dashboard instructions](https://atlas-git-feat-cinematic-landing-greyw0rks-projects.vercel.app/local-dashboard). Hosted dashboard routes redirect to that guide, and hosted memory API routes return HTTP 403. Your local database and signing credentials are excluded from the deployment.
 
-### From Claude Code
+## Storage behavior and current limits
 
-```
-# Start a session (auto-fired if you installed the hook, otherwise call manually)
-atlas_start_session(repoPath="/home/user/my-project", repoName="my-project", agentId="claude-code")
+The current implementation separates uploaded memory text from local project records:
 
-# Scan repository for tech stack and architecture
-atlas_scan_repository(repoPath="/home/user/my-project", repoId="...")
+- SQLite stores memory copies, repository context, session history, tags, importance scores, task status, and structured verification details. Full reconstruction of this metadata from Walrus is not implemented; keep a backup of your SQLite file.
+- When credentials are missing or a Walrus write fails, Atlas keeps the record locally with `blobId: null` and reports `storedOnWalrus: false`. That record has no confirmed remote copy.
+- Semantic search requires Walrus Memory. Local records remain available in the dashboard, but there is no local semantic search fallback.
+- Machines using the same Memory account can recall uploaded text. Their local session histories and metadata do not automatically synchronize.
+- Memory namespaces derive from repository names. Use distinct names for projects that should have separate recall namespaces.
 
-# Extract memories from git history
-atlas_extract_git_memories(sessionId="...", repoId="...", repoPath="/home/user/my-project")
+## MCP tool reference
 
-# Save a memory
-atlas_save_memory(sessionId="...", repoId="...", kind="ARCHITECTURE", content="Uses Next.js 14 with App Router", importance=4)
+The server exposes these tools:
 
-# Record a decision
-atlas_record_decision(sessionId="...", repoId="...", title="Use Prisma over Drizzle", rationale="Team familiarity", alternatives=["Drizzle", "TypeORM"])
+| Task | Tools |
+| --- | --- |
+| Start, review, and end sessions | `atlas_start_session`, `atlas_get_recent_sessions`, `atlas_end_session` |
+| Read and update project context | `atlas_get_repository_context`, `atlas_update_context` |
+| Save, search, and query work | `atlas_save_memory`, `atlas_search_memory`, `atlas_get_open_tasks` |
+| Record decisions | `atlas_record_decision` |
+| Generate handoffs and briefs | `atlas_create_handoff`, `atlas_generate_atlas_md` |
+| Inspect repositories and history | `atlas_scan_repository`, `atlas_extract_git_memories`, `atlas_reconstruct_timeline` |
+| Verify Sui references | `atlas_verify_onchain` |
 
-# Search memories
-atlas_search_memory(query="how does authentication work?", repoPath="/home/user/my-project")
+Memories use nine [kinds](lib/memory/kinds.ts): `ARCHITECTURE`, `DECISION`, `BUG`, `TODO`, `WARNING`, `IMPORTANT_FILE`, `DEPENDENCY`, `SECURITY`, and `CONTEXT`. Each memory has an importance score from 1 to 5 and optional tags. Decisions record a title, rationale, and alternatives.
 
-# Generate ATLAS.md (portable session-start primer, no MCP needed)
-atlas_generate_atlas_md(repoPath="/home/user/my-project")
+Ending a session writes `.atlas/` context, task, decision, and handoff files when the corresponding data exists. `atlas_generate_atlas_md` separately writes `ATLAS.md`.
 
-# Reconstruct project timeline
-atlas_reconstruct_timeline(repoPath="/home/user/my-project", since="2026-01-01")
+## Develop Atlas
 
-# End session
-atlas_end_session(sessionId="...", summary="Added user authentication", repoPath="/home/user/my-project")
-```
+Atlas uses TypeScript, Node.js, Next.js, Prisma, SQLite, the MCP SDK, Walrus Memory, and Tatum Sui RPC.
 
-### From OpenAI Codex / VS Code Agent Mode (Cross-Agent)
-
-Atlas speaks standard MCP — any agent that supports the Model Context Protocol can use it. For Codex in VS Code, add Atlas to your `.vscode/mcp.json`:
-
-```json
-{
-  "servers": {
-    "atlas": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["/path/to/atlas-2/mcp-server/dist/index.js"],
-      "env": {
-        "DATABASE_URL": "postgresql://...",
-        "AWS_REGION": "us-east-1",
-        "AWS_ACCESS_KEY_ID": "...",
-        "AWS_SECRET_ACCESS_KEY": "..."
-      }
-    }
-  }
-}
-```
-
-Both Claude Code and Codex write to the same CockroachDB cluster, so memories created in one agent are immediately available to the other. The `agentId` field on each session and memory record tracks which agent wrote it.
-
-### From the UI
-
-- **Workspace** (`/`) — All repositories with session count, open tasks, last agent
-- **Repository** (`/repo/[id]`) — "Pick Up Where You Left Off" widget, recent sessions, open tasks, key decisions
-- **Session** (`/session/[id]`) — Session timeline with memories + decisions chronologically
-- **Search** (`/search`) — Semantic memory search across all repositories
-
-## API Routes
-
-- `GET /api/repositories` — List all repositories
-- `GET /api/repositories/[id]` — Get repository by ID with context
-- `POST /api/sessions` — Start a new session
-- `GET /api/sessions/[id]` — Get session details
-- `POST /api/sessions/[id]/handoff` — Generate handoff document
-- `GET /api/memories/search?q=query` — Semantic search
-- `GET /api/memories/stats` — Memory statistics
-
-## Deployment
-
-### Vercel (UI)
+After installation, run the checks from the repository root:
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-
-# Set environment variables in Vercel dashboard
+npm run lint
+npm run build
+npm run build --prefix mcp-server
 ```
 
-### MCP Server
+The source is organized around these responsibilities:
 
-The MCP server runs locally on your machine. Each developer needs to configure it in their Claude Code settings.
-
-For team deployments, consider:
-- Running the MCP server on a shared development server
-- Using SSH tunneling to connect Claude Code to remote MCP server
-- Deploying as a container with shared CockroachDB connection
-
-## Tech Stack
-
-- **Frontend** — Next.js 14, React, TypeScript, Tailwind CSS
-- **Backend** — Next.js API routes, Prisma ORM
-- **Database** — CockroachDB Cloud (PostgreSQL-compatible, vector support)
-- **Embeddings** — AWS Bedrock Titan Embeddings v2 (1024d)
-- **MCP** — Model Context Protocol (Claude Code integration)
-- **Deployment** — Vercel (UI), local/SSH (MCP server)
-
-## Why CockroachDB?
-
-- **Vector indexing** — native VECTOR type with cosine similarity search
-- **Distributed SQL** — horizontal scalability without sharding complexity
-- **Prisma support** — type-safe queries with auto-generated client
-- **Free tier** — 5 GB storage, perfect for personal projects
-
-## Why Atlas 2.0?
-
-Atlas 1.0 was a blockchain wallet tracer — interesting product but **tangential** to "agentic memory."
-
-Atlas 2.0 **IS** an agentic memory system:
-- ✅ Structured memory (CockroachDB models: sessions, memories, decisions)
-- ✅ Semantic memory (VECTOR + kNN search via AWS Bedrock embeddings)
-- ✅ Persistent memory (survives sessions, travels with repo via .atlas/ files)
-- ✅ Multi-agent (MCP for Claude/Codex + SDK for custom agents)
-- ✅ Repository-aware (memory is scoped to projects, not just user accounts)
+| Path | Responsibility |
+| --- | --- |
+| [mcp-server/](mcp-server/) | MCP tools, environment loading, and Markdown exports |
+| [lib/memory/memwal.ts](lib/memory/memwal.ts) | Walrus Memory writes and recall |
+| [lib/memory/writer.ts](lib/memory/writer.ts) | Sessions, memory writes, and decisions |
+| [lib/memory/retrieval.ts](lib/memory/retrieval.ts) | Context queries and recall result hydration |
+| [lib/chain/tatum.ts](lib/chain/tatum.ts) | Sui reference extraction and verification |
+| [app/](app/) | Public website, local dashboard, and API routes |
+| [prisma/schema.prisma](prisma/schema.prisma) | Local database schema |
 
 ## License
 
-MIT
+Atlas is available under the [MIT license](LICENSE).

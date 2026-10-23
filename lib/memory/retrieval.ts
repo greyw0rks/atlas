@@ -1,5 +1,25 @@
 import { prisma } from "@/lib/db";
-import type { MemoryKind } from "@prisma/client";
+import {
+  type MemoryKind,
+  decodeStringList,
+  encodeList,
+} from "./kinds";
+import { recallFromWalrus, recallAcrossNamespaces } from "./memwal";
+import { namespaceForRepo } from "./writer";
+import type { ChainVerification } from "@/lib/chain/tatum";
+
+/**
+ * chainVerification is stored as JSON text on SQLite. Parse it on read; a
+ * malformed value must never break recall, so failures degrade to null.
+ */
+function parseChainVerification(json: string | null): ChainVerification | null {
+  if (!json) return null;
+  try {
+    return JSON.parse(json) as ChainVerification;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Get overall memory statistics.
@@ -22,6 +42,7 @@ export async function getMemoryStats() {
 
 /**
  * Get full repository context for a given repository path.
+ * List fields (techStack / importantFiles) are decoded from their JSON storage.
  */
 export async function getRepositoryContext(repoPath: string) {
   const repo = await prisma.repository.findUnique({
@@ -35,11 +56,19 @@ export async function getRepositoryContext(repoPath: string) {
     return null;
   }
 
+  const context = repo.context
+    ? {
+        ...repo.context,
+        techStack: decodeStringList(repo.context.techStack),
+        importantFiles: decodeStringList(repo.context.importantFiles),
+      }
+    : null;
+
   return {
     repoId: repo.id,
     name: repo.name,
     path: repo.path,
-    context: repo.context,
+    context,
   };
 }
 
@@ -108,7 +137,7 @@ export async function getOpenTasks(repoPath: string) {
     kind: t.kind,
     content: t.content,
     importance: t.importance,
-    tags: t.tags,
+    tags: decodeStringList(t.tags),
     createdAt: t.createdAt,
   }));
 }
@@ -143,7 +172,9 @@ export async function getDecisions(repoPath: string, limit = 20) {
     id: d.id,
     title: d.title,
     rationale: d.rationale,
-    alternatives: d.alternatives,
+    alternatives: decodeStringList(d.alternatives),
+    blobId: d.blobId,
+    chainVerification: parseChainVerification(d.chainVerification),
     createdAt: d.createdAt,
     agentId: d.session.agentId,
     sessionStartedAt: d.session.startedAt,
@@ -164,8 +195,10 @@ export async function getSessionMemories(sessionId: string) {
     kind: m.kind,
     content: m.content,
     importance: m.importance,
-    tags: m.tags,
+    tags: decodeStringList(m.tags),
     resolved: m.resolved,
+    blobId: m.blobId,
+    chainVerification: parseChainVerification(m.chainVerification),
     createdAt: m.createdAt,
   }));
 }
@@ -183,53 +216,56 @@ export async function getSessionDecisions(sessionId: string) {
     id: d.id,
     title: d.title,
     rationale: d.rationale,
-    alternatives: d.alternatives,
+    alternatives: decodeStringList(d.alternatives),
+    blobId: d.blobId,
+    chainVerification: parseChainVerification(d.chainVerification),
     createdAt: d.createdAt,
   }));
 }
 
 /**
- * Find similar repositories using vector kNN search.
- * Returns repositories ordered by cosine similarity.
+ * Find repositories whose deterministic context text matches a query.
+ * (Cross-repo semantic search now lives in Walrus Memory per-namespace; this is a
+ * cheap local text-contains fallback over the SQLite index.)
  */
-export async function findSimilarRepositories(queryEmbedding: number[], limit = 10) {
-  const vectorLiteral = `[${queryEmbedding.join(",")}]`;
+export async function findSimilarRepositories(query: string, limit = 10) {
+  const q = query.trim().toLowerCase();
 
-  const results = await prisma.$queryRaw<
-    Array<{ repoId: string; name: string; path: string; distance: number }>
-  >`
-    SELECT
-      rc."repoId",
-      r.name,
-      r.path,
-      rc."contextEmbedding" <=> ${vectorLiteral}::vector AS distance
-    FROM "RepositoryContext" rc
-    JOIN "Repository" r ON r.id = rc."repoId"
-    WHERE rc."contextEmbedding" IS NOT NULL
-    ORDER BY distance
-    LIMIT ${limit}
-  `;
+  const repos = await prisma.repository.findMany({
+    include: { context: { select: { contextText: true } } },
+  });
 
-  return results.map((r) => ({
+  const scored = repos
+    .map((r) => {
+      const text = (r.context?.contextText ?? r.name).toLowerCase();
+      const hit = q.length > 0 && text.includes(q);
+      return { repoId: r.id, name: r.name, path: r.path, hit };
+    })
+    .filter((r) => r.hit)
+    .slice(0, limit);
+
+  return scored.map((r) => ({
     repoId: r.repoId,
     name: r.name,
     path: r.path,
-    similarity: 1 - r.distance, // cosine distance to similarity
+    similarity: 1,
   }));
 }
 
 /**
- * Semantic search over memories using vector kNN.
- * Returns memories ordered by cosine similarity.
+ * Semantic search over memories via Walrus Memory (MemWal) recall.
+ *
+ * Recall runs server-side on the relayer (embedding + vector search over SEAL-
+ * encrypted blobs on Walrus). Hits are hydrated from the local SQLite index by
+ * blobId to recover kind/importance/tags; hits without a local row are returned
+ * from the recalled text directly.
  */
 export async function searchMemories(
-  queryEmbedding: number[],
+  query: string,
   repoPath?: string,
   kind?: MemoryKind,
   limit = 20,
 ) {
-  const vectorLiteral = `[${queryEmbedding.join(",")}]`;
-
   let repo = null;
   if (repoPath) {
     repo = await prisma.repository.findUnique({
@@ -240,54 +276,99 @@ export async function searchMemories(
     }
   }
 
-  // Build WHERE clause dynamically
-  const whereClauses: string[] = [`m.embedding IS NOT NULL`];
-  if (repo) whereClauses.push(`m."repoId" = '${repo.id}'`);
-  if (kind) whereClauses.push(`m.kind = '${kind}'`);
+  const namespace = repo ? namespaceForRepo(repo.name) : undefined;
 
-  const whereSQL = whereClauses.join(" AND ");
+  // Over-fetch when a kind filter is applied, since MemWal can't filter by kind.
+  const recallLimit = kind ? Math.min(limit * 3, 100) : limit;
+  // The relayer scopes recall to a namespace. With no repository, discover the
+  // account's namespaces and merge their results instead of querying nothing.
+  const hits = namespace
+    ? await recallFromWalrus({ query, namespace, limit: recallLimit })
+    : await recallAcrossNamespaces({ query, limit: recallLimit });
 
-  const results = await prisma.$queryRaw<
-    Array<{
-      id: string;
-      kind: string;
-      content: string;
-      importance: number;
-      tags: string[];
-      resolved: boolean;
-      createdAt: Date;
-      repoName: string;
-      distance: number;
-    }>
-  >`
-    SELECT
-      m.id,
-      m.kind,
-      m.content,
-      m.importance,
-      m.tags,
-      m.resolved,
-      m."createdAt",
-      r.name AS "repoName",
-      m.embedding <=> ${vectorLiteral}::vector AS distance
-    FROM "Memory" m
-    JOIN "Repository" r ON r.id = m."repoId"
-    WHERE ${whereSQL}
-    ORDER BY distance
-    LIMIT ${limit}
-  `;
+  if (hits.length === 0) {
+    return [];
+  }
 
-  return results.map((m) => ({
-    id: m.id,
-    kind: m.kind as MemoryKind,
-    content: m.content,
-    importance: m.importance,
-    tags: m.tags,
-    resolved: m.resolved,
-    createdAt: m.createdAt,
-    repoName: m.repoName,
-    similarity: 1 - m.distance,
-  }));
+  // Hydrate from the local index by blobId.
+  const blobIds = hits.map((h) => h.blobId).filter(Boolean);
+  const rows = blobIds.length
+    ? await prisma.memory.findMany({
+        where: { blobId: { in: blobIds } },
+        include: { repo: { select: { name: true } } },
+      })
+    : [];
+  const byBlob = new Map(rows.map((r) => [r.blobId as string, r]));
+
+  // Decisions live in their own table but are written to Walrus with the same
+  // blob id, so they hydrate from the decision rows rather than surfacing as
+  // anonymous CONTEXT hits.
+  const decisionRows = blobIds.length
+    ? await prisma.decision.findMany({
+        where: { blobId: { in: blobIds } },
+        include: { repo: { select: { name: true } } },
+      })
+    : [];
+  const decisionsByBlob = new Map(
+    decisionRows.map((d) => [d.blobId as string, d]),
+  );
+
+  const results = hits.map((h) => {
+    const row = byBlob.get(h.blobId);
+    if (row) {
+      return {
+        id: row.id,
+        kind: row.kind as MemoryKind,
+        content: row.content,
+        importance: row.importance,
+        tags: decodeStringList(row.tags),
+        resolved: row.resolved,
+        blobId: row.blobId,
+        chainVerification: parseChainVerification(row.chainVerification),
+        createdAt: row.createdAt,
+        repoName: row.repo.name,
+        similarity: 1 - h.distance,
+      };
+    }
+    const decision = decisionsByBlob.get(h.blobId);
+    if (decision) {
+      const alternatives = decodeStringList(decision.alternatives);
+      return {
+        id: decision.id,
+        kind: "DECISION" as MemoryKind,
+        content:
+          `Decision: ${decision.title}\nRationale: ${decision.rationale}` +
+          (alternatives.length
+            ? `\nAlternatives considered: ${alternatives.join(", ")}`
+            : ""),
+        importance: 5,
+        tags: [] as string[],
+        resolved: false,
+        blobId: decision.blobId,
+        chainVerification: parseChainVerification(decision.chainVerification),
+        createdAt: decision.createdAt,
+        repoName: decision.repo.name,
+        similarity: 1 - h.distance,
+      };
+    }
+    // Memory lives on Walrus but not in this local index — surface it anyway.
+    return {
+      id: h.blobId,
+      kind: "CONTEXT" as MemoryKind,
+      content: h.text,
+      importance: 1,
+      tags: [] as string[],
+      resolved: false,
+      blobId: h.blobId,
+      chainVerification: null,
+      createdAt: h.createdAt ? new Date(h.createdAt) : new Date(),
+      repoName: repo?.name ?? "",
+      similarity: 1 - h.distance,
+    };
+  });
+
+  const filtered = kind ? results.filter((r) => r.kind === kind) : results;
+  return filtered.slice(0, limit);
 }
 
 /**
@@ -306,8 +387,8 @@ export async function logRetrieval(
       kind,
       queryText,
       repoId,
-      hitIds,
-      scores,
+      hitIds: encodeList(hitIds),
+      scores: encodeList(scores),
       latencyMs,
     },
   });
@@ -345,8 +426,16 @@ export async function getSession(sessionId: string) {
     summary: session.summary,
     handoffText: session.handoffText,
     completed: session.completed,
-    memories: session.memories,
-    decisions: session.decisions,
+    memories: session.memories.map((m) => ({
+      ...m,
+      tags: decodeStringList(m.tags),
+      chainVerification: parseChainVerification(m.chainVerification),
+    })),
+    decisions: session.decisions.map((d) => ({
+      ...d,
+      alternatives: decodeStringList(d.alternatives),
+      chainVerification: parseChainVerification(d.chainVerification),
+    })),
   };
 }
 
@@ -405,8 +494,10 @@ export async function getRepoTimeline(
         kind: m.kind,
         content: m.content,
         importance: m.importance,
-        tags: m.tags,
+        tags: decodeStringList(m.tags),
         resolved: m.resolved,
+        blobId: m.blobId,
+        chainVerification: parseChainVerification(m.chainVerification),
       },
     })),
     ...decisions.map((d) => ({
@@ -417,7 +508,9 @@ export async function getRepoTimeline(
         id: d.id,
         title: d.title,
         rationale: d.rationale,
-        alternatives: d.alternatives,
+        alternatives: decodeStringList(d.alternatives),
+        blobId: d.blobId,
+        chainVerification: parseChainVerification(d.chainVerification),
       },
     })),
   ].sort((a, b) => a.date.getTime() - b.date.getTime());

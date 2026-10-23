@@ -3,21 +3,14 @@ generator client {
 }
 
 datasource db {
-  provider = "cockroachdb"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-enum MemoryKind {
-  ARCHITECTURE   // how the system is structured
-  DECISION       // a choice that was made
-  BUG            // a known issue
-  TODO           // unfinished work
-  WARNING        // don't touch / tread carefully
-  IMPORTANT_FILE // a file that matters disproportionately
-  DEPENDENCY     // key external dep or integration
-  SECURITY       // security consideration
-  CONTEXT        // general background context
-}
+// MemoryKind — stored as a plain String on SQLite (Prisma has no enum on SQLite).
+// Allowed values (keep in sync with lib/memory/kinds.ts):
+//   ARCHITECTURE | DECISION | BUG | TODO | WARNING |
+//   IMPORTANT_FILE | DEPENDENCY | SECURITY | CONTEXT
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ORGANIZATIONAL MEMORY — knowledge shared across repositories
@@ -60,8 +53,9 @@ model RepositoryContext {
   repoId         String     @unique
   repo           Repository @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  techStack      String[]   @default([])
-  importantFiles String[]   @default([])
+  // JSON-encoded string[] (SQLite has no scalar lists). Parse via lib/memory/kinds.ts.
+  techStack      String     @default("[]")
+  importantFiles String     @default("[]")
   architecture   String?    // markdown: how the system is structured
   constraints    String?    // hard rules / "don't touch" notes
 
@@ -69,12 +63,8 @@ model RepositoryContext {
   openTaskCount  Int        @default(0)
 
   // Deterministic summary built from the structured fields above.
-  // Written as a stable string so re-embedding produces an identical vector.
-  // Never LLM-generated — that would make semantic neighbourhoods drift.
-  contextText      String?
-  // Written via $executeRaw with ::vector cast (Prisma has no native vector type)
-  contextEmbedding Unsupported("VECTOR(1024)")?
-  embeddedAt       DateTime?
+  // Semantic recall now lives in Walrus Memory (MemWal), not a local vector column.
+  contextText    String?
 
   sessionCount  Int       @default(0)
   lastSessionAt DateTime?
@@ -117,17 +107,24 @@ model Memory {
   repoId     String
   repo       Repository    @relation(fields: [repoId], references: [id])
 
-  kind       MemoryKind
+  kind       String        // see MemoryKind values above
   content    String        // the fact / note
-  // 1 = low-signal, 5 = critical. Embedding gate: importance >= 3.
+  // 1 = low-signal, 5 = critical.
   importance Int           @default(1)
-  tags       String[]      @default([])
+  // JSON-encoded string[] (SQLite has no scalar lists).
+  tags       String        @default("[]")
   // TODOs and BUGs can be marked resolved without deletion, preserving history.
   resolved   Boolean       @default(false)
 
-  // Written via $executeRaw with ::vector cast
-  embedding  Unsupported("VECTOR(1024)")?
-  embeddedAt DateTime?
+  // Walrus Memory (MemWal) is the system-of-record for the memory text on Mainnet.
+  // blobId = the Walrus blob id returned by rememberAndWait (onchain proof / link).
+  // namespace = the MemWal namespace the memory was written under (= repo name).
+  blobId     String?
+  namespace  String?
+  // JSON provenance from Tatum's Sui RPC for any object ids / tx digests named in
+  // the memory (ChainVerification in lib/chain/tatum.ts). null = nothing to check
+  // or Tatum not configured; it is never a claim that a check passed.
+  chainVerification String?
 
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
@@ -145,7 +142,13 @@ model Decision {
 
   title        String    // short label: "Use Fastify over Express"
   rationale    String    // why this choice was made
-  alternatives String[]  @default([]) // what else was considered
+  // JSON-encoded string[] (SQLite has no scalar lists).
+  alternatives String    @default("[]")
+
+  // Mirrored to Walrus Memory as well; blobId = onchain proof for the decision.
+  blobId       String?
+  // Tatum-verified provenance for Sui references in the decision text.
+  chainVerification String?
 
   createdAt    DateTime  @default(now())
 
@@ -162,11 +165,11 @@ model MemoryRetrieval {
   kind      String
   queryText String
   repoId    String?
-  hitIds    String[]
-  scores    Float[]
+  // JSON-encoded string[] / number[] (SQLite has no scalar lists).
+  hitIds    String   @default("[]")
+  scores    String   @default("[]")
   latencyMs Int
   createdAt DateTime @default(now())
 
   @@index([repoId, createdAt])
 }
-

@@ -50,3 +50,11 @@ next-env.d.ts
 
 # MCP server build artifacts
 mcp-server/prisma/migrations
+*.tgz
+
+# Local SQLite index (never commit the memory database)
+prisma/dev.db
+prisma/dev.db-journal
+*.db
+*.db-journal
+.env*

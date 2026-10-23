@@ -1,278 +1,155 @@
-# Atlas Memory System - Complete Installation Guide
+# Installing Atlas
 
-## One-Command Installation
+## What you need
+
+- **Node.js 20+** and npm, as required by the Walrus Memory SDK
+- A **Walrus Memory delegate key** and its **account object id** — create them at <https://memory.walrus.xyz/dashboard>
+- Optional: a **Tatum API key** (Sui RPC). The gateway also answers keyless requests today; a key is recommended for rate limits and production use.
+
+No database server is required. The local index is a SQLite file created on first run.
+
+## One command
 
 ```bash
-cd /path/to/atlas-2
+cd /path/to/atlas
+cp .env.example .env    # then fill in the values
 ./install.sh
 ```
 
-This automated installer will:
-1. ✅ Check Node.js prerequisites (18+)
-2. ✅ Verify `.env` configuration exists
-3. ✅ Install all dependencies (root + mcp-server)
-4. ✅ Setup database (Prisma generate + push schema)
-5. ✅ Build and install `atlas-mcp` globally
-6. ✅ Configure Claude Code settings (with backup)
-7. ✅ Fix SessionStart hook conflicts automatically
-8. ✅ Install `/atlas` skill
+The installer:
 
-**The installer automatically fixes all common issues, including:**
-- Conflicting HANDOFF.md hooks
-- Missing MCP server configuration
-- SessionStart/Stop hooks properly configured for Atlas
-- Skill installation with correct directory structure
+1. checks Node and npm
+2. verifies `.env` exists
+3. installs root and MCP-server dependencies
+4. creates the SQLite schema (`prisma db push`)
+5. builds the MCP server and links `atlas-mcp` globally
+6. registers the MCP server in `~/.claude/settings.json` (after backing it up)
+7. installs the `/atlas` skill
+8. appends an Atlas block to `~/.claude/CLAUDE.md` without overwriting your existing instructions
+9. registers the same MCP server in Codex (`~/.codex/config.toml`) and appends
+   an Atlas block to `~/.codex/AGENTS.md`
 
----
+Restart Claude Code and Codex afterwards.
 
-## Manual Installation (if needed)
+## Environment
 
-### Prerequisites
-- Node.js 20+
-- CockroachDB or PostgreSQL with pgvector
-- AWS Bedrock access (Titan Embeddings v2)
+`.env.example` documents every variable. The three that matter:
 
-### Step 1: Clone & Navigate
 ```bash
-git clone <atlas-2-repo-url>
-cd atlas-2
+# The on-chain MemWalAccount object id (0x + 64 hex) — NOT the delegate public key.
+# Using the public key here makes the relayer reject requests with HTTP 401.
+MEMWAL_PRIVATE_KEY="<delegate private key>"
+MEMWAL_ACCOUNT_ID="0x<memwal account object id>"
+
+# Optional. Sent as x-api-key when set; the gateway also answers keyless today.
+TATUM_API_KEY=""
 ```
 
-### Step 2: Configure Environment
-Create `.env`:
+Find the account object id from the `account::DelegateKeyAdded` event emitted when the delegate key was registered (its JSON has an `account_id` field), or from the MemWal dashboard.
+
+The delegate private key is a Mainnet signing key. Keep it server-side; `.env` is gitignored.
+
+## Manual install
+
 ```bash
-DATABASE_URL="postgresql://user:pass@host:26257/db?sslmode=require"
-AWS_REGION="us-east-1"
-AWS_ACCESS_KEY_ID="your-key"
-AWS_SECRET_ACCESS_KEY="your-secret"
+npm install
+npx prisma db push
+npx prisma generate
+
+cd mcp-server
+npm install
+npm run build
+npm link
 ```
 
-### Step 3: Run Installer
-```bash
-./install.sh
-```
+Then add Atlas to your MCP client configuration:
 
-### Step 4: Restart Claude Code
-Close and reopen Claude Code to load Atlas.
-
----
-
-## What Gets Configured
-
-### 1. Global Binary
-- **Location**: `~/.nvm/versions/node/vX.X.X/bin/atlas-mcp`
-- **Test**: `atlas-mcp` (should output: "Atlas MCP Server running on stdio")
-
-### 2. Claude Code Settings (`~/.claude/settings.json`)
 ```json
 {
   "mcpServers": {
     "atlas": {
       "command": "atlas-mcp"
     }
-  },
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Start an Atlas session using atlas_start_session MCP tool (pass repoPath as current working directory, repoName as directory name, agentId as 'claude-code'). Do not create or update HANDOFF.md files."
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "End the Atlas session using atlas_end_session MCP tool with a brief summary of what was accomplished."
-          }
-        ]
-      }
-    ]
   }
 }
 ```
 
-**Important**: The installer removes any conflicting HANDOFF.md hooks automatically.
+For Codex, register it via the CLI (this writes `~/.codex/config.toml`):
 
-### 3. /atlas Skill
-- **Location**: `~/.claude/skills/atlas/SKILL.md`
-- **Usage**: Type `/atlas` in any directory
-
----
-
-## Usage After Installation
-
-### Automatic Session Tracking
-When you open Claude Code in any directory, Atlas automatically starts tracking:
 ```bash
-cd ~/my-project
-claude
-# Atlas session starts automatically
+codex mcp add atlas -- atlas-mcp
+# or, without the global link:
+codex mcp add atlas -- node $PWD/mcp-server/dist/mcp-server/index.js
+# see what got written
+codex mcp list
 ```
 
-### Manual Commands
+Or add the table by hand to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.atlas]
+command = "atlas-mcp"
 ```
-"Search my Atlas memories for authentication"
-"What tasks are open across all projects?"
-"Record this as an architecture decision"
-"/atlas" - Show current repository status
-```
 
-### End Session
-Claude Code automatically calls `atlas_end_session` when you exit, creating:
-- `.atlas/` directory with portable context files
-- Session summary in database
+The installer (`./install.sh`) does step 6 (global build + link) and this Codex
+registration automatically (step 7b), plus appends an Atlas block to
+`~/.codex/AGENTS.md` so Codex starts sessions with the right agent id.
 
----
+For VS Code agent mode, the same entry goes in `.vscode/mcp.json` under
+`"servers"` with `"type": "stdio"`.
 
-## Verification
+## Run the dashboard
 
-### 1. Check Global Command
 ```bash
-which atlas-mcp
-# Output: /home/<user>/.nvm/versions/node/vX.X.X/bin/atlas-mcp
+npm run dev
+```
 
+Open <http://localhost:3000/workspace>. The dashboard reads the same SQLite index as the MCP server, so memories written by your agent appear immediately.
+
+The Vercel deployment serves the public website and a local dashboard guide.
+Dashboard URLs redirect to that guide, and memory API routes are unavailable
+there. Run the dashboard locally with your own `.env`; no local memory index
+or Walrus signing credentials are uploaded to Vercel.
+
+## Verify
+
+```bash
+# Server starts and speaks MCP over stdio
 atlas-mcp
-# Output: Atlas MCP Server running on stdio
+
+# In Claude Code
+/atlas
 ```
 
-### 2. Check Settings
-```bash
-cat ~/.claude/settings.json | grep -A 3 mcpServers
-# Should show atlas MCP server
-```
+Or ask the agent to save a memory and search for it. A successful write returns a `blobId`; the same memory appears on the session page with a Walrus link.
 
-### 3. Test in Claude Code
-```bash
-claude
-❯ /atlas
-# Should display repository status
-```
-
----
-
-## Common Issues (Auto-Fixed by Installer)
-
-### ❌ "Unknown command: /atlas"
-**Fixed**: Installer creates skill at `~/.claude/skills/atlas/SKILL.md`
-
-### ❌ Claude creates HANDOFF.md instead of using Atlas
-**Fixed**: Installer removes conflicting SessionStart hooks and configures Atlas hooks
-
-### ❌ "atlas-mcp: command not found"
-**Fixed**: Installer runs `npm link` and verifies PATH
-
-### ❌ "Database connection failed"
-**Fixed**: Installer verifies `.env` exists before proceeding
-
-### ❌ MCP tools not available
-**Fixed**: Installer adds MCP server to settings.json and creates backup
-
----
+To check Tatum specifically, call `atlas_verify_onchain` with a known Sui object id. It returns the object's type and owner, plus whether the call used an API key or ran keyless. Any rejection is returned per reference rather than hidden.
 
 ## Rollback
 
-If something goes wrong, your settings are backed up:
-
 ```bash
-# Restore previous settings
 cp ~/.claude/settings.json.backup-YYYYMMDD-HHMMSS ~/.claude/settings.json
-
-# Uninstall global command
-cd /path/to/atlas-2/mcp-server
-npm unlink
-
-# Remove skill
+cd mcp-server && npm unlink
 rm -rf ~/.claude/skills/atlas
 ```
 
----
-
-## Updating Atlas
+## Updating
 
 ```bash
-cd /path/to/atlas-2
 git pull
-
-cd mcp-server
-npm run build
-# Global link stays valid - settings unchanged
+npm install
+cd mcp-server && npm install && npm run build
 ```
 
-Restart Claude Code to use updated version.
+The global link and settings stay valid. Restart Claude Code.
 
----
+## Multi-machine
 
-## Multi-Machine Setup
+Use the same `.env` on every machine. Each machine keeps its own SQLite index, but all memories live in the same Walrus Memory account, so recall works from anywhere.
 
-Run the installer on each machine with the **same `.env` file** (same DATABASE_URL):
+## Troubleshooting
 
-```bash
-# Machine 1
-cd atlas-2 && ./install.sh
-
-# Machine 2 (same database)
-cd atlas-2 && ./install.sh
-# All machines share the same memory!
-```
-
----
-
-## Installation Summary
-
-**Before installer:**
-- ❌ Manual settings.json editing
-- ❌ Hook conflicts with HANDOFF.md
-- ❌ Forgot to remove template hooks
-- ❌ Skill not installed correctly
-
-**After installer:**
-- ✅ One command: `./install.sh`
-- ✅ All conflicts resolved automatically
-- ✅ Settings backed up before changes
-- ✅ Hooks properly configured
-- ✅ Skill installed with correct structure
-- ✅ Global command verified
-
----
-
-## Getting Help
-
-**Installation failed?**
-```bash
-# Check the backup
-ls ~/.claude/*.backup-*
-
-# Restore if needed
-cp ~/.claude/settings.json.backup-* ~/.claude/settings.json
-```
-
-**Atlas not starting sessions?**
-```bash
-# Verify MCP server
-atlas-mcp
-# Should output: "Atlas MCP Server running on stdio"
-
-# Check settings
-cat ~/.claude/settings.json | grep -A 10 mcpServers
-```
-
-**Still having issues?**
-Check `/path/to/atlas-2/TROUBLESHOOTING.md` or open an issue.
-
----
-
-## What's Next?
-
-After installation:
-1. **Restart Claude Code**
-2. Navigate to any project
-3. Sessions start automatically
-4. Use `/atlas` to view status
-5. Ask Claude to search memories, record decisions, etc.
-
-Atlas is now tracking all your coding work across every project! 🚀
+- **`atlas-mcp: command not found`** — `npm link` did not reach your PATH; restart the terminal or add npm's global bin directory to `PATH`.
+- **Every write returns `blobId: null`** — the relayer is unreachable or credentials are wrong. Check that `MEMWAL_ACCOUNT_ID` is the object id, not the public key.
+- **`atlas_verify_onchain` reports an auth error** — the gateway started requiring a key. Add `TATUM_API_KEY`; no other config changes.
+- **WSL2: Prisma/fetch cannot reach the network** — no IPv6 route but DNS returns AAAA. Run Node with `NODE_OPTIONS=--no-network-family-autoselection`.

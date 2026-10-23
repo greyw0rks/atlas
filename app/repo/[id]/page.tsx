@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { WalrusProof, type ChainVerification } from "@/components/WalrusProof";
 
 interface RepositoryData {
   id: string;
@@ -43,6 +44,8 @@ interface RepositoryData {
     alternatives: string[];
     createdAt: string;
     agentId: string;
+    blobId: string | null;
+    chainVerification: ChainVerification | null;
   }>;
 }
 
@@ -86,7 +89,7 @@ export default function RepositoryPage() {
       <div className="min-h-screen bg-[#05070C] flex items-center justify-center">
         <div className="text-center">
           <div className="text-2xl font-bold mb-2">Repository not found</div>
-          <Link href="/" className="text-[#8B5CF6] hover:text-[#A78BFA]">
+          <Link href="/workspace" className="text-[#8B5CF6] hover:text-[#A78BFA]">
             ← Back to workspace
           </Link>
         </div>
@@ -104,7 +107,7 @@ export default function RepositoryPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Link
-                href="/"
+                href="/workspace"
                 className="text-[#64748B] hover:text-[#E8E9F3] transition-colors"
               >
                 ←
@@ -273,6 +276,10 @@ export default function RepositoryPage() {
                     <span>•</span>
                     <span>{formatRelativeTime(decision.createdAt)}</span>
                   </div>
+                  <WalrusProof
+                    blobId={decision.blobId}
+                    chainVerification={decision.chainVerification}
+                  />
                 </div>
               ))}
             </div>

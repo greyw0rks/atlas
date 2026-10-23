@@ -1,0 +1,12 @@
+{
+  "text": "Start a session, and Atlas returns the last summary, open tasks, and past decisions. Here, the agent recovers three tasks and the decision to keep SQLite as a disposable index. Before writing code, it knows where the last session stopped.",
+  "model": "KittenML/kitten-tts-2",
+  "revision": "f2eee74f4467855ad58fe16f1fb7b7df473263fd",
+  "reference_sha256": "8c0ad2140a3e871d6d446e925924544dec2ec2908f6bff10091a1b1b4efd20ac",
+  "preset": "stable",
+  "seed": 20261024,
+  "cpu_int8": true,
+  "sample_rate": 24000,
+  "duration": 18.88,
+  "generation_seconds": 244.384
+}

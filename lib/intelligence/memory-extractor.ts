@@ -1,5 +1,5 @@
 import { saveMemory } from "@/lib/memory/writer";
-import type { MemoryKind } from "@prisma/client";
+import type { MemoryKind } from "@/lib/memory/kinds";
 
 interface GitCommit {
   hash: string;

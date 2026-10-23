@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRecentSessions, getOpenTasks, getDecisions } from "@/lib/memory/retrieval";
+import { decodeStringList } from "@/lib/memory/kinds";
 import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +37,13 @@ export async function GET(
       id: repo.id,
       name: repo.name,
       path: repo.path,
-      context: repo.context,
+      context: repo.context
+        ? {
+            ...repo.context,
+            techStack: decodeStringList(repo.context.techStack),
+            importantFiles: decodeStringList(repo.context.importantFiles),
+          }
+        : null,
       recentSessions,
       openTasks,
       decisions,
