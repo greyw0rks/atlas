@@ -119,7 +119,7 @@ Start an Atlas session for this repository with agentId "codex".
 Summarize the previous session, open tasks, and key decisions.
 ```
 
-A successful call returns a session ID and repository ID. A new repository may have no previous session yet. See the [website's Codex guide](https://atlas-git-feat-cinematic-landing-greyw0rks-projects.vercel.app/docs#codex) for copyable commands and troubleshooting.
+A successful call returns a session ID and repository ID. A new repository may have no previous session yet. See the [website's Codex guide](https://atlas-a.vercel.app/docs#codex) for copyable commands and troubleshooting.
 
 ### Other MCP clients
 
