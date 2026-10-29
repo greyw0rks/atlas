@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { REPO_URL } from "@/components/landing/content";
+import { DOCS_URL } from "@/components/landing/content";
 
 export const metadata: Metadata = {
   title: "Run your local dashboard",
@@ -40,9 +40,9 @@ export default function LocalDashboard() {
         </section>
 
         <div className="mt-10 flex flex-wrap gap-4">
-          <a href={`${REPO_URL}/blob/feat/cinematic-landing/INSTALL.md`} className="atl-btn atl-btn-primary">
+          <Link href={`${DOCS_URL}#installation`} className="atl-btn atl-btn-primary">
             Installation guide
-          </a>
+          </Link>
           <Link href="/#install" className="atl-btn atl-btn-ghost">Install Atlas</Link>
         </div>
       </main>

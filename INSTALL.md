@@ -53,13 +53,11 @@ The delegate private key is a Mainnet signing key. Keep it server-side; `.env` i
 
 ```bash
 npm install
-npx prisma db push
 npx prisma generate
-
-cd mcp-server
-npm install
-npm run build
-npm link
+npx prisma db push
+npm install --prefix mcp-server
+npm run build --prefix mcp-server
+npm link --prefix mcp-server
 ```
 
 Then add Atlas to your MCP client configuration:
@@ -74,26 +72,56 @@ Then add Atlas to your MCP client configuration:
 }
 ```
 
-For Codex, register it via the CLI (this writes `~/.codex/config.toml`):
+### Connect Codex
+
+From the **Atlas repository root**, register it via the CLI (this writes `~/.codex/config.toml`):
 
 ```bash
 codex mcp add atlas -- atlas-mcp
 # or, without the global link:
-codex mcp add atlas -- node $PWD/mcp-server/dist/mcp-server/index.js
+codex mcp add atlas -- node "$PWD/mcp-server/dist/mcp-server/index.js"
 # see what got written
 codex mcp list
 ```
 
-Or add the table by hand to `~/.codex/config.toml`:
+Or, if `atlas-mcp` is linked on PATH, add the table by hand to `~/.codex/config.toml`. Choose one registration method; update an existing Atlas table instead of adding a duplicate:
 
 ```toml
 [mcp_servers.atlas]
 command = "atlas-mcp"
 ```
 
-The installer (`./install.sh`) does step 6 (global build + link) and this Codex
-registration automatically (step 7b), plus appends an Atlas block to
-`~/.codex/AGENTS.md` so Codex starts sessions with the right agent id.
+For manual setup, append the following to `~/.codex/AGENTS.md` for all projects, or to one repository's `AGENTS.md`. Preserve your existing instructions and update an existing Atlas block instead of duplicating it:
+
+```markdown
+<!-- atlas:begin -->
+## Atlas memory
+
+Use the Atlas MCP tools for this repository:
+- On session start, call atlas_start_session with repoPath = cwd,
+  repoName = the directory name, and agentId = "codex".
+- Read the returned context, previous session, open tasks, and decisions.
+- Save durable facts with atlas_save_memory; use TODO or BUG for tasks
+  and ARCHITECTURE for project structure.
+- Record choices with atlas_record_decision, including the rationale.
+- Before stopping, call atlas_end_session with a brief summary.
+- If Atlas tools are unavailable, carry on normally.
+<!-- atlas:end -->
+```
+
+The installer (`./install.sh`) builds and links the server, registers Codex,
+and appends global instructions automatically.
+
+Restart Codex, open the project you want Atlas to remember, and ask:
+
+```text
+Start an Atlas session for this repository with agentId "codex".
+Summarize the previous session, open tasks, and key decisions.
+```
+
+A successful call returns a session ID and repository ID. A new repository may have no previous session yet. See the [website's Codex guide](https://atlas-git-feat-cinematic-landing-greyw0rks-projects.vercel.app/docs#codex) for copyable commands and troubleshooting.
+
+### Other MCP clients
 
 For VS Code agent mode, the same entry goes in `.vscode/mcp.json` under
 `"servers"` with `"type": "stdio"`.
@@ -141,7 +169,7 @@ npm install
 cd mcp-server && npm install && npm run build
 ```
 
-The global link and settings stay valid. Restart Claude Code.
+The global link and settings stay valid. Restart Claude Code or Codex.
 
 ## Multi-machine
 

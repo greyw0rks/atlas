@@ -4,7 +4,7 @@ Persistent project memory for AI coding agents, built with Walrus Memory and Tat
 
 Atlas helps your coding agent resume work with the decisions, bugs, tasks, and context from previous sessions. It connects through the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) and works with Claude Code, Codex, Cursor, and other MCP clients.
 
-[Public website](https://atlas-git-feat-cinematic-landing-greyw0rks-projects.vercel.app) · [Demo video](demo-video/renders/demo-video_2026-10-22_19-32-55.mp4) · [Installation guide](INSTALL.md) · [Architecture walkthrough](docs/blog/total-recall.md)
+[Public website](https://atlas-git-feat-cinematic-landing-greyw0rks-projects.vercel.app) · [Documentation](https://atlas-git-feat-cinematic-landing-greyw0rks-projects.vercel.app/docs) · [Codex setup](https://atlas-git-feat-cinematic-landing-greyw0rks-projects.vercel.app/docs#codex) · [Demo video](demo-video/renders/demo-video_2026-10-22_19-32-55.mp4) · [Installation guide](INSTALL.md) · [Architecture walkthrough](docs/blog/total-recall.md)
 
 Built for the Tatum × Walrus **Total Recall** hackathon, Track 02: Smart Agents for Real Life.
 

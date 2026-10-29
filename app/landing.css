@@ -596,6 +596,41 @@
 
 /* ── Anchor scrolling ───────────────────────────────────────────────────── */
 
+.atl-docs-section {
+  margin-top: 3.5rem;
+  border-top: 1px solid var(--atl-border);
+  padding-top: 2rem;
+  line-height: 1.7;
+}
+
+.atl-docs-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.atl-docs-section h3 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.atl-docs-section p {
+  margin: 1rem 0;
+  color: var(--atl-muted);
+}
+
+.atl-docs-section .atl-terminal {
+  margin-top: 1rem;
+}
+
+.atl-docs :is(a, button, summary):focus-visible,
+.atl-root :is(.atl-tab, .atl-copy, .atl-link):focus-visible {
+  outline: 2px solid var(--atl-violet);
+  outline-offset: 4px;
+}
+
 .atl-root [id] {
   scroll-margin-top: 88px;
 }

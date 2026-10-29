@@ -2,13 +2,14 @@
 
 import {
   useCallback,
-  useEffect,
-  useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
+import CommandBlock from "./CommandBlock";
 import {
   AUTOMATED_INSTALL,
+  CODEX_COMMANDS,
+  CODEX_SETTINGS,
   DOCS_URL,
   INSTALL_EFFECTS,
   INSTALL_WARNINGS,
@@ -17,11 +18,12 @@ import {
   SETTINGS_SNIPPET,
 } from "./content";
 
-type TabKey = "auto" | "manual";
+type TabKey = "auto" | "manual" | "codex";
 
 const TABS: Array<{ key: TabKey; label: string }> = [
   { key: "auto", label: "Automated" },
   { key: "manual", label: "Manual" },
+  { key: "codex", label: "Codex" },
 ];
 
 /**
@@ -68,102 +70,31 @@ const STEPS: Record<TabKey, Array<{ title: string; body: string }>> = {
     },
     {
       title: "Register the server",
-      body: "Add the snippet below to ~/.claude/settings.json yourself. This route skips the /atlas skill and leaves your CLAUDE.md alone.",
+      body: "Use the JSON below for Claude Code, or select the Codex tab for its CLI and TOML configuration. Manual setup leaves your agent instructions for you to add.",
+    },
+  ],
+  codex: [
+    {
+      title: "Install Atlas first",
+      body: "Complete the Automated or Manual steps with Node 20+ and your .env configured. The automated installer already registers Codex; use the command below if you installed manually or need to reconnect it.",
+    },
+    {
+      title: "Register Atlas with Codex",
+      body: "Run the commands below from the Atlas repository root. The absolute server path lets Codex use Atlas while you work in other projects. Confirm atlas appears in codex mcp list.",
+    },
+    {
+      title: "Add session instructions",
+      body: "Add the Atlas instructions from the Codex guide to ~/.codex/AGENTS.md, or to one project's AGENTS.md. The automated installer adds global instructions for you.",
+    },
+    {
+      title: "Restart Codex and start a session",
+      body: 'Open your project in a new Codex session and ask: "Start an Atlas session for this repository with agentId codex, and summarize previous work."',
     },
   ],
 };
 
-function CopyButton({ value, label }: { value: string; label: string }) {
-  const [state, setState] = useState<"idle" | "copied" | "error">("idle");
-  const timer = useRef<number | null>(null);
-
-  useEffect(
-    () => () => {
-      if (timer.current !== null) window.clearTimeout(timer.current);
-    },
-    [],
-  );
-
-  const copy = useCallback(async () => {
-    let ok = false;
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(value);
-        ok = true;
-      } else {
-        // Fallback for pages served over plain HTTP, where the async clipboard
-        // API is unavailable.
-        const area = document.createElement("textarea");
-        area.value = value;
-        area.setAttribute("readonly", "");
-        area.style.position = "fixed";
-        area.style.top = "-1000px";
-        area.style.opacity = "0";
-        document.body.appendChild(area);
-        area.select();
-        ok = document.execCommand("copy");
-        document.body.removeChild(area);
-      }
-    } catch {
-      ok = false;
-    }
-
-    setState(ok ? "copied" : "error");
-    if (timer.current !== null) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setState("idle"), 2200);
-  }, [value]);
-
-  return (
-    <button
-      type="button"
-      className="atl-copy"
-      onClick={copy}
-      aria-label={label}
-      aria-live="polite"
-    >
-      {state === "copied" ? "Copied" : state === "error" ? "Copy failed" : "Copy"}
-    </button>
-  );
-}
-
-function CommandBlock({
-  title,
-  commands,
-  copyLabel,
-}: {
-  title: string;
-  commands: string;
-  copyLabel: string;
-}) {
-  return (
-    <div className="atl-terminal">
-      <div className="atl-terminal-bar">
-        <span className="atl-dot" style={{ background: "#39414f" }} aria-hidden="true" />
-        <span className="atl-dot" style={{ background: "#39414f" }} aria-hidden="true" />
-        <span
-          className="atl-dot"
-          style={{ background: "rgba(139,124,255,0.8)" }}
-          aria-hidden="true"
-        />
-        <span className="atl-mono ml-2 truncate text-[0.6875rem] text-[#a4adbd]/70">
-          {title}
-        </span>
-        <span className="ml-auto flex-none">
-          <CopyButton value={commands} label={copyLabel} />
-        </span>
-      </div>
-      <pre className="atl-mono overflow-x-auto px-4 py-3.5 text-[0.75rem] leading-[1.75] text-[#e8eef8] sm:text-[0.8125rem]">
-        <code>{commands}</code>
-      </pre>
-    </div>
-  );
-}
-
 /**
- * The installation panel: two real routes, numbered steps, copy buttons that
- * work, and the exact JSON the installer writes. Nothing here is a placeholder
- * — the commands are the ones in `install.sh`, and the snippet is copied from
- * `mcp-server/install-config.cjs`.
+ * Installation steps and client registration share commands with the docs.
  */
 export default function InstallPanel() {
   const [active, setActive] = useState<TabKey>("auto");
@@ -188,7 +119,7 @@ export default function InstallPanel() {
     <div>
       <div
         role="tablist"
-        aria-label="Installation method"
+        aria-label="Installation and client setup"
         className="flex gap-2"
         onKeyDown={onTabKeyDown}
       >
@@ -233,9 +164,9 @@ export default function InstallPanel() {
 
         <div className="mt-7 space-y-4">
           <CommandBlock
-            title={active === "auto" ? "atlas — install" : "atlas — manual"}
-            commands={active === "auto" ? AUTOMATED_INSTALL : MANUAL_INSTALL}
-            copyLabel={`Copy the ${active === "auto" ? "automated" : "manual"} install commands`}
+            title={active === "codex" ? "Atlas checkout — connect Codex" : `atlas — ${active}`}
+            commands={active === "codex" ? CODEX_COMMANDS : active === "auto" ? AUTOMATED_INSTALL : MANUAL_INSTALL}
+            copyLabel={active === "codex" ? "Copy the Codex registration commands" : `Copy the ${active === "auto" ? "automated" : "manual"} install commands`}
           />
 
           {active === "auto" ? (
@@ -269,6 +200,22 @@ export default function InstallPanel() {
                 ))}
               </ul>
             </>
+          ) : active === "codex" ? (
+            <>
+              <p className="text-sm leading-relaxed text-[#a4adbd]">
+                Alternatively, if atlas-mcp is linked on your PATH, add this
+                table to ~/.codex/config.toml. Use one registration method;
+                update an existing atlas table instead of adding a duplicate.
+              </p>
+              <CommandBlock
+                title="~/.codex/config.toml — alternative"
+                commands={CODEX_SETTINGS}
+                copyLabel="Copy the Codex config.toml snippet"
+              />
+              <a href={`${DOCS_URL}#codex`} className="atl-link">
+                Codex guide and AGENTS.md instructions
+              </a>
+            </>
           ) : (
             <>
               <CommandBlock
@@ -289,7 +236,7 @@ export default function InstallPanel() {
         <a href="/local-dashboard" className="atl-link">
           Run the local dashboard
         </a>
-        <a href={DOCS_URL} target="_blank" rel="noreferrer" className="atl-link">
+        <a href={DOCS_URL} className="atl-link">
           Read the documentation
         </a>
         <a

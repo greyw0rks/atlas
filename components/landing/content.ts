@@ -19,7 +19,7 @@
  */
 
 export const REPO_URL = "https://github.com/greyw0rks/atlas";
-export const DOCS_URL = "https://github.com/greyw0rks/atlas/tree/feat/cinematic-landing/docs";
+export const DOCS_URL = "/docs";
 export const CLONE_COMMAND = `git clone ${REPO_URL}.git`;
 
 /** The four commands from `install.sh`, in the order a new user runs them. */
@@ -68,6 +68,27 @@ export const SETTINGS_SNIPPET = `{
     }
   }
 }`;
+
+/** Run from the Atlas checkout; matches the absolute path used by install.sh. */
+export const CODEX_COMMANDS = `codex mcp add atlas -- node "$PWD/mcp-server/dist/mcp-server/index.js"
+codex mcp list`;
+
+export const CODEX_SETTINGS = `[mcp_servers.atlas]
+command = "atlas-mcp"`;
+
+export const CODEX_INSTRUCTIONS = `<!-- atlas:begin -->
+## Atlas memory
+
+Use the Atlas MCP tools for this repository:
+- On session start, call atlas_start_session with repoPath = cwd,
+  repoName = the directory name, and agentId = "codex".
+- Read the returned context, previous session, open tasks, and decisions.
+- Save durable facts with atlas_save_memory; use TODO or BUG for tasks
+  and ARCHITECTURE for project structure.
+- Record choices with atlas_record_decision, including the rationale.
+- Before stopping, call atlas_end_session with a brief summary.
+- If Atlas tools are unavailable, carry on normally.
+<!-- atlas:end -->`;
 
 /**
  * Two things a user should know before running the script. Read out of

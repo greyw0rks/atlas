@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { REPO_URL } from "./content";
+import { DOCS_URL, REPO_URL } from "./content";
 
 const LINKS = [
   { href: "#what-is-atlas", label: "What is Atlas" },
@@ -55,6 +55,7 @@ export default function Nav() {
         </nav>
 
         <div className="ml-auto flex items-center gap-3">
+          <a href={DOCS_URL} className="atl-nav-link">Docs</a>
           <a
             href={REPO_URL}
             target="_blank"

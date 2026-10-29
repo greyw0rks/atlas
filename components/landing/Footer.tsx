@@ -48,8 +48,6 @@ export default function Footer() {
             ))}
             <a
               href={DOCS_URL}
-              target="_blank"
-              rel="noreferrer"
               className="text-[0.8125rem] transition-colors hover:text-[#f4f6fa]"
             >
               Documentation
@@ -67,7 +65,7 @@ export default function Footer() {
 
         <div className="mt-12 flex flex-col gap-2 border-t border-[rgba(164,173,189,0.12)] pt-6 md:flex-row md:items-center md:justify-between">
           <p className="atl-mono text-[0.6875rem]">
-            MCP server for Claude Code · Walrus Memory on mainnet · Tatum Sui RPC
+            MCP server for Claude Code and Codex · Walrus Memory on mainnet · Tatum Sui RPC
           </p>
           <p className="atl-mono text-[0.6875rem]">
             Your context. Your AI. Always.

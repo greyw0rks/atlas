@@ -44,7 +44,7 @@ export default function Install() {
               Install Atlas in a few commands.
             </h2>
             <p className="atl-lede mt-5 max-w-[46ch]">
-              Requires Node 18 or newer, a Walrus Memory delegate key and its
+              Requires Node 20 or newer, a Walrus Memory delegate key and its
               account id. A Tatum API key is optional. The installer checks
               Node and npm, backs up ~/.claude/settings.json before editing it,
               and leaves your existing instructions in place.
