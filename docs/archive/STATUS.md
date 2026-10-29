@@ -39,7 +39,6 @@
 
 ### Documentation
 - [x] **README.md** — Setup guide, architecture diagram, usage examples, API reference
-- [x] **DEMO_SCRIPT.md** — 3-4 minute script for video recording
 - [x] **DEMO_CHECKLIST.md** — Comprehensive pre-recording, recording, post-recording, submission checklist
 - [x] **HANDOFF.md** — Project status, decisions, remaining work
 
@@ -101,7 +100,6 @@
 
 ### Documentation
 - **README.md:** 300+ lines
-- **DEMO_SCRIPT.md:** 250+ lines
 - **DEMO_CHECKLIST.md:** 200+ lines
 - **HANDOFF.md:** 150+ lines
 

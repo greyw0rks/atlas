@@ -11,6 +11,7 @@ prisma/*.db*
 demo-video/
 brag-output/
 mcp-server/
-docs/
+# Exclude repository documents, but keep the app/docs website route.
+/docs/
 scripts/
 .git/

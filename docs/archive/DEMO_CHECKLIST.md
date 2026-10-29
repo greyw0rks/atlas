@@ -42,7 +42,6 @@
 
 ### Timing & Script
 - [ ] Timer ready (aim for 3-4 minutes total)
-- [ ] DEMO_SCRIPT.md open in second monitor or printed
 - [ ] Practiced run-through at least once
 - [ ] Backup talking points ready
 

@@ -162,7 +162,6 @@ cd atlas && ./install.sh
 **Required Fields:**
 - [x] Project title: "Atlas - Persistent Memory for Coding Agents"
 - [x] Tagline: "AI assistants that remember context across sessions"
-- [x] Detailed description: DEVPOST_SUBMISSION.md (complete)
 - [ ] Demo video: YouTube/Vimeo link (upload after recording)
 - [x] GitHub repo: https://github.com/greyw0rks/atlas
 - [ ] Live demo: https://atlas-eight-plum.vercel.app
